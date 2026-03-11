@@ -1,0 +1,332 @@
+/* ============================================================================
+   KNAR DESIGN SYSTEM + TAILWIND CSS V4 INTEGRATION
+   ============================================================================ */
+
+/* Import Google Fonts first (required before any CSS rules) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap');
+
+/* Import Tailwind CSS v4 */
+@import "tailwindcss";
+
+/* Import KNAR Design System (without the font import) */
+@import "./knar-design.css";
+
+/* ============================================================================
+   TAILWIND THEME EXTENSION - KNAR TOKENS
+   ============================================================================ */
+
+@theme inline {
+  /* Colors - KNAR Palette */
+  --color-knar-dark: var(--knar-dark);
+  --color-knar-charcoal: var(--knar-charcoal);
+  --color-knar-slate: var(--knar-slate);
+  --color-knar-slate-light: var(--knar-slate-light);
+  --color-knar-orange: var(--knar-orange);
+  --color-knar-orange-bright: var(--knar-orange-bright);
+  
+  /* Orange alpha variants */
+  --color-knar-orange-5: var(--knar-orange-5);
+  --color-knar-orange-10: var(--knar-orange-10);
+  --color-knar-orange-12: var(--knar-orange-12);
+  --color-knar-orange-15: var(--knar-orange-15);
+  --color-knar-orange-16: var(--knar-orange-16);
+  --color-knar-orange-18: var(--knar-orange-18);
+  --color-knar-orange-20: var(--knar-orange-20);
+  --color-knar-orange-25: var(--knar-orange-25);
+  --color-knar-orange-30: var(--knar-orange-30);
+  --color-knar-orange-40: var(--knar-orange-40);
+  --color-knar-orange-50: var(--knar-orange-50);
+  --color-knar-orange-70: var(--knar-orange-70);
+  
+  /* Text colors */
+  --color-knar-text-primary: var(--text-primary);
+  --color-knar-text-secondary: var(--text-secondary);
+  --color-knar-text-muted: var(--text-muted);
+  --color-knar-text-disabled: var(--text-disabled);
+  
+  /* Border colors */
+  --color-knar-border-3: var(--border-3);
+  --color-knar-border-4: var(--border-4);
+  --color-knar-border-6: var(--border-6);
+  --color-knar-border-8: var(--border-8);
+  --color-knar-border-10: var(--border-10);
+  --color-knar-border-15: var(--border-15);
+  
+  /* Semantic aliases */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+
+  /* Spacing - KNAR compact scale */
+  --spacing-knar-px: var(--space-px);
+  --spacing-knar-0-5: var(--space-0-5);
+  --spacing-knar-1: var(--space-1);
+  --spacing-knar-1-5: var(--space-1-5);
+  --spacing-knar-2: var(--space-2);
+  --spacing-knar-2-5: var(--space-2-5);
+  --spacing-knar-3: var(--space-3);
+  --spacing-knar-4: var(--space-4);
+  --spacing-knar-5: var(--space-5);
+  --spacing-knar-6: var(--space-6);
+  --spacing-knar-8: var(--space-8);
+  --spacing-knar-10: var(--space-10);
+  --spacing-knar-12: var(--space-12);
+  --spacing-knar-16: var(--space-16);
+  --spacing-knar-20: var(--space-20);
+  --spacing-knar-24: var(--space-24);
+
+  /* Font families */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  /* Font sizes */
+  --text-3xs: var(--text-3xs);
+  --text-2xs: var(--text-2xs);
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-md: var(--text-md);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+
+  /* Font weights */
+  --font-weight-light: var(--weight-light);
+  --font-weight-normal: var(--weight-normal);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+
+  /* Line heights */
+  --leading-tight: var(--leading-tight);
+  --leading-normal: var(--leading-normal);
+  --leading-relaxed: var(--leading-relaxed);
+
+  /* Letter spacing */
+  --tracking-tight: var(--tracking-tight);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: var(--tracking-wide);
+  --tracking-wider: var(--tracking-wider);
+
+  /* Border radius */
+  --radius-knar-none: var(--radius-none);
+  --radius-knar-sm: var(--radius-sm);
+  --radius-knar-md: var(--radius-md);
+  --radius-knar-lg: var(--radius-lg);
+  --radius-knar-xl: var(--radius-xl);
+  --radius-knar-pill: var(--radius-pill);
+  --radius-knar-full: var(--radius-full);
+
+  /* Shadows */
+  --shadow-knar-none: var(--shadow-none);
+  --shadow-knar-xs: var(--shadow-xs);
+  --shadow-knar-sm: var(--shadow-sm);
+  --shadow-knar-md: var(--shadow-md);
+  --shadow-knar-lg: var(--shadow-lg);
+  --shadow-knar-xl: var(--shadow-xl);
+  --shadow-knar-glow: var(--shadow-glow);
+  --shadow-knar-hover: var(--shadow-hover);
+  --shadow-knar-btn-accent: var(--shadow-btn-accent);
+
+  /* Transitions */
+  --transition-knar-fast: var(--transition-fast);
+  --transition-knar-normal: var(--transition-normal);
+  --transition-knar-slow: var(--transition-slow);
+  --transition-knar-smooth: var(--transition-smooth);
+
+  /* Icon sizes */
+  --icon-knar-xs: var(--icon-xs);
+  --icon-knar-sm: var(--icon-sm);
+  --icon-knar-md: var(--icon-md);
+  --icon-knar-lg: var(--icon-lg);
+  --icon-knar-xl: var(--icon-xl);
+  --icon-knar-2xl: var(--icon-2xl);
+
+  /* Z-index */
+  --z-knar-base: var(--z-base);
+  --z-knar-dropdown: var(--z-dropdown);
+  --z-knar-sticky: var(--z-sticky);
+  --z-knar-modal: var(--z-modal);
+  --z-knar-tooltip: var(--z-tooltip);
+  --z-knar-toast: var(--z-toast);
+}
+
+/* ============================================================================
+   BASE STYLES
+   ============================================================================ */
+
+/* 
+   Note: knar-design.css contains the base body styles.
+   We let those take precedence over Tailwind's preflight.
+*/
+
+/* Custom scrollbar for webkit browsers - optional refinement */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--knar-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--knar-slate);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--knar-slate-light);
+}
+
+/* ============================================================================
+   RESPONSIVE UTILITIES
+   ============================================================================ */
+
+/* Container utilities that combine Tailwind + KNAR */
+@layer components {
+  .container-knar {
+    @apply max-w-[1500px] mx-auto;
+    padding: var(--space-5) var(--space-10);
+  }
+  
+  .container-knar-narrow {
+    @apply max-w-[1000px] mx-auto;
+    padding: var(--space-10) var(--space-10) var(--space-6);
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT
+   ============================================================================ */
+
+/* 
+   KNAR is designed as a dark theme by default.
+   This light mode variant inverts the color scheme for users who prefer it.
+   Toggle by adding class="dark" to the <html> element.
+*/
+
+@media (prefers-color-scheme: light) {
+  html:not(.dark) {
+    /* Light mode overrides - optional, only if you want auto-switching */
+    /* Uncomment to enable automatic light mode based on system preference */
+    /*
+    --knar-dark: #f8f9fa;
+    --knar-charcoal: #ffffff;
+    --knar-slate: #e9ecef;
+    --text-primary: #1a1f2e;
+    --text-secondary: #4a5568;
+    --text-muted: #64748b;
+    --border-10: rgba(0, 0, 0, 0.10);
+    --border-15: rgba(0, 0, 0, 0.15);
+    */
+  }
+}
+
+/* Manual dark mode toggle (when .dark class is applied to <html>) */
+html.dark {
+  /* Already using KNAR dark colors by default, no overrides needed */
+  color-scheme: dark;
+}
+
+/* ============================================================================
+   HERO SECTION STYLES
+   ============================================================================ */
+
+/* Hero section specific styles */
+.knar-hero {
+  padding: var(--space-16) 0 var(--space-12);
+  text-align: center;
+}
+
+.knar-hero-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+  margin: var(--space-3) 0;
+  letter-spacing: var(--tracking-tight);
+}
+
+@media (min-width: 768px) {
+  .knar-hero-title {
+    font-size: var(--text-3xl);
+  }
+}
+
+.knar-hero-description {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-light);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.knar-hero-actions {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-6);
+}
+
+/* ============================================================================
+   ADDITIONAL UTILITIES
+   ============================================================================ */
+
+@layer utilities {
+  .knar-mb-md {
+    margin-bottom: var(--space-4);
+  }
+  
+  .knar-mb-lg {
+    margin-bottom: var(--space-8);
+  }
+  
+  .knar-text-center {
+    text-align: center;
+  }
+  
+  .knar-flex {
+    display: flex;
+  }
+  
+  .knar-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .knar-gap-md {
+    gap: var(--space-3);
+  }
+  
+  .knar-gap-lg {
+    gap: var(--space-5);
+  }
+  
+  .knar-mt-sm {
+    margin-top: var(--space-3);
+  }
+  
+  .knar-mt-md {
+    margin-top: var(--space-8);
+  }
+  
+  .knar-mt-lg {
+    margin-top: var(--space-12);
+  }
+  
+  .knar-p-lg {
+    padding: var(--space-8);
+  }
+}

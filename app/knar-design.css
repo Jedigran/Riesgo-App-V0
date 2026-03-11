@@ -1,0 +1,1096 @@
+/**
+ * ============================================================================
+ * KNAR GLOBAL DESIGN SYSTEM
+ * Ultra-Delicate & Refined Visual Language
+ * Version: 2.0.0  —  Derived from Knar Work Launchpad Chrome Extension
+ * ============================================================================
+ *
+ * PHILOSOPHY
+ * ----------
+ * This design system is inspired by the refined minimalism of interfaces like
+ * v0.dev and the Knar corporate identity. The guiding principles are:
+ *
+ *   1. DELICACY FIRST  — Smaller text, lighter weights, thinner borders.
+ *      Think "whisper", not "shout". If you think a font is small enough,
+ *      make it smaller.
+ *
+ *   2. RESTRAINT IN COLOR  — Only 3-5 colors total. One dark background,
+ *      one card surface, one accent (orange), one neutral text family.
+ *      Never introduce random new colors.
+ *
+ *   3. PRECISION SPACING  — Tight, deliberate padding. Empty space is earned,
+ *      not default. Dense layouts outperform sparse ones for dashboards.
+ *
+ *   4. NO BOLD EVERYWHERE  — font-weight: 300 is default. Use 400 for active
+ *      states. Use 500 only for titles. 600+ is reserved for rare emphasis.
+ *
+ *   5. THIN BORDERS ONLY  — 0.5px is the default border width. 1px is
+ *      "emphasized". 1.5px is for active accent indicators only.
+ *
+ *   6. SUBTLE INTERACTIONS  — 1px translateY lifts, 1px translateX nudges,
+ *      opacity transitions. Never scale > 1.1 or move > 4px.
+ *
+ *   7. ICONS ARE SMALL  — 12px for inline, 14px for card headers. Stroke
+ *      width 1.5 always. Never fill-based icons on dark backgrounds.
+ *
+ * TABLE OF CONTENTS
+ * -----------------
+ *   1.  CSS Reset & Base
+ *   2.  Design Tokens
+ *       2.1  Color Palette
+ *       2.2  Typography Scale
+ *       2.3  Spacing Scale
+ *       2.4  Border System
+ *       2.5  Shadow System
+ *       2.6  Transition System
+ *       2.7  Icon System
+ *       2.8  Z-Index Scale
+ *   3.  Typography System
+ *   4.  Layout System
+ *   5.  Component Library
+ *       5.1  Cards
+ *       5.2  Buttons
+ *       5.3  Quick Links
+ *       5.4  Search Input
+ *       5.5  Tabs
+ *       5.6  Header / Navigation
+ *       5.7  Agent Groups (Special Focus)
+ *       5.8  Footer
+ *   6.  Utility Classes
+ *   7.  Animations & Transitions
+ *   8.  Background Patterns
+ *   9.  Responsive Breakpoints
+ *
+ * ============================================================================
+ */
+
+/* ============================================================================
+   0. FONT IMPORTS
+   ============================================================================ */
+
+/* Note: Font imports are now handled in globals.css to comply with CSS @import rules */
+
+/* ============================================================================
+   1. CSS RESET & BASE
+   ============================================================================ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================================
+   2. DESIGN TOKENS
+   ============================================================================ */
+
+:root {
+
+  /* --------------------------------------------------------------------------
+     2.1 COLOR PALETTE
+     --------------------------------------------------------------------------
+     Total colors: 5 (dark bg, charcoal surface, slate hover, orange accent, white)
+     NEVER add more colors without explicit approval.
+  */
+
+  /* Backgrounds */
+  --knar-dark:          #1a1f2e;   /* Page background — deep navy charcoal       */
+  --knar-charcoal:      #2c3544;   /* Card / elevated surface                    */
+  --knar-slate:         #4a5568;   /* Hover surface state                        */
+  --knar-slate-light:   #64748b;   /* Secondary / disabled elements              */
+
+  /* Accent — Burnt copper orange. The ONLY brand color used for highlights. */
+  --knar-orange:        #ff8c42;   /* Primary accent                             */
+  --knar-orange-bright: #f57c00;   /* Active / pressed accent                    */
+
+  /* Accent alpha variants — computed from --knar-orange */
+  --knar-orange-5:  rgba(255, 140, 66, 0.05);
+  --knar-orange-8:  rgba(255, 140, 66, 0.08);
+  --knar-orange-10: rgba(255, 140, 66, 0.10);
+  --knar-orange-12: rgba(255, 140, 66, 0.12);
+  --knar-orange-15: rgba(255, 140, 66, 0.15);
+  --knar-orange-16: rgba(255, 140, 66, 0.16);
+  --knar-orange-18: rgba(255, 140, 66, 0.18);
+  --knar-orange-20: rgba(255, 140, 66, 0.20);
+  --knar-orange-25: rgba(255, 140, 66, 0.25);
+  --knar-orange-30: rgba(255, 140, 66, 0.30);
+  --knar-orange-40: rgba(255, 140, 66, 0.40);
+  --knar-orange-50: rgba(255, 140, 66, 0.50);
+  --knar-orange-70: rgba(255, 140, 66, 0.70);
+
+  /* Text hierarchy — 4 levels only */
+  --text-primary:   #ffffff;       /* Headings, active labels                    */
+  --text-secondary: #cbd5e1;       /* Body text, link labels                     */
+  --text-muted:     #94a3b8;       /* Placeholders, footnotes, tab labels        */
+  --text-disabled:  #64748b;       /* Disabled states                            */
+
+  /* White variants */
+  --white:     #ffffff;
+  --off-white: #f8f9fa;
+
+  /* Border alpha variants — white-on-dark */
+  --border-3:   rgba(255, 255, 255, 0.03);
+  --border-4:   rgba(255, 255, 255, 0.04);
+  --border-6:   rgba(255, 255, 255, 0.06);
+  --border-8:   rgba(255, 255, 255, 0.08);
+  --border-10:  rgba(255, 255, 255, 0.10);
+  --border-15:  rgba(255, 255, 255, 0.15);
+
+  /* Semantic aliases */
+  --background:    var(--knar-dark);
+  --foreground:    var(--white);
+  --card:          var(--knar-charcoal);
+  --card-hover:    var(--knar-slate);
+  --accent:        var(--knar-orange);
+  --accent-hover:  var(--knar-orange-bright);
+  --border:        var(--border-10);
+  --border-subtle: var(--border-6);
+
+  /* --------------------------------------------------------------------------
+     2.2 TYPOGRAPHY SCALE
+     --------------------------------------------------------------------------
+     Rule: Default is 13px / weight 300. Go smaller before going larger.
+     Use serif (Playfair Display) ONLY for card titles and page headings.
+     Use sans-serif (Inter) for ALL other text.
+  */
+
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-mono:  'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* Size scale — built around 13px base */
+  --text-3xs:   0.5625rem;  /*  9px — Category eyebrows, micro badges             */
+  --text-2xs:   0.625rem;   /* 10px — Timestamps, metadata                        */
+  --text-xs:    0.6875rem;  /* 11px — Button labels, footer text, nav labels      */
+  --text-sm:    0.75rem;    /* 12px — Link labels, secondary content              */
+  --text-base:  0.8125rem;  /* 13px — DEFAULT body text                           */
+  --text-md:    0.875rem;   /* 14px — Slightly emphasized body                    */
+  --text-lg:    1rem;       /* 16px — Card titles (serif)                         */
+  --text-xl:    1.125rem;   /* 18px — Section headings                            */
+  --text-2xl:   1.25rem;    /* 20px — Page titles                                 */
+  --text-3xl:   1.5rem;     /* 24px — Hero / display text                         */
+
+  /* Weight scale — use the lightest weight that communicates hierarchy */
+  --weight-light:    300;   /* Default for body, links, form elements             */
+  --weight-normal:   400;   /* Active states, emphasized labels, card titles      */
+  --weight-medium:   500;   /* Strong headings — use sparingly                    */
+  --weight-semibold: 600;   /* Reserved for rare maximum emphasis only            */
+
+  /* Line heights */
+  --leading-tight:   1.25;  /* Headings, compact elements                         */
+  --leading-normal:  1.5;   /* Body text                                          */
+  --leading-relaxed: 1.625; /* Long-form / reading content                        */
+
+  /* Letter spacing */
+  --tracking-tight:  -0.01em; /* Large display headings                           */
+  --tracking-normal:  0;      /* Body text                                        */
+  --tracking-wide:    0.05em; /* Small buttons                                    */
+  --tracking-wider:   0.10em; /* Category labels, ALL CAPS eyebrows               */
+
+  /* --------------------------------------------------------------------------
+     2.3 SPACING SCALE
+     --------------------------------------------------------------------------
+     Compact-first. Start tight and add space only when needed for clarity.
+  */
+
+  --space-px:  1px;
+  --space-0-5: 0.125rem;  /*  2px */
+  --space-1:   0.1875rem; /*  3px */
+  --space-1-5: 0.25rem;   /*  4px */
+  --space-2:   0.3rem;    /*  4.8px — very tight */
+  --space-2-5: 0.375rem;  /*  6px */
+  --space-3:   0.5rem;    /*  8px */
+  --space-4:   0.625rem;  /* 10px */
+  --space-5:   0.75rem;   /* 12px */
+  --space-6:   0.875rem;  /* 14px */
+  --space-8:   1rem;      /* 16px */
+  --space-10:  1.25rem;   /* 20px */
+  --space-12:  1.5rem;    /* 24px */
+  --space-16:  2rem;      /* 32px */
+  --space-20:  2.5rem;    /* 40px */
+  --space-24:  3rem;      /* 48px */
+
+  /* --------------------------------------------------------------------------
+     2.4 BORDER SYSTEM
+     --------------------------------------------------------------------------
+     Default is 0.5px. The thinner the border, the more refined the result.
+  */
+
+  --border-width-thin:   0.5px; /* Default — all cards, inputs, links            */
+  --border-width-normal: 1px;   /* Emphasized / interactive focus                */
+  --border-width-accent: 1.5px; /* Active tab underline, card top accent bar     */
+  --border-width-thick:  2px;   /* Maximum — use very rarely                     */
+
+  /* Border radius — subtle rounding, not rounded-full pills for containers */
+  --radius-none: 0;
+  --radius-sm:   3px;   /* Quick links, small chips                              */
+  --radius-md:   4px;   /* Buttons, icon boxes, small elements                   */
+  --radius-lg:   6px;   /* Cards, containers                                     */
+  --radius-xl:   8px;   /* Large modals, drawers                                 */
+  --radius-pill: 18px;  /* Search inputs, pill-style search buttons              */
+  --radius-full: 9999px;/* Truly circular elements only                          */
+
+  /* --------------------------------------------------------------------------
+     2.5 SHADOW SYSTEM
+     --------------------------------------------------------------------------
+     Shadows communicate depth subtly. Never use colored shadows except
+     for the orange glow which is the brand accent.
+  */
+
+  --shadow-none: none;
+  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md:   0 2px 5px rgba(0, 0, 0, 0.12);
+  --shadow-lg:   0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-xl:   0 6px 12px rgba(0, 0, 0, 0.2);
+
+  /* Glow: orange 0.5px ring used on card hover */
+  --shadow-glow:  0 0 0 0.5px var(--knar-orange-15);
+  --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.2), 0 0 0 0.5px var(--knar-orange-15);
+
+  /* Button accent shadow */
+  --shadow-btn-accent: 0 2px 6px var(--knar-orange-15);
+
+  /* --------------------------------------------------------------------------
+     2.6 TRANSITION SYSTEM
+  */
+
+  --transition-fast:   150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow:   300ms ease;
+  --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --------------------------------------------------------------------------
+     2.7 ICON SYSTEM
+     --------------------------------------------------------------------------
+     Always use SVG stroke icons (Lucide style). Never filled icons.
+     Stroke width is always 1.5 for the delicate look.
+  */
+
+  --icon-xs:  10px; /* Micro / decorative inline icons                           */
+  --icon-sm:  12px; /* Quick link icons, inline text icons                       */
+  --icon-md:  14px; /* Card header icons, button icons, header icons             */
+  --icon-lg:  16px; /* Standalone action icons                                   */
+  --icon-xl:  20px; /* Feature icons                                             */
+  --icon-2xl: 24px; /* Hero/display icons                                        */
+
+  --icon-stroke: 1.5; /* Universal stroke width — NEVER change to 2 for delicate UI */
+
+  /* --------------------------------------------------------------------------
+     2.8 Z-INDEX SCALE
+  */
+
+  --z-base:     0;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-modal:    300;
+  --z-tooltip:  400;
+  --z-toast:    500;
+}
+
+
+/* ============================================================================
+   3. TYPOGRAPHY SYSTEM
+   ============================================================================ */
+
+/* Base */
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);       /* 13px */
+  font-weight: var(--weight-light);  /* 300  */
+  line-height: var(--leading-normal);
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/* Heading defaults — serif, weight 400, tight leading */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h1 { font-size: var(--text-3xl); }  /* 24px */
+h2 { font-size: var(--text-2xl); }  /* 20px */
+h3 { font-size: var(--text-xl);  }  /* 18px */
+h4 { font-size: var(--text-lg);  }  /* 16px */
+h5 { font-size: var(--text-md);  }  /* 14px */
+h6 { font-size: var(--text-base);}  /* 13px */
+
+/* Category eyebrow label — appears ABOVE a title */
+.knar-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-3xs);           /* 9px  */
+  font-weight: var(--weight-normal);    /* 400  */
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--accent);
+  margin-bottom: var(--space-1);
+}
+
+/* Text colour utilities */
+.knar-text-primary   { color: var(--text-primary);   }
+.knar-text-secondary { color: var(--text-secondary); }
+.knar-text-muted     { color: var(--text-muted);     }
+.knar-text-accent    { color: var(--accent);         }
+
+/* Text size utilities */
+.knar-text-3xs  { font-size: var(--text-3xs);  }
+.knar-text-xs   { font-size: var(--text-xs);   }
+.knar-text-sm   { font-size: var(--text-sm);   }
+.knar-text-base { font-size: var(--text-base); }
+.knar-text-md   { font-size: var(--text-md);   }
+.knar-text-lg   { font-size: var(--text-lg);   }
+
+/* Weight utilities */
+.knar-light  { font-weight: var(--weight-light);  }
+.knar-normal { font-weight: var(--weight-normal); }
+.knar-medium { font-weight: var(--weight-medium); }
+
+
+/* ============================================================================
+   4. LAYOUT SYSTEM
+   ============================================================================ */
+
+/* Page container — max 1500px, tight horizontal padding */
+.knar-container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-10);
+}
+
+/* Narrow container for search / centered content */
+.knar-container-narrow {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-10) var(--space-6);
+}
+
+/* 3-Column responsive grid — the standard layout for dashboard sections */
+.knar-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .knar-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .knar-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Flex utilities */
+.knar-flex         { display: flex; }
+.knar-flex-center  { display: flex; align-items: center; justify-content: center; }
+.knar-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.knar-flex-start   { display: flex; align-items: center; justify-content: flex-start; }
+.knar-gap-sm       { gap: var(--space-2-5); }
+.knar-gap-md       { gap: var(--space-3);   }
+.knar-gap-lg       { gap: var(--space-5);   }
+
+
+/* ============================================================================
+   5. COMPONENT LIBRARY
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   5.1 CARDS
+   --------------------------------------------------------------------------
+   The primary content container. Gradient dark background, 0.5px border,
+   6px radius. Orange accent bar appears at top on hover.
+*/
+
+.knar-card {
+  background: linear-gradient(135deg, var(--card) 0%, #353d4f 100%);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-smooth);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Top accent bar — hidden by default, revealed on hover */
+.knar-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-width-accent);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
+}
+
+.knar-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.knar-card:hover::before {
+  opacity: 1;
+}
+
+/* Card Header — icon box + category eyebrow + serif title */
+.knar-card-header {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: var(--border-width-thin) solid var(--border-4);
+}
+
+/* Icon box inside card header */
+.knar-icon-box {
+  padding: var(--space-2-5);
+  background: linear-gradient(135deg, var(--knar-orange-10), var(--knar-orange-5));
+  border: var(--border-width-thin) solid var(--knar-orange-18);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-normal);
+}
+
+.knar-card:hover .knar-icon-box {
+  background: linear-gradient(135deg, var(--knar-orange-16), var(--knar-orange-8));
+  border-color: var(--knar-orange-30);
+}
+
+.knar-icon-box svg {
+  width: var(--icon-md);       /* 14px */
+  height: var(--icon-md);
+  stroke-width: var(--icon-stroke); /* 1.5 */
+  color: var(--accent);
+}
+
+/* Header text container */
+.knar-card-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Card title — uses serif font */
+.knar-card-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);         /* 16px */
+  font-weight: var(--weight-normal); /* 400  */
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Card content area */
+.knar-card-content {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   5.2 BUTTONS
+   --------------------------------------------------------------------------
+   Three variants: primary (orange), ghost (transparent), pill (search).
+   All share the same delicate sizing philosophy.
+*/
+
+/* Base button reset */
+.knar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);           /* 11px */
+  font-weight: var(--weight-light);    /* 300  */
+  line-height: 1;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  border: var(--border-width-thin) solid transparent;
+  white-space: nowrap;
+}
+
+.knar-btn svg {
+  width: var(--icon-sm);              /* 12px */
+  height: var(--icon-sm);
+  stroke-width: var(--icon-stroke);   /* 1.5 */
+  flex-shrink: 0;
+}
+
+/* Primary — orange tinted background with orange border */
+.knar-btn-primary {
+  background: linear-gradient(135deg, var(--knar-orange-12), var(--knar-orange-5));
+  border-color: var(--knar-orange-25);
+  color: var(--accent);
+}
+
+.knar-btn-primary:hover {
+  background: linear-gradient(135deg, var(--knar-orange-20), var(--knar-orange-8));
+  border-color: var(--knar-orange-40);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-accent);
+}
+
+/* Ghost — nearly invisible, subtle border */
+.knar-btn-ghost {
+  background-color: var(--border-3);
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.knar-btn-ghost:hover {
+  background-color: var(--border-6);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+/* Pill — used for search engine selector buttons */
+.knar-btn-pill {
+  padding: var(--space-2) var(--space-4);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);           /* 11px */
+  font-weight: var(--weight-light);    /* 300  */
+  color: var(--knar-orange-70);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.knar-btn-pill:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  border-color: var(--knar-orange-30);
+}
+
+.knar-btn-pill svg {
+  color: var(--knar-orange-50);
+  transition: color var(--transition-normal);
+}
+
+.knar-btn-pill:hover svg {
+  color: var(--accent);
+}
+
+/* Open-All button — used in agent groups */
+.knar-btn-open-all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: linear-gradient(135deg, var(--knar-orange-12), var(--knar-orange-5));
+  border: var(--border-width-thin) solid var(--knar-orange-25);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: var(--text-sm);           /* 12px */
+  font-weight: var(--weight-light);    /* 300  */
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-family: var(--font-sans);
+  text-decoration: none;
+}
+
+.knar-btn-open-all:hover {
+  background: linear-gradient(135deg, var(--knar-orange-20), var(--knar-orange-8));
+  border-color: var(--knar-orange-40);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-accent);
+}
+
+.knar-btn-open-all svg {
+  width: var(--icon-sm);              /* 12px */
+  height: var(--icon-sm);
+  stroke-width: var(--icon-stroke);
+}
+
+/* --------------------------------------------------------------------------
+   5.3 QUICK LINKS
+   --------------------------------------------------------------------------
+   Used inside cards for navigation items. Dense grid layout.
+   12px text, 300 weight, 0.5px border, 3px radius.
+*/
+
+/* Link grid container */
+.knar-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+
+/* Individual link item */
+.knar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--border-3);
+  border: var(--border-width-thin) solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all var(--transition-normal);
+  font-size: var(--text-sm);           /* 12px */
+  font-weight: var(--weight-light);    /* 300  */
+  color: var(--text-secondary);
+}
+
+.knar-link:hover {
+  background-color: var(--knar-orange-10);
+  border-color: var(--knar-orange-25);
+  color: var(--text-primary);
+  transform: translateX(1px);
+}
+
+.knar-link-icon {
+  width: var(--icon-sm);              /* 12px */
+  height: var(--icon-sm);
+  stroke-width: var(--icon-stroke);   /* 1.5 */
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform var(--transition-normal);
+}
+
+.knar-link:hover .knar-link-icon {
+  transform: scale(1.08);
+}
+
+.knar-link-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Inline header icon link (e.g., folder link in group header) */
+.knar-header-icon-link {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  transition: all var(--transition-normal);
+  padding: var(--space-1) var(--space-2-5);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.knar-header-icon-link:hover {
+  opacity: 1;
+  color: var(--accent);
+  background-color: var(--knar-orange-8);
+}
+
+.knar-header-icon-link svg {
+  width: var(--icon-md);             /* 14px */
+  height: var(--icon-md);
+  stroke-width: var(--icon-stroke);  /* 1.5 */
+}
+
+/* --------------------------------------------------------------------------
+   5.4 SEARCH INPUT
+   --------------------------------------------------------------------------
+   White pill-shaped input with grey placeholder.
+   Icon sits 10px from the left edge.
+   No "Search" button — replaced by engine selector buttons below.
+*/
+
+.knar-search-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-10) var(--space-6);
+}
+
+.knar-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.knar-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.knar-search-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-5) var(--space-3) calc(var(--space-4) + var(--icon-md) + var(--space-2));
+  font-size: var(--text-base);         /* 13px */
+  font-weight: var(--weight-light);    /* 300  */
+  font-family: var(--font-sans);
+  background-color: rgba(255, 255, 255, 0.95);
+  border: var(--border-width-thin) solid var(--border-15);
+  border-radius: var(--radius-pill);
+  color: var(--knar-dark);
+  outline: none;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+}
+
+.knar-search-input:focus {
+  box-shadow: var(--shadow-md);
+  border-color: var(--knar-orange-25);
+}
+
+.knar-search-input::placeholder {
+  color: #5f6368;
+  font-weight: var(--weight-light);
+}
+
+.knar-search-icon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5f6368;
+  pointer-events: none;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  stroke-width: var(--icon-stroke);
+}
+
+/* Search engine selector row */
+.knar-search-engines {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2-5);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   5.5 TABS
+   --------------------------------------------------------------------------
+   Minimal tab navigation. Active tab has a 1.5px orange underline.
+   Tab labels are 13px / weight 300 by default, weight 400 when active.
+*/
+
+.knar-tabs-bar {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 var(--space-10);
+  border-bottom: var(--border-width-thin) solid var(--border);
+}
+
+.knar-tabs-list {
+  display: flex;
+  gap: var(--space-10);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.knar-tab-button {
+  position: relative;
+  background: none;
+  border: none;
+  padding: var(--space-3) 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);         /* 13px */
+  font-weight: var(--weight-light);    /* 300  */
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.knar-tab-button:hover {
+  color: var(--text-secondary);
+}
+
+.knar-tab-button.active {
+  color: var(--text-primary);
+  font-weight: var(--weight-normal);   /* 400 when active */
+}
+
+/* Orange underline for active tab */
+.knar-tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: calc(-1 * var(--border-width-thin));
+  left: 0;
+  right: 0;
+  height: var(--border-width-accent);  /* 1.5px */
+  background: var(--accent);
+}
+
+.knar-tab-panel {
+  display: none;
+}
+
+.knar-tab-panel.active {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   5.6 HEADER / NAVIGATION
+   --------------------------------------------------------------------------
+   Dark header matching page background. Logo 48px tall on the left.
+   Actions on the right. Separated from content by a 0.5px border.
+*/
+
+.knar-header {
+  background-color: var(--knar-dark);
+  border-bottom: var(--border-width-thin) solid var(--border);
+  padding: var(--space-4) var(--space-10);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo — 48px height, auto width to preserve aspect ratio */
+.knar-logo {
+  width: auto;
+  height: 48px;
+  display: block;
+}
+
+/* Header action button (e.g. Baticave meeting link) */
+.knar-header-action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  padding: var(--space-2-5) var(--space-4);
+  background: linear-gradient(135deg, var(--knar-orange-12), var(--knar-orange-5));
+  border: var(--border-width-thin) solid var(--knar-orange-25);
+  border-radius: var(--radius-md);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: var(--text-xs);           /* 11px */
+  font-weight: var(--weight-normal);   /* 400  */
+  transition: all var(--transition-normal);
+}
+
+.knar-header-action:hover {
+  background: linear-gradient(135deg, var(--knar-orange-20), var(--knar-orange-8));
+  border-color: var(--knar-orange-40);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-btn-accent);
+}
+
+.knar-header-action svg {
+  width: var(--icon-md);              /* 14px */
+  height: var(--icon-md);
+  stroke-width: var(--icon-stroke);   /* 1.5 */
+}
+
+/* --------------------------------------------------------------------------
+   5.7 AGENT GROUPS (Special Focus pattern)
+   --------------------------------------------------------------------------
+   Groups of agent/tool links that share a folder or context.
+   Header has an inline icon link (folder) that floats to the right.
+   Links are displayed in an auto-fill grid with an "Open All" at the end.
+*/
+
+.knar-agent-group {
+  background: linear-gradient(135deg, var(--card) 0%, #353d4f 100%);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  transition: all var(--transition-smooth);
+}
+
+.knar-agent-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-width-accent);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
+}
+
+.knar-agent-group:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.knar-agent-group:hover::before {
+  opacity: 1;
+}
+
+.knar-agent-group-header {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: var(--border-width-thin) solid var(--border-4);
+}
+
+.knar-agent-group-content {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+}
+
+/* Agent links grid with Open All at end */
+.knar-agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   5.8 FOOTER
+   --------------------------------------------------------------------------
+   Minimal footer. 11px / weight 300. Orange accent on highlight text.
+*/
+
+.knar-footer {
+  margin-top: var(--space-12);
+  padding: var(--space-6) 0;
+  border-top: var(--border-width-thin) solid var(--border);
+}
+
+.knar-footer-text {
+  font-size: var(--text-xs);           /* 11px */
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: var(--weight-light);    /* 300  */
+}
+
+.knar-footer-accent {
+  color: var(--accent);
+  font-weight: var(--weight-normal);   /* 400  */
+}
+
+
+/* ============================================================================
+   6. UTILITY CLASSES
+   ============================================================================ */
+
+/* Display */
+.knar-hidden  { display: none; }
+.knar-block   { display: block; }
+.knar-flex    { display: flex; }
+.knar-grid-u  { display: grid; }
+
+/* Overflow */
+.knar-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Borders */
+.knar-border        { border: var(--border-width-thin) solid var(--border); }
+.knar-border-accent { border: var(--border-width-thin) solid var(--knar-orange-25); }
+.knar-border-top    { border-top: var(--border-width-thin) solid var(--border); }
+.knar-border-bottom { border-bottom: var(--border-width-thin) solid var(--border); }
+
+/* Radius */
+.knar-rounded-sm   { border-radius: var(--radius-sm); }
+.knar-rounded-md   { border-radius: var(--radius-md); }
+.knar-rounded-lg   { border-radius: var(--radius-lg); }
+.knar-rounded-pill { border-radius: var(--radius-pill); }
+.knar-rounded-full { border-radius: var(--radius-full); }
+
+/* Spacing */
+.knar-p-sm   { padding: var(--space-2-5); }
+.knar-p-md   { padding: var(--space-4); }
+.knar-p-lg   { padding: var(--space-8); }
+.knar-mt-sm  { margin-top: var(--space-3); }
+.knar-mt-md  { margin-top: var(--space-8); }
+.knar-mt-lg  { margin-top: var(--space-12); }
+.knar-ml-auto { margin-left: auto; }
+
+/* Opacity */
+.knar-opacity-40 { opacity: 0.4; }
+.knar-opacity-60 { opacity: 0.6; }
+.knar-opacity-70 { opacity: 0.7; }
+
+/* Transitions */
+.knar-transition { transition: all var(--transition-normal); }
+
+
+/* ============================================================================
+   7. ANIMATIONS & TRANSITIONS
+   ============================================================================ */
+
+/* Fade in */
+@keyframes knar-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.knar-fade-in {
+  animation: knar-fade-in 200ms ease forwards;
+}
+
+/* Subtle pulse for active indicators */
+@keyframes knar-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+.knar-pulse {
+  animation: knar-pulse 2s ease infinite;
+}
+
+/* Tab content enter */
+@keyframes knar-tab-enter {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.knar-tab-panel.active {
+  animation: knar-tab-enter 150ms ease forwards;
+}
+
+
+/* ============================================================================
+   8. BACKGROUND PATTERNS
+   ============================================================================
+   The page uses a very subtle teamwork connectivity pattern at 1.5% opacity.
+   This mirrors the Knar website hero section where a node-graph SVG pattern
+   is used as a barely-visible atmospheric texture.
+*/
+
+/* Apply to <body> or any full-bleed container */
+.knar-bg-pattern {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 140, 66, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 140, 66, 0.015) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='nodes' x='0' y='0' width='200' height='200' patternUnits='userSpaceOnUse'%3E%3Cg opacity='0.015' stroke='%23ff8c42' fill='none' stroke-width='0.5'%3E%3Ccircle cx='50'  cy='50'  r='15'/%3E%3Ccircle cx='150' cy='50'  r='15'/%3E%3Ccircle cx='100' cy='120' r='15'/%3E%3Cline x1='50'  y1='50'  x2='100' y2='120'/%3E%3Cline x1='150' y1='50'  x2='100' y2='120'/%3E%3Cline x1='50'  y1='50'  x2='150' y2='50'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='200' fill='url(%23nodes)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+
+/* ============================================================================
+   9. RESPONSIVE BREAKPOINTS
+   ============================================================================ */
+
+/* Mobile first. All components default to single column / stacked layout. */
+
+/* Small tablets: 2 columns */
+@media (min-width: 768px) {
+  .knar-grid       { grid-template-columns: repeat(2, 1fr); }
+  .knar-links-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+}
+
+/* Desktops: 3 columns (primary target layout) */
+@media (min-width: 1024px) {
+  .knar-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Wide screens: allow more density */
+@media (min-width: 1440px) {
+  .knar-container {
+    padding: var(--space-5) var(--space-16);
+  }
+}
