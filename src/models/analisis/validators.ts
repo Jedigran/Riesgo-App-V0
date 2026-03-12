@@ -1,0 +1,579 @@
+/**
+ * ============================================================================
+ * ANALISIS VALIDATORS - Validation Functions for Analysis Forms
+ * ============================================================================
+ * 
+ * This module provides validation functions for all analysis methodologies.
+ * Each validator returns a detailed result with success status and error messages.
+ * 
+ * Validation Rules:
+ * - Required fields must not be empty
+ * - Numeric ranges must be within specified bounds
+ * - Arrays must have at least one element (when required)
+ * - Related IDs must follow naming conventions
+ * 
+ * @module models/analisis/validators
+ */
+
+import type {
+  AnalisisHAZOP,
+  AnalisisFMEA,
+  AnalisisLOPA,
+  AnalisisOCA,
+  AnalisisIntuicion,
+  AnalisisBase,
+  TipoAnalisis,
+} from './types';
+
+// ============================================================================
+// VALIDATION RESULT TYPE
+// ============================================================================
+
+/**
+ * Result of a validation operation.
+ */
+export interface ValidationResult {
+  /** Whether the validation passed */
+  valido: boolean;
+
+  /** List of validation errors (empty if valid) */
+  errores: string[];
+
+  /** List of validation warnings (non-blocking issues) */
+  advertencias?: string[];
+}
+
+// ============================================================================
+// GENERIC VALIDATORS
+// ============================================================================
+
+/**
+ * Validates that a string is not empty or whitespace-only.
+ * @param value - String to validate
+ * @param fieldName - Name of the field for error messages
+ * @returns True if valid string
+ */
+function validarStringRequerido(value: string | undefined | null, fieldName: string): string | null {
+  if (!value || value.trim() === '') {
+    return `${fieldName} es requerido y no puede estar vacío`;
+  }
+  return null;
+}
+
+/**
+ * Validates that a number is within a specified range.
+ * @param value - Number to validate
+ * @param min - Minimum allowed value
+ * @param max - Maximum allowed value
+ * @param fieldName - Name of the field for error messages
+ * @returns Error message or null if valid
+ */
+function validarRangoNumerico(
+  value: number | undefined | null,
+  min: number,
+  max: number,
+  fieldName: string
+): string | null {
+  if (value === undefined || value === null) {
+    return `${fieldName} es requerido`;
+  }
+  if (typeof value !== 'number' || isNaN(value)) {
+    return `${fieldName} debe ser un número válido`;
+  }
+  if (value < min || value > max) {
+    return `${fieldName} debe estar entre ${min} y ${max} (valor actual: ${value})`;
+  }
+  return null;
+}
+
+/**
+ * Validates that an array is not empty.
+ * @param array - Array to validate
+ * @param fieldName - Name of the field for error messages
+ * @returns Error message or null if valid
+ */
+function validarArrayNoVacio(array: unknown[] | undefined, fieldName: string): string | null {
+  if (!array || array.length === 0) {
+    return `${fieldName} debe tener al menos un elemento`;
+  }
+  return null;
+}
+
+/**
+ * Validates base analysis fields common to all methodologies.
+ * @param base - Base analysis data
+ * @returns Validation result
+ * 
+ * @example
+ * const result = validarAnalisisBase({
+ *   id: 'hazop-001',
+ *   tipo: 'HAZOP',
+ *   fechaCreacion: '2024-01-01T00:00:00Z',
+ *   estado: 'en_progreso',
+ *   analisisRelacionadosIds: []
+ * });
+ */
+export function validarAnalisisBase(base: AnalisisBase): ValidationResult {
+  const errores: string[] = [];
+
+  // Validate ID
+  const idError = validarStringRequerido(base.id, 'ID');
+  if (idError) errores.push(idError);
+
+  // Validate tipo
+  const tiposValidos: TipoAnalisis[] = ['HAZOP', 'FMEA', 'LOPA', 'OCA', 'Intuicion'];
+  if (!tiposValidos.includes(base.tipo)) {
+    errores.push(`Tipo de análisis inválido: ${base.tipo}. Debe ser uno de: ${tiposValidos.join(', ')}`);
+  }
+
+  // Validate fechaCreacion (ISO 8601)
+  if (!base.fechaCreacion || isNaN(Date.parse(base.fechaCreacion))) {
+    errores.push('fechaCreacion debe ser una fecha ISO 8601 válida');
+  }
+
+  // Validate estado
+  const estadosValidos = ['completado', 'en_progreso'];
+  if (!estadosValidos.includes(base.estado)) {
+    errores.push(`Estado inválido: ${base.estado}. Debe ser: ${estadosValidos.join(', ')}`);
+  }
+
+  // Validate analisisRelacionadosIds (optional but should be strings)
+  if (base.analisisRelacionadosIds && !Array.isArray(base.analisisRelacionadosIds)) {
+    errores.push('analisisRelacionadosIds debe ser un array');
+  }
+
+  return {
+    valido: errores.length === 0,
+    errores,
+  };
+}
+
+// ============================================================================
+// HAZOP VALIDATOR
+// ============================================================================
+
+/**
+ * Validates a HAZOP analysis form.
+ * 
+ * Required fields:
+ * - nodo, parametro, palabraGuia, causa, consecuencia
+ * - salvaguardasExistentes (at least one)
+ * - recomendaciones (at least one)
+ * 
+ * @param data - HAZOP analysis data
+ * @returns Validation result with errors
+ * 
+ * @example
+ * const result = validarAnalisisHAZOP({
+ *   nodo: 'Reactor R-101',
+ *   parametro: 'Presión',
+ *   palabraGuia: 'Más de',
+ *   causa: 'Falla en válvula',
+ *   consecuencia: 'Sobrepresión',
+ *   salvaguardasExistentes: ['PSV-101'],
+ *   recomendaciones: ['Instalar manómetro']
+ * });
+ * 
+ * if (!result.valido) {
+ *   console.error('Errores:', result.errores);
+ * }
+ */
+export function validarAnalisisHAZOP(data: AnalisisHAZOP): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // Validate required string fields
+  const camposRequeridos = [
+    { value: data.nodo, name: 'nodo' },
+    { value: data.parametro, name: 'parametro' },
+    { value: data.palabraGuia, name: 'palabraGuia' },
+    { value: data.causa, name: 'causa' },
+    { value: data.consecuencia, name: 'consecuencia' },
+  ];
+
+  for (const campo of camposRequeridos) {
+    const error = validarStringRequerido(campo.value, campo.name);
+    if (error) errores.push(error);
+  }
+
+  // Validate arrays
+  const salvaguardasError = validarArrayNoVacio(data.salvaguardasExistentes, 'salvaguardasExistentes');
+  if (salvaguardasError) {
+    errores.push(salvaguardasError);
+  } else if (data.salvaguardasExistentes.length < 2) {
+    advertencias.push('Se recomienda tener al menos 2 salvaguardas documentadas');
+  }
+
+  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
+  if (recomendacionesError) {
+    errores.push(recomendacionesError);
+  }
+
+  // Validate content length
+  if (data.causa && data.causa.length < 10) {
+    advertencias.push('causa: La descripción parece muy corta (mínimo 10 caracteres recomendados)');
+  }
+
+  if (data.consecuencia && data.consecuencia.length < 10) {
+    advertencias.push('consecuencia: La descripción parece muy corta (mínimo 10 caracteres recomendados)');
+  }
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
+
+// ============================================================================
+// FMEA VALIDATOR
+// ============================================================================
+
+/**
+ * Validates a FMEA analysis form.
+ * 
+ * Required fields:
+ * - componente, modoFalla, efecto, causa
+ * - controlesActuales (at least one)
+ * - S, O, D (1-10 range)
+ * - RPN (must equal S × O × D)
+ * - accionesRecomendadas (at least one)
+ * 
+ * @param data - FMEA analysis data
+ * @returns Validation result with errors
+ * 
+ * @example
+ * const result = validarAnalisisFMEA({
+ *   componente: 'Bomba P-201',
+ *   modoFalla: 'Pérdida de sello',
+ *   efecto: 'Fuga de producto',
+ *   causa: 'Desgaste',
+ *   controlesActuales: ['Inspección visual'],
+ *   S: 7, O: 4, D: 3,
+ *   RPN: 84,
+ *   accionesRecomendadas: ['Lubricación preventiva']
+ * });
+ */
+export function validarAnalisisFMEA(data: AnalisisFMEA): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // Validate required string fields
+  const camposRequeridos = [
+    { value: data.componente, name: 'componente' },
+    { value: data.modoFalla, name: 'modoFalla' },
+    { value: data.efecto, name: 'efecto' },
+    { value: data.causa, name: 'causa' },
+  ];
+
+  for (const campo of camposRequeridos) {
+    const error = validarStringRequerido(campo.value, campo.name);
+    if (error) errores.push(error);
+  }
+
+  // Validate numeric ratings (1-10)
+  const sError = validarRangoNumerico(data.S, 1, 10, 'S (Severidad)');
+  if (sError) errores.push(sError);
+
+  const oError = validarRangoNumerico(data.O, 1, 10, 'O (Ocurrencia)');
+  if (oError) errores.push(oError);
+
+  const dError = validarRangoNumerico(data.D, 1, 10, 'D (Detección)');
+  if (dError) errores.push(dError);
+
+  // Validate RPN calculation
+  if (data.S !== undefined && data.O !== undefined && data.D !== undefined) {
+    const rpnCalculado = data.S * data.O * data.D;
+    if (data.RPN !== rpnCalculado) {
+      errores.push(`RPN inválido: debe ser ${rpnCalculado} (${data.S} × ${data.O} × ${data.D}), pero se obtuvo ${data.RPN}`);
+    }
+    
+    // Warn about high RPN
+    if (data.RPN >= 400) {
+      advertencias.push(`RPN alto (${data.RPN}): Se requieren acciones correctivas inmediatas`);
+    } else if (data.RPN >= 200) {
+      advertencias.push(`RPN moderado (${data.RPN}): Considerar acciones de mejora`);
+    }
+  }
+
+  // Validate arrays
+  const controlesError = validarArrayNoVacio(data.controlesActuales, 'controlesActuales');
+  if (controlesError) errores.push(controlesError);
+
+  const accionesError = validarArrayNoVacio(data.accionesRecomendadas, 'accionesRecomendadas');
+  if (accionesError) errores.push(accionesError);
+
+  // Validate S, O, D consistency
+  if (data.S !== undefined && data.S >= 9) {
+    advertencias.push('Severidad crítica (≥9): Requiere atención prioritaria');
+  }
+
+  if (data.O !== undefined && data.O >= 8) {
+    advertencias.push('Ocurrencia frecuente (≥8): Revisar controles preventivos');
+  }
+
+  if (data.D !== undefined && data.D >= 8) {
+    advertencias.push('Detección difícil (≥8): Mejorar sistemas de detección');
+  }
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
+
+// ============================================================================
+// LOPA VALIDATOR
+// ============================================================================
+
+/**
+ * Validates a LOPA analysis form.
+ * 
+ * Required fields:
+ * - escenario, consecuencia
+ * - frecuenciaInicial (> 0)
+ * - capasIPL (at least one with valid PFD 0-1)
+ * - frecuenciaFinal (must equal inicial × all PFDs)
+ * - objetivoRiesgo (> 0)
+ * 
+ * @param data - LOPA analysis data
+ * @returns Validation result with errors
+ */
+export function validarAnalisisLOPA(data: AnalisisLOPA): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // Validate required string fields
+  const escenarioError = validarStringRequerido(data.escenario, 'escenario');
+  if (escenarioError) errores.push(escenarioError);
+
+  const consecuenciaError = validarStringRequerido(data.consecuencia, 'consecuencia');
+  if (consecuenciaError) errores.push(consecuenciaError);
+
+  // Validate frequencies
+  const freqInicialError = validarRangoNumerico(data.frecuenciaInicial, 0.0000001, 1000, 'frecuenciaInicial');
+  if (freqInicialError) errores.push(freqInicialError);
+
+  if (data.frecuenciaInicial !== undefined && data.frecuenciaInicial <= 0) {
+    errores.push('frecuenciaInicial debe ser mayor a 0');
+  }
+
+  // Validate IPL layers
+  if (!data.capasIPL || data.capasIPL.length === 0) {
+    errores.push('capasIPL debe tener al menos una capa de protección');
+  } else {
+    for (let i = 0; i < data.capasIPL.length; i++) {
+      const capa = data.capasIPL[i];
+      
+      const nombreError = validarStringRequerido(capa.nombre, `capasIPL[${i}].nombre`);
+      if (nombreError) errores.push(nombreError);
+
+      if (capa.pfd === undefined || capa.pfd === null) {
+        errores.push(`capasIPL[${i}].pfd es requerido`);
+      } else if (capa.pfd <= 0 || capa.pfd > 1) {
+        errores.push(`capasIPL[${i}].pfd debe estar entre 0 y 1 (valor actual: ${capa.pfd})`);
+      }
+    }
+
+    // Validate frecuenciaFinal calculation
+    if (data.frecuenciaInicial !== undefined) {
+      const frecuenciaCalculada = data.frecuenciaInicial * 
+        data.capasIPL.reduce((acc, capa) => acc * capa.pfd, 1);
+      
+      // Allow small floating-point tolerance
+      const tolerancia = 0.0000001;
+      if (data.frecuenciaFinal !== undefined && 
+          Math.abs(data.frecuenciaFinal - frecuenciaCalculada) > tolerancia) {
+        errores.push(
+          `frecuenciaFinal inválida: debe ser ${frecuenciaCalculada.toExponential(2)} ` +
+          `(${data.frecuenciaInicial} × ${data.capasIPL.map(c => c.pfd).join(' × ')}), ` +
+          `pero se obtuvo ${data.frecuenciaFinal}`
+        );
+      }
+    }
+  }
+
+  // Validate objetivoRiesgo
+  if (data.objetivoRiesgo === undefined || data.objetivoRiesgo <= 0) {
+    errores.push('objetivoRiesgo debe ser mayor a 0');
+  }
+
+  // Check if risk target is met
+  if (data.frecuenciaFinal !== undefined && data.objetivoRiesgo !== undefined) {
+    if (data.frecuenciaFinal > data.objetivoRiesgo) {
+      advertencias.push(
+        `El riesgo final (${data.frecuenciaFinal.toExponential(2)}) excede el objetivo (${data.objetivoRiesgo.toExponential(2)}). ` +
+        'Se requieren capas de protección adicionales.'
+      );
+    }
+  }
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
+
+// ============================================================================
+// OCA VALIDATOR
+// ============================================================================
+
+/**
+ * Validates an OCA (Consequence Analysis) form.
+ * 
+ * Required fields:
+ * - eventoIniciador, consecuencia
+ * - barrerasExistentes (at least one)
+ * - gaps (at least one)
+ * - recomendaciones (at least one, recommended >= gaps.length)
+ * 
+ * @param data - OCA analysis data
+ * @returns Validation result with errors
+ */
+export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // Validate required string fields
+  const eventoError = validarStringRequerido(data.eventoIniciador, 'eventoIniciador');
+  if (eventoError) errores.push(eventoError);
+
+  const consecuenciaError = validarStringRequerido(data.consecuencia, 'consecuencia');
+  if (consecuenciaError) errores.push(consecuenciaError);
+
+  // Validate arrays
+  const barrerasError = validarArrayNoVacio(data.barrerasExistentes, 'barrerasExistentes');
+  if (barrerasError) errores.push(barrerasError);
+
+  const gapsError = validarArrayNoVacio(data.gaps, 'gaps');
+  if (gapsError) errores.push(gapsError);
+
+  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
+  if (recomendacionesError) errores.push(recomendacionesError);
+
+  // Check if recommendations cover all gaps
+  if (data.gaps && data.recomendaciones && data.gaps.length > data.recomendaciones.length) {
+    advertencias.push(
+      `Hay más gaps (${data.gaps.length}) que recomendaciones (${data.recomendaciones.length}). ` +
+      'Considere agregar más recomendaciones.'
+    );
+  }
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
+
+// ============================================================================
+// INTUICION VALIDATOR
+// ============================================================================
+
+/**
+ * Validates an Intuitive Analysis form.
+ * 
+ * Required fields:
+ * - titulo, descripcion
+ * - observaciones (at least one)
+ * 
+ * @param data - Intuitive analysis data
+ * @returns Validation result with errors
+ */
+export function validarAnalisisIntuicion(data: AnalisisIntuicion): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // Validate required string fields
+  const tituloError = validarStringRequerido(data.titulo, 'titulo');
+  if (tituloError) errores.push(tituloError);
+
+  const descripcionError = validarStringRequerido(data.descripcion, 'descripcion');
+  if (descripcionError) errores.push(descripcionError);
+
+  // Validate description length
+  if (data.descripcion && data.descripcion.length < 20) {
+    advertencias.push('descripcion: Se recomienda una descripción más detallada (mínimo 20 caracteres)');
+  }
+
+  // Validate observaciones array
+  const observacionesError = validarArrayNoVacio(data.observaciones, 'observaciones');
+  if (observacionesError) errores.push(observacionesError);
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
+
+// ============================================================================
+// GENERIC ANALYSIS VALIDATOR
+// ============================================================================
+
+/**
+ * Validates any analysis type by dispatching to the specific validator.
+ * 
+ * @param base - Base analysis data
+ * @param datos - Methodology-specific data
+ * @returns Validation result with errors
+ * 
+ * @example
+ * // Validate a HAZOP analysis
+ * const result = validarAnalisisGenerico(
+ *   { id: 'hazop-001', tipo: 'HAZOP', ... },
+ *   { nodo: 'R-101', parametro: 'Presión', ... }
+ * );
+ * 
+ * // Validate an FMEA analysis
+ * const fmeaResult = validarAnalisisGenerico(
+ *   { id: 'fmea-001', tipo: 'FMEA', ... },
+ *   { componente: 'P-201', modoFalla: 'Fuga', ... }
+ * );
+ */
+export function validarAnalisisGenerico(
+  base: AnalisisBase,
+  datos: AnalisisHAZOP | AnalisisFMEA | AnalisisLOPA | AnalisisOCA | AnalisisIntuicion
+): ValidationResult {
+  const errores: string[] = [];
+  const advertencias: string[] = [];
+
+  // First validate base fields
+  const baseResult = validarAnalisisBase(base);
+  errores.push(...baseResult.errores);
+
+  // Then validate methodology-specific fields
+  let datosResult: ValidationResult;
+
+  switch (base.tipo) {
+    case 'HAZOP':
+      datosResult = validarAnalisisHAZOP(datos as AnalisisHAZOP);
+      break;
+    case 'FMEA':
+      datosResult = validarAnalisisFMEA(datos as AnalisisFMEA);
+      break;
+    case 'LOPA':
+      datosResult = validarAnalisisLOPA(datos as AnalisisLOPA);
+      break;
+    case 'OCA':
+      datosResult = validarAnalisisOCA(datos as AnalisisOCA);
+      break;
+    case 'Intuicion':
+      datosResult = validarAnalisisIntuicion(datos as AnalisisIntuicion);
+      break;
+    default:
+      errores.push(`Tipo de análisis no soportado: ${(base as AnalisisBase).tipo}`);
+      datosResult = { valido: false, errores: [] };
+  }
+
+  errores.push(...datosResult.errores);
+  advertencias.push(...(datosResult.advertencias || []));
+
+  return {
+    valido: errores.length === 0,
+    errores,
+    advertencias,
+  };
+}
