@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx tsx test/models.test.ts && npx tsx test/validators.test.ts",
+    "test": "npx tsx test/models.test.ts && npx tsx test/validators.test.ts && npx tsx test/utils.test.ts",
     "test:models": "npx tsx test/models.test.ts",
-    "test:validators": "npx tsx test/validators.test.ts"
+    "test:validators": "npx tsx test/validators.test.ts",
+    "test:utils": "npx tsx test/utils.test.ts"
   },
   "dependencies": {
     "next": "16.1.6",
