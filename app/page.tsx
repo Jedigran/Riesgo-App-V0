@@ -208,30 +208,65 @@ export default function RiesgoApp() {
   };
 
   // ========================================
-  // UNIFIED GUARD HANDLER (with all logic inside)
+  // SHARED HALLAZGO CREATOR (all types)
+  // ========================================
+  const crearHallazgosDeFormulario = (analisisId: string) => {
+    for (const hallazgo of hallazgosForm) {
+      if (hallazgo.tipo === 'Peligro') {
+        crearPeligro({
+          titulo: hallazgo.titulo,
+          descripcion: hallazgo.descripcion,
+          consecuencia: hallazgo.consecuencia || '',
+          severidad: (hallazgo.severidad || 3) as any,
+          causaRaiz: hallazgo.causaRaiz || '',
+          analisisOrigenIds: [analisisId],
+        }, hallazgo.ubicacion);
+      } else if (hallazgo.tipo === 'Barrera') {
+        crearBarrera({
+          titulo: hallazgo.titulo,
+          descripcion: hallazgo.descripcion,
+          tipoBarrera: (hallazgo.tipoBarrera || 'Fisica') as any,
+          efectividadEstimada: (hallazgo.efectividadEstimada || 3) as any,
+          elementoProtegido: hallazgo.elementoProtegido || '',
+          analisisOrigenIds: [analisisId],
+        }, hallazgo.ubicacion);
+      } else if (hallazgo.tipo === 'POE') {
+        crearPOE({
+          titulo: hallazgo.titulo,
+          descripcion: hallazgo.descripcion,
+          procedimientoReferencia: hallazgo.procedimientoReferencia || '',
+          frecuenciaAplicacion: hallazgo.frecuenciaAplicacion || '',
+          responsable: hallazgo.responsable || '',
+          analisisOrigenIds: [analisisId],
+        }, hallazgo.ubicacion);
+      } else if (hallazgo.tipo === 'SOL') {
+        crearSOL({
+          titulo: hallazgo.titulo,
+          descripcion: hallazgo.descripcion,
+          capaNumero: hallazgo.capaNumero || 1,
+          independiente: hallazgo.independiente ?? true,
+          tipoTecnologia: hallazgo.tipoTecnologia || '',
+          analisisOrigenIds: [analisisId],
+        }, hallazgo.ubicacion);
+      }
+    }
+  };
+
+  // ========================================
+  // UNIFIED GUARDAR HANDLER
   // ========================================
   const handleGuardar = async () => {
-    console.log('🔴 GUARDAR CLICKED!');
-    console.log('🔴 metodologiaSeleccionada:', metodologiaSeleccionada);
-
     // ========== HAZOP ==========
     if (metodologiaSeleccionada === 'hazop') {
-      console.log('🔵 HAZOP: Starting validation');
-      console.log('🔵 HAZOP data:', hazopData);
-      console.log('🔵 Hallazgos:', hallazgosForm);
-
       if (!hazopData.nodo.trim() || !hazopData.parametro.trim() || !hazopData.causa.trim() || !hazopData.consecuencia.trim()) {
-        console.log('🔵 HAZOP: Validation failed - missing fields');
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de HAZOP' });
         return;
       }
       if (hallazgosForm.length === 0) {
-        console.log('🔵 HAZOP: Validation failed - no hallazgos');
         agregarError({ severidad: 'warning', mensaje: 'Agregue al menos un hallazgo' });
         return;
       }
 
-      console.log('🔵 HAZOP: Validation passed, creating...');
       try {
         const resultadoAnalisis = crearAnalisisHAZOP({
           nodo: hazopData.nodo,
@@ -243,43 +278,18 @@ export default function RiesgoApp() {
           recomendaciones: hazopData.recomendaciones.filter(r => r.trim()),
         });
 
-        console.log('🔵 HAZOP: Analysis result:', resultadoAnalisis);
-
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
-          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error' });
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar HAZOP' });
           return;
         }
 
-        for (const hallazgo of hallazgosForm) {
-          if (hallazgo.tipo === 'Peligro') {
-            crearPeligro({
-              titulo: hallazgo.titulo,
-              descripcion: hallazgo.descripcion,
-              consecuencia: hallazgo.consecuencia || '',
-              severidad: (hallazgo.severidad || 3) as any,
-              causaRaiz: hallazgo.causaRaiz || '',
-              analisisOrigenIds: [resultadoAnalisis.id],
-            }, hallazgo.ubicacion);
-          } else if (hallazgo.tipo === 'Barrera') {
-            crearBarrera({
-              titulo: hallazgo.titulo,
-              descripcion: hallazgo.descripcion,
-              tipoBarrera: (hallazgo.tipoBarrera || 'Fisica') as any,
-              efectividadEstimada: (hallazgo.efectividadEstimada || 3) as any,
-              elementoProtegido: hallazgo.elementoProtegido || '',
-              analisisOrigenIds: [resultadoAnalisis.id],
-            }, hallazgo.ubicacion);
-          }
-        }
-
+        crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
         setHazopData({ nodo: '', parametro: '', palabraGuia: '', causa: '', consecuencia: '', salvaguardasExistentes: [''], recomendaciones: [''] });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
-        console.log('🔵 HAZOP: Done!');
       } catch (error) {
-        console.log('🔵 HAZOP: Error:', error);
-        agregarError({ severidad: 'error', mensaje: 'Error inesperado' });
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar HAZOP' });
       }
     }
     // ========== FMEA ==========
@@ -288,11 +298,34 @@ export default function RiesgoApp() {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de FMEA' });
         return;
       }
-      // ... (similar logic for other methodologies)
-      agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis guardado', duracion: 3000 });
-      setFmeaData({ componente: '', modoFalla: '', efecto: '', causa: '', controlesActuales: [''], S: 1, O: 1, D: 1, RPN: 1, accionesRecomendadas: [''] });
-      setHallazgosForm([]);
-      setMetodologiaSeleccionada(null);
+
+      try {
+        const resultadoAnalisis = crearAnalisisFMEA({
+          componente: fmeaData.componente,
+          modoFalla: fmeaData.modoFalla,
+          efecto: fmeaData.efecto,
+          causa: fmeaData.causa,
+          controlesActuales: fmeaData.controlesActuales.filter(c => c.trim()),
+          S: fmeaData.S,
+          O: fmeaData.O,
+          D: fmeaData.D,
+          RPN: fmeaData.S * fmeaData.O * fmeaData.D,
+          accionesRecomendadas: fmeaData.accionesRecomendadas.filter(a => a.trim()),
+        });
+
+        if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar FMEA' });
+          return;
+        }
+
+        crearHallazgosDeFormulario(resultadoAnalisis.id);
+        agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        setFmeaData({ componente: '', modoFalla: '', efecto: '', causa: '', controlesActuales: [''], S: 1, O: 1, D: 1, RPN: 1, accionesRecomendadas: [''] });
+        setHallazgosForm([]);
+        setMetodologiaSeleccionada(null);
+      } catch (error) {
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar FMEA' });
+      }
     }
     // ========== LOPA ==========
     else if (metodologiaSeleccionada === 'lopa') {
@@ -300,10 +333,30 @@ export default function RiesgoApp() {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de LOPA' });
         return;
       }
-      agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis guardado', duracion: 3000 });
-      setLopaData({ escenario: '', frecuenciaInicial: 0.1, consecuencia: '', capasIPL: [{ nombre: '', pfd: 0.1 }], frecuenciaFinal: 0.01, objetivoRiesgo: 0.001 });
-      setHallazgosForm([]);
-      setMetodologiaSeleccionada(null);
+
+      try {
+        const resultadoAnalisis = crearAnalisisLOPA({
+          escenario: lopaData.escenario,
+          frecuenciaInicial: lopaData.frecuenciaInicial,
+          consecuencia: lopaData.consecuencia,
+          capasIPL: lopaData.capasIPL.filter(c => c.nombre.trim()),
+          frecuenciaFinal: lopaData.frecuenciaFinal,
+          objetivoRiesgo: lopaData.objetivoRiesgo,
+        });
+
+        if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar LOPA' });
+          return;
+        }
+
+        crearHallazgosDeFormulario(resultadoAnalisis.id);
+        agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        setLopaData({ escenario: '', frecuenciaInicial: 0.1, consecuencia: '', capasIPL: [{ nombre: '', pfd: 0.1 }], frecuenciaFinal: 0.01, objetivoRiesgo: 0.001 });
+        setHallazgosForm([]);
+        setMetodologiaSeleccionada(null);
+      } catch (error) {
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar LOPA' });
+      }
     }
     // ========== OCA ==========
     else if (metodologiaSeleccionada === 'oca') {
@@ -311,10 +364,29 @@ export default function RiesgoApp() {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de OCA' });
         return;
       }
-      agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis guardado', duracion: 3000 });
-      setOcaData({ eventoIniciador: '', consecuencia: '', barrerasExistentes: [''], gaps: [''], recomendaciones: [''] });
-      setHallazgosForm([]);
-      setMetodologiaSeleccionada(null);
+
+      try {
+        const resultadoAnalisis = crearAnalisisOCA({
+          eventoIniciador: ocaData.eventoIniciador,
+          consecuencia: ocaData.consecuencia,
+          barrerasExistentes: ocaData.barrerasExistentes.filter(b => b.trim()),
+          gaps: ocaData.gaps.filter(g => g.trim()),
+          recomendaciones: ocaData.recomendaciones.filter(r => r.trim()),
+        });
+
+        if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar OCA' });
+          return;
+        }
+
+        crearHallazgosDeFormulario(resultadoAnalisis.id);
+        agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        setOcaData({ eventoIniciador: '', consecuencia: '', barrerasExistentes: [''], gaps: [''], recomendaciones: [''] });
+        setHallazgosForm([]);
+        setMetodologiaSeleccionada(null);
+      } catch (error) {
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar OCA' });
+      }
     }
     // ========== INTUICION ==========
     else if (metodologiaSeleccionada === 'intuicion') {
@@ -322,10 +394,27 @@ export default function RiesgoApp() {
         agregarError({ severidad: 'error', mensaje: 'Complete título y descripción' });
         return;
       }
-      agregarNotificacion({ tipo: 'success', titulo: 'Intuición Guardado', mensaje: 'Hallazgo guardado', duracion: 3000 });
-      setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
-      setHallazgosForm([]);
-      setMetodologiaSeleccionada(null);
+
+      try {
+        const resultadoAnalisis = crearAnalisisIntuicion({
+          titulo: intuicionData.titulo,
+          descripcion: intuicionData.descripcion,
+          observaciones: intuicionData.observaciones.filter(o => o.trim()),
+        });
+
+        if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar Intuición' });
+          return;
+        }
+
+        crearHallazgosDeFormulario(resultadoAnalisis.id);
+        agregarNotificacion({ tipo: 'success', titulo: 'Intuición Guardada', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
+        setHallazgosForm([]);
+        setMetodologiaSeleccionada(null);
+      } catch (error) {
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar Intuición' });
+      }
     }
     else {
       agregarError({ severidad: 'error', mensaje: 'Seleccione una metodología' });
