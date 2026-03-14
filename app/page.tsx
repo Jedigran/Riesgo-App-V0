@@ -24,6 +24,7 @@ import { useAnalisis } from '@/src/controllers/useAnalisis';
 import { useHallazgo } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useMapa } from '@/src/controllers/useMapa';
+import { useSesion } from '@/src/controllers/useSesion';
 import { SiteHeader } from '@/components';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
@@ -74,15 +75,18 @@ interface HallazgoFormData {
 // ============================================================================
 
 export default function RiesgoApp() {
+  // Get session for map markers
+  const { sesion } = useSesion();
+
   // Estado para tab izquierdo (EXCLUSIVO)
   const [leftTabActive, setLeftTabActive] = useState<LeftTab>('configuracion');
-  
+
   // Estado para tab derecho (solo uno visible a la vez)
   const [rightTabActive, setRightTabActive] = useState<RightTab>('esquematico');
-  
+
   // Estado para metodología seleccionada en Censo
   const [metodologiaSeleccionada, setMetodologiaSeleccionada] = useState<Metodologia>(null);
-  
+
   // Estado para configuración del proyecto
   const [configData, setConfigData] = useState<ConfigData>({
     proyecto: '',
@@ -707,8 +711,8 @@ export default function RiesgoApp() {
                       </div>
                     )}
                     
-                    {/* HALLAZGO MARKERS - ALWAYS VISIBLE (not just in edit mode) */}
-                    {hallazgosForm.map((h) => h.ubicacion && (
+                    {/* HALLAZGO MARKERS - ALWAYS VISIBLE from session (not just form) */}
+                    {sesion?.hallazgos.map((h) => h.ubicacion && (
                       <div
                         key={h.id}
                         className="absolute w-4 h-4 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2 shadow-lg hover:scale-125 transition-transform cursor-pointer"
