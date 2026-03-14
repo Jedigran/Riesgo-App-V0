@@ -13,6 +13,7 @@
 
 import { useState, useMemo } from 'react';
 import { useSesion } from '@/src/controllers/useSesion';
+import { useRelacionesHallazgo } from '@/src/controllers/useRelacionesHallazgo';
 import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
 
 interface FiltrosTabla {
@@ -22,6 +23,7 @@ interface FiltrosTabla {
 
 export default function TablaHallazgos() {
   const { sesion, sesionCargada } = useSesion();
+  const { relaciones } = useRelacionesHallazgo();
   
   const [filtros, setFiltros] = useState<FiltrosTabla>({
     tipo: 'todos',
@@ -66,6 +68,13 @@ export default function TablaHallazgos() {
       return true;
     });
   }, [sesion, filtros]);
+
+  // Contar relaciones por hallazgo
+  const contarRelaciones = (hallazgoId: string) => {
+    return relaciones.filter(r => 
+      r.origenId === hallazgoId || r.destinoId === hallazgoId
+    ).length;
+  };
 
   // Contar por tipo
   const conteoPorTipo = useMemo(() => {
@@ -177,7 +186,7 @@ export default function TablaHallazgos() {
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Título</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Descripción</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Ubicación</th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Análisis Origen</th>
+                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Relaciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-knar-border">
@@ -207,15 +216,14 @@ export default function TablaHallazgos() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-col space-y-1">
-                      {hallazgo.analisisOrigenIds.length > 0 ? (
-                        hallazgo.analisisOrigenIds.map((id) => (
-                          <span key={id} className="text-xs text-knar-text-muted font-mono">
-                            {id.substring(0, 12)}...
-                          </span>
-                        ))
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-knar-text-primary font-medium">
+                        {contarRelaciones(hallazgo.id)}
+                      </span>
+                      {contarRelaciones(hallazgo.id) > 0 ? (
+                        <span className="text-xs" title={`${contarRelaciones(hallazgo.id)} relaciones`}>🔗</span>
                       ) : (
-                        <span className="text-xs text-knar-text-muted">—</span>
+                        <span className="text-xs text-knar-text-muted" title="Sin relaciones">—</span>
                       )}
                     </div>
                   </td>

@@ -27,6 +27,7 @@ import { useMapa } from '@/src/controllers/useMapa';
 import { SiteHeader } from '@/components';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
+import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
 
 // ============================================================================
 // TYPES
@@ -665,13 +666,7 @@ export default function RiesgoApp() {
 
             {/* Relaciones Tab */}
             {leftTabActive === 'relaciones' && (
-              <div className="knar-card">
-                <div className="knar-card-header">
-                  <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></div>
-                  <h3 className="knar-card-title">Relaciones</h3>
-                </div>
-                <div className="knar-card-content"><p className="text-xs text-knar-text-secondary">Panel de relaciones (próximamente)</p></div>
-              </div>
+              <RelacionesPanel />
             )}
           </div>
         </aside>
@@ -687,7 +682,12 @@ export default function RiesgoApp() {
                   <h3 className="knar-card-title">Esquemático - Sistema de Bombas de Achique</h3>
                 </div>
                 <div className="knar-card-content">
-                  <div onClick={handleMapClick} className={`relative bg-knar-charcoal rounded-lg border-2 overflow-hidden cursor-crosshair ${ubicacionEditando ? 'border-blue-500' : 'border-knar-border'}`}>
+                  <div
+                    onClick={handleMapClick}
+                    className={`relative bg-knar-charcoal rounded-lg border-2 overflow-hidden ${
+                      ubicacionEditando ? 'border-blue-500 cursor-crosshair' : 'border-knar-border cursor-default'
+                    }`}
+                  >
                     {/* ACTUAL IMAGE HERE */}
                     <img src="/ReferenceIamge/Sistema Bombas de Achique_V2.png" alt="Sistema de Bombas de Achique" className="w-full h-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     
@@ -700,12 +700,25 @@ export default function RiesgoApp() {
                       </div>
                     </div>
                     
-                    {/* Edit mode indicator */}
-                    {ubicacionEditando && (<div className="absolute top-2 right-2 px-2 py-1 bg-blue-500 bg-opacity-20 border border-blue-500 border-opacity-30 rounded text-xs text-blue-400">Modo edición: Ubicación activa</div>)}
+                    {/* Edit mode indicator - ONLY show when editing */}
+                    {ubicacionEditando && (
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-blue-500 bg-opacity-20 border border-blue-500 border-opacity-30 rounded text-xs text-blue-400 pointer-events-none">
+                        Modo edición: Ubicación activa
+                      </div>
+                    )}
                     
-                    {/* Hallazgo markers */}
+                    {/* HALLAZGO MARKERS - ALWAYS VISIBLE (not just in edit mode) */}
                     {hallazgosForm.map((h) => h.ubicacion && (
-                      <div key={h.id} className="absolute w-4 h-4 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2" style={{ left: `${h.ubicacion.x}%`, top: `${h.ubicacion.y}%`, backgroundColor: h.tipo === 'Peligro' ? '#ef4444' : h.tipo === 'Barrera' ? '#3b82f6' : '#10b981' }} />
+                      <div
+                        key={h.id}
+                        className="absolute w-4 h-4 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2 shadow-lg hover:scale-125 transition-transform cursor-pointer"
+                        style={{ 
+                          left: `${h.ubicacion.x}%`, 
+                          top: `${h.ubicacion.y}%`, 
+                          backgroundColor: h.tipo === 'Peligro' ? '#ef4444' : h.tipo === 'Barrera' ? '#3b82f6' : h.tipo === 'POE' ? '#10b981' : '#8b5cf6'
+                        }}
+                        title={`${h.tipo}: ${h.titulo}`}
+                      />
                     ))}
                   </div>
                 </div>
