@@ -211,43 +211,48 @@ export default function RiesgoApp() {
   // SHARED HALLAZGO CREATOR (all types)
   // ========================================
   const crearHallazgosDeFormulario = (analisisId: string) => {
+    // Default location for hallazgos not yet placed on the schematic
+    const ubicacionDefault = { x: 0, y: 0 };
+
     for (const hallazgo of hallazgosForm) {
+      const ubicacion = hallazgo.ubicacion ?? ubicacionDefault;
+
       if (hallazgo.tipo === 'Peligro') {
         crearPeligro({
-          titulo: hallazgo.titulo,
-          descripcion: hallazgo.descripcion,
-          consecuencia: hallazgo.consecuencia || '',
+          titulo: hallazgo.titulo || 'Sin título',
+          descripcion: hallazgo.descripcion || 'Sin descripción',
+          consecuencia: hallazgo.consecuencia || 'Por definir',
           severidad: (hallazgo.severidad || 3) as any,
-          causaRaiz: hallazgo.causaRaiz || '',
+          causaRaiz: hallazgo.causaRaiz || 'Por definir',
           analisisOrigenIds: [analisisId],
-        }, hallazgo.ubicacion);
+        }, ubicacion);
       } else if (hallazgo.tipo === 'Barrera') {
         crearBarrera({
-          titulo: hallazgo.titulo,
-          descripcion: hallazgo.descripcion,
+          titulo: hallazgo.titulo || 'Sin título',
+          descripcion: hallazgo.descripcion || 'Sin descripción',
           tipoBarrera: (hallazgo.tipoBarrera || 'Fisica') as any,
           efectividadEstimada: (hallazgo.efectividadEstimada || 3) as any,
-          elementoProtegido: hallazgo.elementoProtegido || '',
+          elementoProtegido: hallazgo.elementoProtegido || 'Por definir',
           analisisOrigenIds: [analisisId],
-        }, hallazgo.ubicacion);
+        }, ubicacion);
       } else if (hallazgo.tipo === 'POE') {
         crearPOE({
-          titulo: hallazgo.titulo,
-          descripcion: hallazgo.descripcion,
-          procedimientoReferencia: hallazgo.procedimientoReferencia || '',
-          frecuenciaAplicacion: hallazgo.frecuenciaAplicacion || '',
-          responsable: hallazgo.responsable || '',
+          titulo: hallazgo.titulo || 'Sin título',
+          descripcion: hallazgo.descripcion || 'Sin descripción',
+          procedimientoReferencia: hallazgo.procedimientoReferencia || 'Por definir',
+          frecuenciaAplicacion: hallazgo.frecuenciaAplicacion || 'Por definir',
+          responsable: hallazgo.responsable || 'Por definir',
           analisisOrigenIds: [analisisId],
-        }, hallazgo.ubicacion);
+        }, ubicacion);
       } else if (hallazgo.tipo === 'SOL') {
         crearSOL({
-          titulo: hallazgo.titulo,
-          descripcion: hallazgo.descripcion,
+          titulo: hallazgo.titulo || 'Sin título',
+          descripcion: hallazgo.descripcion || 'Sin descripción',
           capaNumero: hallazgo.capaNumero || 1,
           independiente: hallazgo.independiente ?? true,
-          tipoTecnologia: hallazgo.tipoTecnologia || '',
+          tipoTecnologia: hallazgo.tipoTecnologia || 'Por definir',
           analisisOrigenIds: [analisisId],
-        }, hallazgo.ubicacion);
+        }, ubicacion);
       }
     }
   };
@@ -274,8 +279,8 @@ export default function RiesgoApp() {
           palabraGuia: hazopData.palabraGuia,
           causa: hazopData.causa,
           consecuencia: hazopData.consecuencia,
-          salvaguardasExistentes: hazopData.salvaguardasExistentes.filter(s => s.trim()),
-          recomendaciones: hazopData.recomendaciones.filter(r => r.trim()),
+          salvaguardasExistentes: hazopData.salvaguardasExistentes.filter(s => s.trim()).length > 0 ? hazopData.salvaguardasExistentes.filter(s => s.trim()) : [''],
+          recomendaciones: hazopData.recomendaciones.filter(r => r.trim()).length > 0 ? hazopData.recomendaciones.filter(r => r.trim()) : [''],
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
@@ -305,12 +310,12 @@ export default function RiesgoApp() {
           modoFalla: fmeaData.modoFalla,
           efecto: fmeaData.efecto,
           causa: fmeaData.causa,
-          controlesActuales: fmeaData.controlesActuales.filter(c => c.trim()),
+          controlesActuales: fmeaData.controlesActuales.filter(c => c.trim()).length > 0 ? fmeaData.controlesActuales.filter(c => c.trim()) : [''],
           S: fmeaData.S,
           O: fmeaData.O,
           D: fmeaData.D,
           RPN: fmeaData.S * fmeaData.O * fmeaData.D,
-          accionesRecomendadas: fmeaData.accionesRecomendadas.filter(a => a.trim()),
+          accionesRecomendadas: fmeaData.accionesRecomendadas.filter(a => a.trim()).length > 0 ? fmeaData.accionesRecomendadas.filter(a => a.trim()) : [''],
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
@@ -339,7 +344,7 @@ export default function RiesgoApp() {
           escenario: lopaData.escenario,
           frecuenciaInicial: lopaData.frecuenciaInicial,
           consecuencia: lopaData.consecuencia,
-          capasIPL: lopaData.capasIPL.filter(c => c.nombre.trim()),
+          capasIPL: lopaData.capasIPL.filter(c => c.nombre.trim()).length > 0 ? lopaData.capasIPL.filter(c => c.nombre.trim()) : [{ nombre: '', pfd: 0.1 }],
           frecuenciaFinal: lopaData.frecuenciaFinal,
           objetivoRiesgo: lopaData.objetivoRiesgo,
         });
@@ -369,9 +374,9 @@ export default function RiesgoApp() {
         const resultadoAnalisis = crearAnalisisOCA({
           eventoIniciador: ocaData.eventoIniciador,
           consecuencia: ocaData.consecuencia,
-          barrerasExistentes: ocaData.barrerasExistentes.filter(b => b.trim()),
-          gaps: ocaData.gaps.filter(g => g.trim()),
-          recomendaciones: ocaData.recomendaciones.filter(r => r.trim()),
+          barrerasExistentes: ocaData.barrerasExistentes.filter(b => b.trim()).length > 0 ? ocaData.barrerasExistentes.filter(b => b.trim()) : [''],
+          gaps: ocaData.gaps.filter(g => g.trim()).length > 0 ? ocaData.gaps.filter(g => g.trim()) : [''],
+          recomendaciones: ocaData.recomendaciones.filter(r => r.trim()).length > 0 ? ocaData.recomendaciones.filter(r => r.trim()) : [''],
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
@@ -399,7 +404,7 @@ export default function RiesgoApp() {
         const resultadoAnalisis = crearAnalisisIntuicion({
           titulo: intuicionData.titulo,
           descripcion: intuicionData.descripcion,
-          observaciones: intuicionData.observaciones.filter(o => o.trim()),
+          observaciones: intuicionData.observaciones.filter(o => o.trim()).length > 0 ? intuicionData.observaciones.filter(o => o.trim()) : [''],
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
