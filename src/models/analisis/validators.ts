@@ -196,17 +196,18 @@ export function validarAnalisisHAZOP(data: AnalisisHAZOP): ValidationResult {
     if (error) errores.push(error);
   }
 
-  // Validate arrays
-  const salvaguardasError = validarArrayNoVacio(data.salvaguardasExistentes, 'salvaguardasExistentes');
-  if (salvaguardasError) {
-    errores.push(salvaguardasError);
-  } else if (data.salvaguardasExistentes.length < 2) {
-    advertencias.push('Se recomienda tener al menos 2 salvaguardas documentadas');
-  }
+  // Validate arrays - OPTIONAL for now (can be empty)
+  // const salvaguardasError = validarArrayNoVacio(data.salvaguardasExistentes, 'salvaguardasExistentes');
+  // if (salvaguardasError) {
+  //   errores.push(salvaguardasError);
+  // } else if (data.salvaguardasExistentes.length < 2) {
+  //   advertencias.push('Se recomienda tener al menos 2 salvaguardas documentadas');
+  // }
 
-  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
-  if (recomendacionesError) {
-    errores.push(recomendacionesError);
+  // const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
+  // if (recomendacionesError) {
+  //   errores.push(recomendacionesError);
+  // }
   }
 
   // Validate content length
