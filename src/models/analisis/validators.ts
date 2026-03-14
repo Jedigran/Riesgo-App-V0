@@ -295,12 +295,14 @@ export function validarAnalisisFMEA(data: AnalisisFMEA): ValidationResult {
     }
   }
 
-  // Validate arrays
-  const controlesError = validarArrayNoVacio(data.controlesActuales, 'controlesActuales');
-  if (controlesError) errores.push(controlesError);
+  // Arrays are optional — warn if empty but do not block
+  if (!data.controlesActuales || data.controlesActuales.length === 0) {
+    advertencias.push('controlesActuales: Se recomienda registrar al menos un control actual');
+  }
 
-  const accionesError = validarArrayNoVacio(data.accionesRecomendadas, 'accionesRecomendadas');
-  if (accionesError) errores.push(accionesError);
+  if (!data.accionesRecomendadas || data.accionesRecomendadas.length === 0) {
+    advertencias.push('accionesRecomendadas: Se recomienda registrar al menos una acción recomendada');
+  }
 
   // Validate S, O, D consistency
   if (data.S !== undefined && data.S >= 9) {
@@ -358,36 +360,29 @@ export function validarAnalisisLOPA(data: AnalisisLOPA): ValidationResult {
     errores.push('frecuenciaInicial debe ser mayor a 0');
   }
 
-  // Validate IPL layers
+  // capasIPL is optional — warn if empty but do not block
   if (!data.capasIPL || data.capasIPL.length === 0) {
-    errores.push('capasIPL debe tener al menos una capa de protección');
+    advertencias.push('capasIPL: Se recomienda registrar al menos una capa de protección');
   } else {
-    for (let i = 0; i < data.capasIPL.length; i++) {
-      const capa = data.capasIPL[i];
-      
-      const nombreError = validarStringRequerido(capa.nombre, `capasIPL[${i}].nombre`);
-      if (nombreError) errores.push(nombreError);
-
-      if (capa.pfd === undefined || capa.pfd === null) {
-        errores.push(`capasIPL[${i}].pfd es requerido`);
-      } else if (capa.pfd <= 0 || capa.pfd > 1) {
+    // Only validate layers that have content
+    const capasConNombre = data.capasIPL.filter(c => c.nombre && c.nombre.trim());
+    for (let i = 0; i < capasConNombre.length; i++) {
+      const capa = capasConNombre[i];
+      if (capa.pfd !== undefined && (capa.pfd <= 0 || capa.pfd > 1)) {
         errores.push(`capasIPL[${i}].pfd debe estar entre 0 y 1 (valor actual: ${capa.pfd})`);
       }
     }
 
-    // Validate frecuenciaFinal calculation
-    if (data.frecuenciaInicial !== undefined) {
-      const frecuenciaCalculada = data.frecuenciaInicial * 
-        data.capasIPL.reduce((acc, capa) => acc * capa.pfd, 1);
-      
-      // Allow small floating-point tolerance
+    // Validate frecuenciaFinal only when capas are present and named
+    if (data.frecuenciaInicial !== undefined && capasConNombre.length > 0) {
+      const frecuenciaCalculada = data.frecuenciaInicial *
+        capasConNombre.reduce((acc, capa) => acc * capa.pfd, 1);
       const tolerancia = 0.0000001;
-      if (data.frecuenciaFinal !== undefined && 
+      if (data.frecuenciaFinal !== undefined &&
           Math.abs(data.frecuenciaFinal - frecuenciaCalculada) > tolerancia) {
-        errores.push(
-          `frecuenciaFinal inválida: debe ser ${frecuenciaCalculada.toExponential(2)} ` +
-          `(${data.frecuenciaInicial} × ${data.capasIPL.map(c => c.pfd).join(' × ')}), ` +
-          `pero se obtuvo ${data.frecuenciaFinal}`
+        advertencias.push(
+          `frecuenciaFinal sugerida: ${frecuenciaCalculada.toExponential(2)} ` +
+          `(${data.frecuenciaInicial} × ${capasConNombre.map(c => c.pfd).join(' × ')})`
         );
       }
     }
@@ -442,15 +437,18 @@ export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
   const consecuenciaError = validarStringRequerido(data.consecuencia, 'consecuencia');
   if (consecuenciaError) errores.push(consecuenciaError);
 
-  // Validate arrays
-  const barrerasError = validarArrayNoVacio(data.barrerasExistentes, 'barrerasExistentes');
-  if (barrerasError) errores.push(barrerasError);
+  // Arrays are optional — warn if empty but do not block
+  if (!data.barrerasExistentes || data.barrerasExistentes.length === 0) {
+    advertencias.push('barrerasExistentes: Se recomienda registrar al menos una barrera existente');
+  }
 
-  const gapsError = validarArrayNoVacio(data.gaps, 'gaps');
-  if (gapsError) errores.push(gapsError);
+  if (!data.gaps || data.gaps.length === 0) {
+    advertencias.push('gaps: Se recomienda identificar al menos un gap de seguridad');
+  }
 
-  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
-  if (recomendacionesError) errores.push(recomendacionesError);
+  if (!data.recomendaciones || data.recomendaciones.length === 0) {
+    advertencias.push('recomendaciones: Se recomienda registrar al menos una recomendación');
+  }
 
   // Check if recommendations cover all gaps
   if (data.gaps && data.recomendaciones && data.gaps.length > data.recomendaciones.length) {
@@ -497,9 +495,10 @@ export function validarAnalisisIntuicion(data: AnalisisIntuicion): ValidationRes
     advertencias.push('descripcion: Se recomienda una descripción más detallada (mínimo 20 caracteres)');
   }
 
-  // Validate observaciones array
-  const observacionesError = validarArrayNoVacio(data.observaciones, 'observaciones');
-  if (observacionesError) errores.push(observacionesError);
+  // observaciones is optional — warn if empty but do not block
+  if (!data.observaciones || data.observaciones.length === 0) {
+    advertencias.push('observaciones: Se recomienda registrar al menos una observación');
+  }
 
   return {
     valido: errores.length === 0,

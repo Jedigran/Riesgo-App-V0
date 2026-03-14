@@ -200,9 +200,13 @@ export function validarHallazgoBase(hallazgo: {
   const descripcionError = validarStringRequerido(hallazgo.descripcion, 'descripcion');
   if (descripcionError) errores.push(descripcionError);
 
-  // Validate ubicacion
-  const ubicacionResult = validarUbicacionObject(hallazgo.ubicacion);
-  errores.push(...ubicacionResult.errores);
+  // Validate ubicacion only when explicitly provided with non-default values
+  if (hallazgo.ubicacion && (hallazgo.ubicacion.x !== 0 || hallazgo.ubicacion.y !== 0)) {
+    const ubicacionResult = validarUbicacionObject(hallazgo.ubicacion);
+    errores.push(...ubicacionResult.errores);
+  } else if (!hallazgo.ubicacion) {
+    advertencias.push('ubicacion: El hallazgo no tiene posición en el esquemático (se usará posición por defecto)');
+  }
 
   // Validate fechaCreacion
   if (!hallazgo.fechaCreacion || isNaN(Date.parse(hallazgo.fechaCreacion))) {
