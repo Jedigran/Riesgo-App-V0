@@ -711,8 +711,8 @@ export default function RiesgoApp() {
                       </div>
                     )}
                     
-                    {/* HALLAZGO MARKERS - ALWAYS VISIBLE from session (not just form) */}
-                    {sesion?.hallazgos.map((h) => h.ubicacion && (
+                    {/* HALLAZGO MARKERS - Show BOTH saved (session) AND in-progress (form) */}
+                    {[...(sesion?.hallazgos || []), ...hallazgosForm].map((h) => h.ubicacion && (
                       <div
                         key={h.id}
                         className="absolute w-4 h-4 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2 shadow-lg hover:scale-125 transition-transform cursor-pointer"
