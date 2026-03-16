@@ -82,7 +82,7 @@ interface HallazgoFormData {
 
 export default function RiesgoApp() {
   // Get session for map markers
-  const { sesion } = useSesion();
+  const { sesion, dispatch } = useSesion();
 
   // Estado para tab izquierdo (EXCLUSIVO)
   const [leftTabActive, setLeftTabActive] = useState<LeftTab>('configuracion');
@@ -93,12 +93,12 @@ export default function RiesgoApp() {
   // Estado para metodología seleccionada en Censo
   const [metodologiaSeleccionada, setMetodologiaSeleccionada] = useState<Metodologia>(null);
 
-  // Estado para configuración del proyecto
+  // Estado para configuración del proyecto — seeded from session on first load
   const [configData, setConfigData] = useState<ConfigData>({
-    proyecto: '',
-    empresa: '',
-    responsable: '',
-    validez: '',
+    proyecto: sesion?.proyecto ?? '',
+    empresa: sesion?.empresa ?? '',
+    responsable: sesion?.responsable ?? '',
+    validez: sesion?.validez ?? '',
   });
 
   // ========================================
@@ -287,6 +287,7 @@ export default function RiesgoApp() {
   const handleConfigChange = (e: FormEvent<HTMLInputElement>) => {
     const { name, value } = e.currentTarget;
     setConfigData((prev) => ({ ...prev, [name]: value }));
+    dispatch({ type: 'ACTUALIZAR_SESION', payload: { [name]: value } });
   };
 
   const agregarHallazgo = () => {
@@ -643,7 +644,7 @@ export default function RiesgoApp() {
   // ========================================
 
   return (
-    <div className="min-h-screen flex flex-col bg-knar-dark font-sans">
+    <div className="h-screen flex flex-col bg-knar-dark font-sans overflow-hidden">
       {/* HEADER */}
       <header style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }} className="px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -652,7 +653,7 @@ export default function RiesgoApp() {
               <svg style={{ color: 'var(--accent)' }} className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>RiesgoApp</h1>
+              <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>Risk-Sensus</h1>
             </div>
             <span style={{ width: '1px', height: '14px', backgroundColor: 'var(--border)', display: 'inline-block' }} />
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Sesión Activa</span>

@@ -25,8 +25,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RiesgoApp - Mapeo de Riesgos Industriales",
-  description: "Aplicación educativa para mapeo visual de riesgos industriales (HAZOP, FMEA, LOPA, OCA)",
+  title: "Risk-Sensus",
+  description: "Herramienta de mapeo visual de riesgos industriales. Soporta metodologías HAZOP, FMEA, LOPA y OCA con censo de hallazgos y relaciones.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

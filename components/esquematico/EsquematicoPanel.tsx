@@ -50,6 +50,7 @@ export default function EsquematicoPanel({
   hallazgosForm = [],
 }: EsquematicoPanelProps) {
   const {
+    imagenActual,
     zoom,
     pan,
     actualizarZoom,
@@ -73,6 +74,12 @@ export default function EsquematicoPanel({
   // Tooltip state
   const [tooltipHallazgo, setTooltipHallazgo] = useState<Hallazgo | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Image name for header display
+  const [imagenNombre, setImagenNombre] = useState<string>('');
+
+  // Drag-over-canvas state (for file drop)
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Pan drag state
   const isPanning = useRef(false);
@@ -174,17 +181,51 @@ export default function EsquematicoPanel({
   );
 
   // ============================================================================
-  // IMAGE UPLOAD
+  // IMAGE UPLOAD & DROP
   // ============================================================================
+
+  const loadImageFile = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith('image/')) return;
+      const objectUrl = URL.createObjectURL(file);
+      cambiarImagen(objectUrl);
+      setImagenNombre(file.name);
+    },
+    [cambiarImagen]
+  );
 
   const handleImageUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const objectUrl = URL.createObjectURL(file);
-      cambiarImagen(objectUrl);
+      loadImageFile(file);
+      // Reset input so the same file can be re-selected
+      e.target.value = '';
     },
-    [cambiarImagen]
+    [loadImageFile]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // Only clear if leaving the container entirely
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file) loadImageFile(file);
+    },
+    [loadImageFile]
   );
 
   // ============================================================================
@@ -224,16 +265,21 @@ export default function EsquematicoPanel({
 
         {/* Image upload — header right */}
         <div className="ml-auto flex items-center gap-2">
+          {imagenNombre && (
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {imagenNombre}
+            </span>
+          )}
           <button
             onClick={() => fileInputRef.current?.click()}
             className="knar-btn knar-btn-ghost"
-            title="Cargar imagen del diagrama"
+            title="Cargar imagen del diagrama (o arrastra un archivo sobre el canvas)"
           >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
-            Imagen
+            Cargar imagen
           </button>
           <input
             ref={fileInputRef}
@@ -398,7 +444,7 @@ export default function EsquematicoPanel({
         </div>
       )}
 
-      {/* ── Map canvas ────────────────────────────────────────────────────── */}
+      {/* ── Map canvas ───────────────────────────────────────────────���────── */}
       <div className="knar-card-content flex-1" style={{ padding: '12px' }}>
         <div
           ref={containerRef}
@@ -416,6 +462,9 @@ export default function EsquematicoPanel({
           onClick={handleMapClick}
           onMouseDown={handleMouseDown}
           onWheel={handleWheel}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
           {/* Transformable layer */}
           <div
@@ -430,7 +479,7 @@ export default function EsquematicoPanel({
           >
             {/* Diagram image */}
             <img
-              src="/ReferenceIamge/Sistema Bombas de Achique_V2.png"
+              src={imagenActual || '/ReferenceIamge/Sistema Bombas de Achique_V2.png'}
               alt="Diagrama del sistema"
               draggable={false}
               style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
@@ -491,6 +540,29 @@ export default function EsquematicoPanel({
               );
             })}
           </div>
+
+          {/* Drag-over drop zone overlay */}
+          {isDragOver && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(14,17,22,0.80)',
+              border: '1.5px dashed var(--accent)',
+              borderRadius: '6px',
+              zIndex: 50,
+              pointerEvents: 'none',
+            }}>
+              <svg width="28" height="28" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span style={{ fontSize: '12px', fontWeight: 300, color: 'var(--accent)' }}>Suelta la imagen aqui</span>
+            </div>
+          )}
 
           {/* Tooltip (in container coords, not transformed) */}
           {tooltipHallazgo && (

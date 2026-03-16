@@ -20,7 +20,7 @@
 
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Hallazgo, Ubicacion, TipoHallazgo } from '../models/hallazgo/types';
 
 import { useSesionContext } from '../lib/state/SessionContext';
@@ -75,7 +75,7 @@ export interface PanPosition {
 // ============================================================================
 
 const DEFAULT_CONFIG: MapaConfig = {
-  imagenPorDefecto: '/diagrams/default-plant.png',
+  imagenPorDefecto: '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
   zoomMin: 0.5,
   zoomMax: 3,
   toleranciaClick: 5, // pixels
@@ -203,12 +203,14 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<Ubicacion | null>(null);
 
-  // Update imagenActual when session changes
-  useMemo(() => {
-    if (sesion?.imagenActual && sesion.imagenActual !== imagenActual) {
-      setImagenActual(sesion.imagenActual);
-    }
-  }, [sesion?.imagenActual, imagenActual]);
+  // Sync imagenActual when session.imagenActual changes externally.
+  // useEffect (not useMemo) because this is a side-effect: calling setState.
+  // imagenActual is intentionally omitted from deps to avoid an update loop.
+  useEffect(() => {
+    const resolved = sesion?.imagenActual || mergedConfig.imagenPorDefecto;
+    setImagenActual(resolved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sesion?.imagenActual, mergedConfig.imagenPorDefecto]);
 
   // ============================================================================
   // HALLAZGO LOCATION FUNCTIONS
@@ -333,8 +335,14 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
    * cambiarImagen('/diagrams/planta-nivel-2.png');
    */
   const cambiarImagen = useCallback((ruta: string): void => {
+    // Revoke previous object URL to free memory (only object URLs, not path strings)
+    if (imagenActual.startsWith('blob:')) {
+      URL.revokeObjectURL(imagenActual);
+    }
     setImagenActual(ruta);
-  }, []);
+    // Persist to session so the sync useMemo doesn't overwrite it
+    dispatch({ type: 'ACTUALIZAR_SESION', payload: { imagenActual: ruta } });
+  }, [imagenActual, dispatch]);
 
   /**
    * Update zoom level.
@@ -531,6 +539,7 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
       iniciarDrag,
       actualizarDrag,
       finalizarDrag,
+      dispatch,
     ]
   );
 }
