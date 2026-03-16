@@ -101,8 +101,8 @@ export type SesionVacia = (imagenInicial?: string) => Sesion;
 
 /**
  * Factory function to create a new empty session with default values.
- * 
- * @param imagenInicial - Optional initial plant diagram path (default: '/diagrams/default-plant.png')
+ *
+ * @param imagenInicial - Optional initial plant diagram path (default: '/ReferenceIamge/Sistema Bombas de Achique_V2.png')
  * @returns A new session with empty arrays and default values
  */
 export function crearSesionVacia(imagenInicial?: string): Sesion {
@@ -111,7 +111,7 @@ export function crearSesionVacia(imagenInicial?: string): Sesion {
     analisis: [],
     hallazgos: [],
     relaciones: [],
-    imagenActual: imagenInicial ?? '/diagrams/default-plant.png',
+    imagenActual: imagenInicial ?? '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
     filtrosActivos: ['Peligro', 'Barrera', 'POE', 'SOL'],
     vistaActiva: 'mapa',
   };

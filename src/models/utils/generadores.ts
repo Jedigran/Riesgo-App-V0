@@ -331,14 +331,14 @@ export function generarEfectividadEstimada(tipoBarrera: string): number {
 
 /**
  * Creates an empty session with default values.
- * 
+ *
  * @param imagenInicial - Optional initial plant diagram path
  * @returns Empty session object
- * 
+ *
  * @example
  * const sesion = crearSesionVacia();
  * // Result: { id: "sesion-20240312-042", analisis: [], hallazgos: [], ... }
- * 
+ *
  * @example
  * const sesionConImagen = crearSesionVacia('/diagrams/planta-01.png');
  */
@@ -348,7 +348,7 @@ export function crearSesionVacia(imagenInicial?: string): Sesion {
     analisis: [],
     hallazgos: [],
     relaciones: [],
-    imagenActual: imagenInicial ?? '/diagrams/default-plant.png',
+    imagenActual: imagenInicial ?? '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
     filtrosActivos: ['Peligro', 'Barrera', 'POE', 'SOL'],
     vistaActiva: 'mapa',
   };
@@ -356,9 +356,9 @@ export function crearSesionVacia(imagenInicial?: string): Sesion {
 
 /**
  * Creates a session with sample data for testing/demo purposes.
- * 
+ *
  * @returns Session with sample analysis and findings
- * 
+ *
  * @example
  * const sesionDemo = crearSesionDemo();
  */
@@ -367,7 +367,7 @@ export function crearSesionDemo(): Sesion {
   const analisisId = generarIdAnalisis('HAZOP');
   const peligroId = generarIdHallazgo('Peligro');
   const barreraId = generarIdHallazgo('Barrera');
-  
+
   return {
     id: generarIdSesion(),
     analisis: [
@@ -421,7 +421,7 @@ export function crearSesionDemo(): Sesion {
       },
     ],
     relaciones: [],
-    imagenActual: '/diagrams/default-plant.png',
+    imagenActual: '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
     filtrosActivos: ['Peligro', 'Barrera', 'POE', 'SOL'],
     vistaActiva: 'mapa',
   };
