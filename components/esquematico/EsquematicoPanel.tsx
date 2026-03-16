@@ -50,6 +50,7 @@ export default function EsquematicoPanel({
   hallazgosForm = [],
 }: EsquematicoPanelProps) {
   const {
+    imagenActual,
     zoom,
     pan,
     actualizarZoom,
@@ -443,7 +444,7 @@ export default function EsquematicoPanel({
         </div>
       )}
 
-      {/* ── Map canvas ────────────────────────────────────────────────────── */}
+      {/* ── Map canvas ───────────────────────────────────────────────���────── */}
       <div className="knar-card-content flex-1" style={{ padding: '12px' }}>
         <div
           ref={containerRef}
