@@ -20,7 +20,7 @@
 
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Hallazgo, Ubicacion, TipoHallazgo } from '../models/hallazgo/types';
 
 import { useSesionContext } from '../lib/state/SessionContext';
@@ -203,13 +203,14 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<Ubicacion | null>(null);
 
-  // Update imagenActual when session changes — always resolve to default if session has no image
-  useMemo(() => {
+  // Sync imagenActual when session.imagenActual changes externally.
+  // useEffect (not useMemo) because this is a side-effect: calling setState.
+  // imagenActual is intentionally omitted from deps to avoid an update loop.
+  useEffect(() => {
     const resolved = sesion?.imagenActual || mergedConfig.imagenPorDefecto;
-    if (resolved !== imagenActual) {
-      setImagenActual(resolved);
-    }
-  }, [sesion?.imagenActual, mergedConfig.imagenPorDefecto, imagenActual]);
+    setImagenActual(resolved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sesion?.imagenActual, mergedConfig.imagenPorDefecto]);
 
   // ============================================================================
   // HALLAZGO LOCATION FUNCTIONS
