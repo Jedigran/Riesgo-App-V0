@@ -50,7 +50,6 @@ export default function EsquematicoPanel({
   hallazgosForm = [],
 }: EsquematicoPanelProps) {
   const {
-    imagenActual,
     zoom,
     pan,
     actualizarZoom,
@@ -64,7 +63,6 @@ export default function EsquematicoPanel({
   const {
     filtrosActivos,
     toggleFiltro,
-    activarTodos,
     busquedaTexto,
     actualizarBusqueda,
     hallazgosFiltrados,
@@ -86,7 +84,7 @@ export default function EsquematicoPanel({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ============================================================================
-  // MAP CLICK — place hallazgo OR show tooltip
+  // MAP CLICK — place hallazgo
   // ============================================================================
 
   const handleMapClick = useCallback(
@@ -98,9 +96,7 @@ export default function EsquematicoPanel({
       const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
 
       if (ubicacionEditando) {
-        // Save to session via useMapa
         actualizarUbicacionHallazgo(ubicacionEditando, x, y);
-        // Also notify page.tsx to clear local form state and editing flag
         onLocationSet(ubicacionEditando, x, y);
       }
     },
@@ -131,12 +127,12 @@ export default function EsquematicoPanel({
   );
 
   // ============================================================================
-  // PAN (mouse drag on background)
+  // PAN (mouse drag)
   // ============================================================================
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (ubicacionEditando) return; // don't pan while placing
+      if (ubicacionEditando) return;
       isPanning.current = false;
       panStart.current = {
         mouseX: e.clientX,
@@ -155,7 +151,6 @@ export default function EsquematicoPanel({
       const onUp = () => {
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
-        // Reset isPanning after a tick so click handler sees the final value
         setTimeout(() => { isPanning.current = false; }, 0);
       };
 
@@ -198,22 +193,17 @@ export default function EsquematicoPanel({
 
   const counts = contarPorTipo();
   const filteredSessionHallazgos = hallazgosFiltrados();
-
-  // Merge: session hallazgos (filtered) + form hallazgos with location (always shown)
   const formHallazgosWithLocation = hallazgosForm.filter((h) => h.ubicacion);
   const allMarkers = [
     ...filteredSessionHallazgos,
     ...formHallazgosWithLocation.map((h) => ({
       ...h,
       ubicacion: h.ubicacion!,
-      // Provide minimum required fields to satisfy Hallazgo union type display
-      id: h.id,
-      tipo: h.tipo,
-      titulo: h.titulo,
     })),
   ];
 
   const isEditMode = ubicacionEditando !== null;
+  const zoomPct = Math.round(zoom * 100);
 
   // ============================================================================
   // RENDER
@@ -221,25 +211,27 @@ export default function EsquematicoPanel({
 
   return (
     <div className="knar-card flex flex-col" style={{ minHeight: '520px' }}>
-      {/* Header */}
+
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="knar-card-header flex-shrink-0">
         <div className="knar-icon-box">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="knar-card-title">Esquemático del Sistema</h3>
+        <h3 className="knar-card-title">Esquematico del Sistema</h3>
 
-        {/* Header right actions */}
+        {/* Image upload — header right */}
         <div className="ml-auto flex items-center gap-2">
-          {/* Image upload */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-2 py-1 rounded text-xs font-light transition-colors text-knar-text-muted hover:text-knar-text-primary hover:bg-knar-slate"
+            className="knar-btn knar-btn-ghost"
             title="Cargar imagen del diagrama"
           >
-            <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
             Imagen
           </button>
@@ -250,142 +242,182 @@ export default function EsquematicoPanel({
             className="hidden"
             onChange={handleImageUpload}
           />
-
-          {/* Zoom controls */}
-          <div className="flex items-center gap-1 border border-knar-border rounded px-1">
-            <button
-              onClick={() => actualizarZoom(zoom - ZOOM_STEP)}
-              className="w-5 h-5 flex items-center justify-center text-knar-text-muted hover:text-knar-text-primary transition-colors text-sm"
-              title="Reducir zoom"
-            >
-              −
-            </button>
-            <span className="text-xs text-knar-text-muted font-mono w-8 text-center">
-              {Math.round(zoom * 100)}%
-            </span>
-            <button
-              onClick={() => actualizarZoom(zoom + ZOOM_STEP)}
-              className="w-5 h-5 flex items-center justify-center text-knar-text-muted hover:text-knar-text-primary transition-colors text-sm"
-              title="Aumentar zoom"
-            >
-              +
-            </button>
-          </div>
-
-          {/* Reset view */}
-          <button
-            onClick={() => { resetearVista(); setTooltipHallazgo(null); }}
-            className="px-2 py-1 rounded text-xs font-light transition-colors text-knar-text-muted hover:text-knar-text-primary hover:bg-knar-slate"
-            title="Restablecer vista"
-          >
-            <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Reset
-          </button>
         </div>
       </div>
 
-      {/* Filter bar */}
-      <div className="flex-shrink-0 px-4 py-2 border-b flex items-center gap-2 flex-wrap" style={{ borderColor: 'var(--border-6)' }}>
+      {/* ── Filter bar ────────────────────────────────────────────────────── */}
+      <div
+        className="flex-shrink-0 flex items-center gap-2 flex-wrap px-4 py-2"
+        style={{ borderBottom: '0.5px solid var(--border-6)' }}
+      >
         {/* Search */}
-        <div className="relative flex-1 min-w-32 max-w-48">
-          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-knar-text-muted pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="relative" style={{ minWidth: '120px', maxWidth: '180px', flex: '1' }}>
+          <svg
+            className="absolute"
+            style={{ left: '8px', top: '50%', transform: 'translateY(-50%)', width: '11px', height: '11px', color: 'var(--text-muted)', pointerEvents: 'none' }}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             type="text"
             value={busquedaTexto}
             onChange={(e) => actualizarBusqueda(e.target.value)}
-            placeholder="Buscar hallazgo..."
-            className="w-full pl-6 pr-2 py-1 bg-knar-charcoal border rounded text-xs font-light text-knar-text-secondary placeholder-knar-text-muted focus:outline-none focus:border-knar-orange transition-colors"
-            style={{ borderColor: 'var(--border-8)' }}
+            placeholder="Buscar..."
+            style={{
+              width: '100%',
+              paddingLeft: '24px',
+              paddingRight: '8px',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+              background: 'var(--knar-dark)',
+              border: '0.5px solid var(--border-8)',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 300,
+              color: 'var(--text-secondary)',
+              outline: 'none',
+            }}
           />
         </div>
 
-        {/* Type filter pills */}
-        <div className="flex items-center gap-1">
-          {TIPOS.map((tipo) => {
-            const active = filtrosActivos.includes(tipo);
-            return (
-              <button
-                key={tipo}
-                onClick={() => toggleFiltro(tipo)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-light transition-all"
-                style={{
-                  borderColor: active ? MARKER_COLORS[tipo] : 'var(--border-8)',
-                  backgroundColor: active ? `${MARKER_COLORS[tipo]}18` : 'transparent',
-                  color: active ? MARKER_COLORS[tipo] : 'var(--text-muted)',
-                }}
-                title={`Filtrar ${tipo}`}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: active ? MARKER_COLORS[tipo] : 'var(--text-disabled)' }}
-                />
-                {tipo}
-                <span
-                  className="ml-0.5 px-1 rounded-full text-xs"
-                  style={{
-                    backgroundColor: active ? `${MARKER_COLORS[tipo]}25` : 'var(--border-6)',
-                    color: active ? MARKER_COLORS[tipo] : 'var(--text-disabled)',
-                  }}
-                >
-                  {counts[tipo]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Divider */}
+        <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
 
-        {/* Show all / clear */}
+        {/* Type filter pills */}
+        {TIPOS.map((tipo) => {
+          const active = filtrosActivos.includes(tipo);
+          const color = MARKER_COLORS[tipo];
+          return (
+            <button
+              key={tipo}
+              onClick={() => toggleFiltro(tipo)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '3px 8px',
+                borderRadius: '9999px',
+                border: `0.5px solid ${active ? color : 'var(--border-8)'}`,
+                backgroundColor: active ? `${color}12` : 'transparent',
+                color: active ? color : 'var(--text-muted)',
+                fontSize: '11px',
+                fontWeight: 300,
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+                whiteSpace: 'nowrap',
+              }}
+              title={`Filtrar ${tipo}`}
+            >
+              {/* Dot */}
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '9999px',
+                  flexShrink: 0,
+                  backgroundColor: active ? color : 'var(--text-disabled)',
+                }}
+              />
+              {tipo}
+              {/* Count badge — always visible, solid background */}
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '16px',
+                  height: '14px',
+                  padding: '0 4px',
+                  borderRadius: '9999px',
+                  fontSize: '10px',
+                  fontWeight: 400,
+                  background: active ? `${color}22` : 'rgba(255,255,255,0.06)',
+                  color: active ? color : 'var(--text-muted)',
+                  border: `0.5px solid ${active ? `${color}30` : 'var(--border-6)'}`,
+                }}
+              >
+                {counts[tipo]}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Clear / show all */}
         <button
           onClick={limpiarFiltros}
-          className="px-2 py-0.5 rounded text-xs font-light text-knar-text-muted hover:text-knar-text-primary transition-colors"
+          style={{
+            fontSize: '11px',
+            fontWeight: 300,
+            color: 'var(--text-disabled)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '2px 4px',
+            transition: 'color 150ms ease',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-disabled)')}
         >
           Todos
         </button>
 
         {/* Marker count */}
-        <span className="ml-auto text-xs text-knar-text-muted">
-          {filteredSessionHallazgos.filter((h) => h.ubicacion.x > 0 || h.ubicacion.y > 0).length} ubicados
+        <span
+          className="ml-auto"
+          style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)' }}
+        >
+          {allMarkers.filter((h) => h.ubicacion).length} ubicados
         </span>
       </div>
 
-      {/* Edit mode banner */}
+      {/* ── Edit mode banner ──────────────────────────────────────────────── */}
       {isEditMode && (
         <div
-          className="flex-shrink-0 px-4 py-1.5 flex items-center gap-2 text-xs font-light"
-          style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', borderBottom: '1px solid rgba(59, 130, 246, 0.2)' }}
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-1.5"
+          style={{
+            background: 'rgba(59,130,246,0.06)',
+            borderBottom: '0.5px solid rgba(59,130,246,0.18)',
+          }}
         >
           <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ backgroundColor: '#3b82f6' }}
+            style={{
+              display: 'inline-block',
+              width: '5px',
+              height: '5px',
+              borderRadius: '9999px',
+              backgroundColor: '#3b82f6',
+              animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite',
+              flexShrink: 0,
+            }}
           />
-          <span style={{ color: '#93c5fd' }}>
+          <span style={{ fontSize: '11px', fontWeight: 300, color: '#93c5fd' }}>
             Modo colocacion activo — haz clic en el diagrama para ubicar el hallazgo
           </span>
         </div>
       )}
 
-      {/* Map canvas */}
-      <div className="knar-card-content flex-1 p-3">
+      {/* ── Map canvas ────────────────────────────────────────────────────── */}
+      <div className="knar-card-content flex-1" style={{ padding: '12px' }}>
         <div
           ref={containerRef}
-          className="relative overflow-hidden rounded-lg"
           style={{
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: '6px',
             height: '420px',
-            backgroundColor: 'var(--knar-charcoal)',
+            background: 'var(--knar-dark)',
             border: isEditMode
-              ? '1px solid rgba(59, 130, 246, 0.4)'
-              : '1px solid var(--border-8)',
+              ? '1px solid rgba(59,130,246,0.35)'
+              : '0.5px solid var(--border-8)',
             cursor: isEditMode ? 'crosshair' : 'grab',
           }}
           onClick={handleMapClick}
           onMouseDown={handleMouseDown}
           onWheel={handleWheel}
         >
-          {/* Transformable inner layer */}
+          {/* Transformable layer */}
           <div
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
@@ -401,10 +433,8 @@ export default function EsquematicoPanel({
               src="/ReferenceIamge/Sistema Bombas de Achique_V2.png"
               alt="Diagrama del sistema"
               draggable={false}
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
             />
 
             {/* Hallazgo markers */}
@@ -418,8 +448,8 @@ export default function EsquematicoPanel({
               return (
                 <div
                   key={h.id}
-                  className="absolute"
                   style={{
+                    position: 'absolute',
                     left: `${ub.x}%`,
                     top: `${ub.y}%`,
                     transform: 'translate(-50%, -50%)',
@@ -427,33 +457,34 @@ export default function EsquematicoPanel({
                   }}
                   onClick={(e) => handleMarkerClick(e, h as Hallazgo)}
                 >
-                  {/* Outer pulse ring */}
-                  <div
-                    className="absolute rounded-full"
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      top: '-4px',
-                      left: '-4px',
-                      backgroundColor: `${color}20`,
-                      border: `1px solid ${color}50`,
-                      transition: 'transform 0.15s',
-                    }}
-                  />
+                  {/* Outer ring */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '20px',
+                    height: '20px',
+                    top: '-4px',
+                    left: '-4px',
+                    borderRadius: '9999px',
+                    background: `${color}18`,
+                    border: `0.5px solid ${color}40`,
+                    transition: 'transform 0.15s',
+                  }} />
                   {/* Marker dot */}
-                  <div
-                    className="relative flex items-center justify-center rounded-full"
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      backgroundColor: color,
-                      border: '1.5px solid rgba(255,255,255,0.8)',
-                      boxShadow: `0 0 6px ${color}60`,
-                      fontSize: '7px',
-                      color: '#fff',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '9999px',
+                    background: color,
+                    border: '1.5px solid rgba(255,255,255,0.75)',
+                    boxShadow: `0 0 6px ${color}50`,
+                    fontSize: '7px',
+                    color: '#fff',
+                    fontWeight: 600,
+                  }}>
                     {label}
                   </div>
                 </div>
@@ -461,7 +492,7 @@ export default function EsquematicoPanel({
             })}
           </div>
 
-          {/* Tooltip (positioned relative to container, not transformed inner) */}
+          {/* Tooltip (in container coords, not transformed) */}
           {tooltipHallazgo && (
             <MarkerTooltip
               hallazgo={tooltipHallazgo}
@@ -471,31 +502,152 @@ export default function EsquematicoPanel({
           )}
 
           {/* Empty state */}
-          {allMarkers.filter((h) => h.ubicacion.x > 0 || h.ubicacion.y > 0).length === 0 && !isEditMode && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <p className="text-xs text-knar-text-muted">
+          {allMarkers.filter((h) => h.ubicacion).length === 0 && !isEditMode && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+            }}>
+              <p style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-disabled)' }}>
                 Sin hallazgos ubicados. Abre un hallazgo en la tabla para colocarlo.
               </p>
             </div>
           )}
+
+          {/* ── Zoom controls overlay — bottom-right ──────────────────────── */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              zIndex: 30,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            {/* Zoom in */}
+            <button
+              onClick={() => actualizarZoom(zoom + ZOOM_STEP)}
+              title="Acercar"
+              style={{
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--knar-charcoal)',
+                border: '0.5px solid var(--border-10)',
+                borderRadius: '4px',
+                color: 'var(--text-secondary)',
+                fontSize: '14px',
+                fontWeight: 300,
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+            >
+              +
+            </button>
+
+            {/* Zoom percentage */}
+            <div style={{
+              width: '26px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'var(--knar-dark)',
+              border: '0.5px solid var(--border-6)',
+              borderRadius: '4px',
+              fontSize: '9px',
+              fontWeight: 400,
+              color: 'var(--text-disabled)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '-0.01em',
+            }}>
+              {zoomPct}%
+            </div>
+
+            {/* Zoom out */}
+            <button
+              onClick={() => actualizarZoom(zoom - ZOOM_STEP)}
+              title="Alejar"
+              style={{
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--knar-charcoal)',
+                border: '0.5px solid var(--border-10)',
+                borderRadius: '4px',
+                color: 'var(--text-secondary)',
+                fontSize: '14px',
+                fontWeight: 300,
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+            >
+              −
+            </button>
+
+            {/* Divider */}
+            <div style={{ height: '0.5px', background: 'var(--border-6)', margin: '1px 3px' }} />
+
+            {/* Reset view */}
+            <button
+              onClick={() => { resetearVista(); setTooltipHallazgo(null); }}
+              title="Restablecer vista"
+              style={{
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--knar-charcoal)',
+                border: '0.5px solid var(--border-10)',
+                borderRadius: '4px',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+            >
+              <svg style={{ width: '11px', height: '11px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Legend */}
+      {/* ── Legend ────────────────────────────────────────────────────────── */}
       <div
-        className="flex-shrink-0 px-4 py-2 flex items-center gap-4 border-t"
-        style={{ borderColor: 'var(--border-6)' }}
+        className="flex-shrink-0 flex items-center gap-4 px-4 py-2"
+        style={{ borderTop: '0.5px solid var(--border-6)' }}
       >
         {TIPOS.map((tipo) => (
           <div key={tipo} className="flex items-center gap-1.5">
             <div
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: MARKER_COLORS[tipo] }}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '9999px',
+                flexShrink: 0,
+                background: MARKER_COLORS[tipo],
+              }}
             />
-            <span className="text-xs font-light text-knar-text-muted">{tipo}</span>
+            <span style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-disabled)' }}>
+              {tipo}
+            </span>
           </div>
         ))}
-        <span className="ml-auto text-xs text-knar-text-muted">
+        <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)' }}>
           Rueda del raton para zoom · Arrastrar para desplazar
         </span>
       </div>
@@ -516,60 +668,66 @@ interface MarkerTooltipProps {
 function MarkerTooltip({ hallazgo, pos, onClose }: MarkerTooltipProps) {
   const color = MARKER_COLORS[hallazgo.tipo];
 
-  // Clamp so tooltip doesn't overflow 300px card width roughly
-  const left = Math.min(pos.x + 8, pos.x - 10);
-
   return (
     <div
-      className="absolute z-30 rounded-lg border shadow-lg"
       style={{
-        left: `${left}px`,
-        top: `${pos.y + 12}px`,
-        maxWidth: '220px',
-        backgroundColor: 'var(--knar-dark)',
-        borderColor: `${color}30`,
-        borderLeftColor: color,
-        borderLeftWidth: '2px',
+        position: 'absolute',
+        left: `${Math.min(pos.x + 10, pos.x - 10)}px`,
+        top: `${pos.y + 14}px`,
+        maxWidth: '210px',
+        zIndex: 30,
+        background: 'var(--knar-dark)',
+        border: `0.5px solid ${color}25`,
+        borderLeft: `1.5px solid ${color}`,
+        borderRadius: '6px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.25)',
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Tooltip header */}
+      {/* Header */}
       <div
-        className="flex items-center justify-between px-3 py-2 border-b"
-        style={{ borderColor: 'var(--border-6)' }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '7px 10px',
+          borderBottom: '0.5px solid var(--border-6)',
+        }}
       >
-        <div className="flex items-center gap-1.5">
-          <div
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ backgroundColor: color }}
-          />
-          <span className="text-xs font-light" style={{ color }}>
-            {hallazgo.tipo}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '9999px', background: color, flexShrink: 0 }} />
+          <span style={{ fontSize: '11px', fontWeight: 400, color }}>{hallazgo.tipo}</span>
         </div>
         <button
           onClick={onClose}
-          className="text-knar-text-muted hover:text-knar-text-primary transition-colors ml-2"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--text-disabled)',
+            padding: '0 0 0 8px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg style={{ width: '11px', height: '11px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      {/* Tooltip body */}
-      <div className="px-3 py-2 space-y-1">
-        <p className="text-xs font-normal text-knar-text-primary leading-snug">
+      {/* Body */}
+      <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <p style={{ fontSize: '12px', fontWeight: 400, color: 'var(--text-primary)', lineHeight: 1.4 }}>
           {hallazgo.titulo || '—'}
         </p>
         {hallazgo.descripcion && (
-          <p className="text-xs font-light text-knar-text-muted leading-relaxed line-clamp-3">
+          <p style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-muted)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {hallazgo.descripcion}
           </p>
         )}
-        {/* Type-specific summary field */}
         <TooltipExtraFields hallazgo={hallazgo} />
-        <p className="text-xs font-light" style={{ color: 'var(--text-disabled)' }}>
+        <p style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)', marginTop: '2px' }}>
           ({Math.round(hallazgo.ubicacion.x)}, {Math.round(hallazgo.ubicacion.y)})
         </p>
       </div>
@@ -578,35 +736,34 @@ function MarkerTooltip({ hallazgo, pos, onClose }: MarkerTooltipProps) {
 }
 
 function TooltipExtraFields({ hallazgo }: { hallazgo: Hallazgo }) {
+  const labelStyle = { color: 'var(--text-disabled)' };
+  const valueStyle: React.CSSProperties = { fontSize: '11px', fontWeight: 300, color: 'var(--text-muted)' };
+
   if (hallazgo.tipo === 'Peligro' && hallazgo.consecuencia) {
     return (
-      <p className="text-xs font-light text-knar-text-muted">
-        <span style={{ color: 'var(--text-disabled)' }}>Consecuencia:</span>{' '}
-        {hallazgo.consecuencia}
+      <p style={valueStyle}>
+        <span style={labelStyle}>Consecuencia: </span>{hallazgo.consecuencia}
       </p>
     );
   }
   if (hallazgo.tipo === 'Barrera' && hallazgo.elementoProtegido) {
     return (
-      <p className="text-xs font-light text-knar-text-muted">
-        <span style={{ color: 'var(--text-disabled)' }}>Protege:</span>{' '}
-        {hallazgo.elementoProtegido}
+      <p style={valueStyle}>
+        <span style={labelStyle}>Protege: </span>{hallazgo.elementoProtegido}
       </p>
     );
   }
   if (hallazgo.tipo === 'POE' && hallazgo.responsable) {
     return (
-      <p className="text-xs font-light text-knar-text-muted">
-        <span style={{ color: 'var(--text-disabled)' }}>Responsable:</span>{' '}
-        {hallazgo.responsable}
+      <p style={valueStyle}>
+        <span style={labelStyle}>Responsable: </span>{hallazgo.responsable}
       </p>
     );
   }
   if (hallazgo.tipo === 'SOL' && hallazgo.parametro) {
     return (
-      <p className="text-xs font-light text-knar-text-muted">
-        <span style={{ color: 'var(--text-disabled)' }}>Parametro:</span>{' '}
-        {hallazgo.parametro}
+      <p style={valueStyle}>
+        <span style={labelStyle}>Parametro: </span>{hallazgo.parametro}
       </p>
     );
   }
