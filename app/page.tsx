@@ -539,6 +539,111 @@ export default function RiesgoApp() {
   };
 
   // ========================================
+  // TEST DATA LOADER FOR ANALYSIS (HAZOP, FMEA, LOPA, OCA)
+  // ========================================
+  const cargarAnalisisEjemplo = () => {
+    // HAZOP-01
+    const resultadoHAZOP = crearAnalisisHAZOP({
+      nodo: 'Sistema de Achique',
+      subnodo: 'Bomba principal',
+      parametro: 'Flujo',
+      palabraGuia: 'No',
+      causa: 'Falla eléctrica del motor',
+      consecuencia: 'Acumulación de agua en el área de operación',
+      receptorImpacto: 'Personal/Operación',
+      salvaguardasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
+      recomendaciones: ['Instalar bomba redundante'],
+    });
+
+    if (resultadoHAZOP.exito && resultadoHAZOP.id) {
+      crearHallazgosDeFormulario(resultadoHAZOP.id);
+    }
+
+    // FMEA-01
+    const resultadoFMEA = crearAnalisisFMEA({
+      equipo: 'Bomba principal del Sistema de Achique',
+      funcion: 'Evacuar agua acumulada del sistema de drenaje',
+      modoFalla: 'Motor no opera',
+      receptorImpacto: 'Personal / Operación',
+      efecto: 'Pérdida de bombeo',
+      causa: 'Falla eléctrica del motor',
+      S: 9,
+      O: 5,
+      D: 3,
+      RPN: 135,
+      barrerasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
+      accionesRecomendadas: ['Instalar bomba redundante'],
+    });
+
+    if (resultadoFMEA.exito && resultadoFMEA.id) {
+      crearHallazgosDeFormulario(resultadoFMEA.id);
+    }
+
+    // LOPA-01
+    const resultadoLOPA = crearAnalisisLOPA({
+      escenario: 'Pérdida de bombeo de achique',
+      consecuencia: 'Acumulación de agua',
+      receptorImpacto: 'Personal / Operación',
+      S: 7,
+      riesgoTolerable: 0.00001,
+      causa: 'Falla eléctrica del motor',
+      frecuenciaInicial: 0.0707,
+      capasIPL: [
+        {
+          nombre: 'Alarma de alto nivel',
+          pfd: 0.0001,
+        },
+      ],
+      pfdTotal: 0.0001,
+      riesgoEscenario: 0.00000707,
+      cumpleCriterio: true,
+      pfdObjetivo: 0,
+      rrf: 0,
+      silRequerido: 0,
+      recomendaciones: ['N/A'],
+    });
+
+    if (resultadoLOPA.exito && resultadoLOPA.id) {
+      crearHallazgosDeFormulario(resultadoLOPA.id);
+    }
+
+    // OCA-01
+    const resultadoOCA = crearAnalisisOCA({
+      compuesto: 'H2S',
+      cantidad: 1000,
+      viento: 1.5,
+      factorViento: 1.0,
+      estabilidad: 'F',
+      factorEscalabilidad: 1.5,
+      topografia: 'Urbana',
+      factorTopografia: 0.85,
+      tipoEscenario: 'Alternativo',
+      endpoint: 0.0017,
+      tasaLiberacion: 16.67,
+      distanciaEndpointMillas: 2.29,
+      distanciaEndpointKm: 3.69,
+      areaAfectadaMillas2: 16.48,
+      areaAfectadaKm2: 42.67,
+      programaRMP: 'Programa 2',
+      evaluacion: '⚠️ MODERADA',
+      barrerasExistentes: [''],
+      gaps: [''],
+      recomendaciones: [''],
+    });
+
+    if (resultadoOCA.exito && resultadoOCA.id) {
+      crearHallazgosDeFormulario(resultadoOCA.id);
+    }
+
+    agregarNotificacion({
+      tipo: 'success',
+      titulo: 'Análisis de Ejemplo Cargados',
+      mensaje: 'Se crearon HAZOP-01, FMEA-01, LOPA-01 y OCA-01',
+      duracion: 4000,
+    });
+  };
+
+  // ========================================
   // SHARED HALLAZGO CREATOR (all types)
   // ========================================
   const crearHallazgosDeFormulario = (analisisId: string) => {
@@ -904,7 +1009,7 @@ export default function RiesgoApp() {
           <div className="knar-tabs-inline flex-shrink-0">
             <button onClick={() => setLeftTabActive('configuracion')} className={`knar-tab-inline${leftTabActive === 'configuracion' ? ' active' : ''}`}>Configuración</button>
             <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Censo</button>
-            <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button>
+            {/* <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button> */}
             <button onClick={() => setLeftTabActive('grupos')} className={`knar-tab-inline${leftTabActive === 'grupos' ? ' active' : ''}`}>Grupos</button>
           </div>
 
@@ -931,6 +1036,39 @@ export default function RiesgoApp() {
             {/* Censo Tab */}
             {leftTabActive === 'censo' && (
               <div className="space-y-4">
+                {/* TEST BUTTON FOR ANALYSIS - REMOVE LATER */}
+                <button
+                  onClick={cargarAnalisisEjemplo}
+                  style={{
+                    padding: '8px 16px',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 400,
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+                    marginBottom: '8px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.filter = 'brightness(1.1)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.filter = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Cargar Análisis de Ejemplo (HAZOP, FMEA, LOPA, OCA) - TESTING ONLY
+                </button>
+
                 {metodologiaSeleccionada === null ? (
                   /* Lista de metodologías */
                   <div className="knar-card">
@@ -1778,10 +1916,10 @@ export default function RiesgoApp() {
               </div>
             )}
 
-            {/* Relaciones Tab */}
-            {leftTabActive === 'relaciones' && (
+            {/* Relaciones Tab - HIDDEN */}
+            {/* {leftTabActive === 'relaciones' && (
               <RelacionesPanel />
-            )}
+            )} */}
 
             {/* Grupos Tab */}
             {leftTabActive === 'grupos' && (

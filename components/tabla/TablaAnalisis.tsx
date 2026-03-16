@@ -219,7 +219,6 @@ export default function TablaAnalisis() {
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Datos Principales</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Hallazgos</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Fecha</th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">ID</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-knar-border">
@@ -253,11 +252,6 @@ export default function TablaAnalisis() {
                   <td className="px-4 py-3">
                     <span className="text-xs text-knar-text-muted font-mono">
                       {new Date(analisis.base.fechaCreacion).toLocaleDateString('es-ES')}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs text-knar-text-muted font-mono">
-                      {analisis.base.id.substring(0, 12)}...
                     </span>
                   </td>
                 </tr>

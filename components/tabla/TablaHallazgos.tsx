@@ -13,7 +13,7 @@
 
 import { useState, useMemo } from 'react';
 import { useSesion } from '@/src/controllers/useSesion';
-import { useRelacionesHallazgo } from '@/src/controllers/useRelacionesHallazgo';
+import { useGrupo } from '@/src/controllers/useGrupo';
 import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
 
 interface FiltrosTabla {
@@ -23,7 +23,7 @@ interface FiltrosTabla {
 
 export default function TablaHallazgos() {
   const { sesion, sesionCargada } = useSesion();
-  const { relaciones } = useRelacionesHallazgo();
+  const { grupos, obtenerGruposPorHallazgo } = useGrupo();
   
   const [filtros, setFiltros] = useState<FiltrosTabla>({
     tipo: 'todos',
@@ -69,22 +69,20 @@ export default function TablaHallazgos() {
     });
   }, [sesion, filtros]);
 
-  // Contar relaciones por hallazgo
-  const contarRelaciones = (hallazgoId: string) => {
-    return relaciones.filter(r => 
-      r.origenId === hallazgoId || r.destinoId === hallazgoId
-    ).length;
-  };
-
   // Contar por tipo
   const conteoPorTipo = useMemo(() => {
     if (!sesion) return { Peligro: 0, Barrera: 0, POE: 0, SOL: 0 };
-    
+
     return sesion.hallazgos.reduce((acc, h) => {
       acc[h.tipo] = (acc[h.tipo] || 0) + 1;
       return acc;
     }, {} as Record<TipoHallazgo, number>);
   }, [sesion]);
+
+  // Get groups for a hallazgo
+  const getGruposParaHallazgo = (hallazgoId: string) => {
+    return obtenerGruposPorHallazgo(hallazgoId);
+  };
 
   // Obtener color por tipo
   const getColorPorTipo = (tipo: Hallazgo['tipo']): string => {
@@ -208,59 +206,91 @@ export default function TablaHallazgos() {
           <table className="w-full">
             <thead style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }}>
               <tr>
-                {(['Tipo', 'Título', 'Descripción', 'Ubicación', 'Relaciones'] as const).map(col => (
+                {(['Tipo', 'Título', 'Descripción', 'Grupos'] as const).map(col => (
                   <th key={col} className="px-4 py-2 text-left" style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-light)', color: 'var(--text-muted)' }}>{col}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {hallazgosFiltrados.map((hallazgo, i) => (
-                <tr
-                  key={hallazgo.id}
-                  style={{
-                    borderTop: i > 0 ? '0.5px solid var(--border)' : undefined,
-                    transition: 'background-color 150ms ease',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--knar-dark)')}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
-                >
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }}>{hallazgo.tipo}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-normal)' }}>{hallazgo.titulo}</span>
-                  </td>
-                  <td className="px-4 py-2">
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)', display: 'block', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {hallazgo.descripcion}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">
-                    {hallazgo.ubicacion ? (
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontWeight: 'var(--weight-light)' }}>
-                        ({hallazgo.ubicacion.x}, {hallazgo.ubicacion.y})
+              {hallazgosFiltrados.map((hallazgo, i) => {
+                const gruposDelHallazgo = getGruposParaHallazgo(hallazgo.id);
+                const tieneGrupos = gruposDelHallazgo.length > 0;
+
+                return (
+                  <tr
+                    key={hallazgo.id}
+                    style={{
+                      borderTop: i > 0 ? '0.5px solid var(--border)' : undefined,
+                      transition: 'background-color 150ms ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--knar-dark)')}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+                  >
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
+                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }}>{hallazgo.tipo}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-normal)' }}>{hallazgo.titulo}</span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)', display: 'block', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {hallazgo.descripcion}
                       </span>
-                    ) : (
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-normal)' }}>
-                        {contarRelaciones(hallazgo.id)}
-                      </span>
-                      {contarRelaciones(hallazgo.id) > 0 ? (
-                        <svg width="12" height="12" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-label={`${contarRelaciones(hallazgo.id)} relaciones`}><title>{`${contarRelaciones(hallazgo.id)} relaciones`}</title><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    </td>
+                    <td className="px-4 py-2">
+                      {tieneGrupos ? (
+                        <div className="flex items-center gap-2">
+                          {/* Show first 2 groups as badges */}
+                          {gruposDelHallazgo.slice(0, 2).map((grupo) => (
+                            <span
+                              key={grupo.id}
+                              style={{
+                                fontSize: '10px',
+                                fontWeight: 300,
+                                color: grupo.color,
+                                background: `${grupo.color}15`,
+                                border: `0.5px solid ${grupo.color}30`,
+                                borderRadius: '3px',
+                                padding: '2px 6px',
+                                cursor: 'default',
+                              }}
+                              title={grupo.nombre}
+                            >
+                              {grupo.nombre.length > 15 ? grupo.nombre.substring(0, 15) + '...' : grupo.nombre}
+                            </span>
+                          ))}
+                          {/* Show count badge if more groups */}
+                          {gruposDelHallazgo.length > 2 && (
+                            <span
+                              style={{
+                                fontSize: '10px',
+                                fontWeight: 400,
+                                color: 'var(--text-muted)',
+                                background: 'var(--knar-charcoal)',
+                                border: '0.5px solid var(--border)',
+                                borderRadius: '9999px',
+                                padding: '2px 6px',
+                                minWidth: '24px',
+                                textAlign: 'center',
+                              }}
+                              title={gruposDelHallazgo.slice(2).map(g => g.nombre).join(', ')}
+                            >
+                              +{gruposDelHallazgo.length - 2}
+                            </span>
+                          )}
+                        </div>
                       ) : (
-                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>—</span>
+                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                          Sin grupos
+                        </span>
                       )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
