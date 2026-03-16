@@ -333,8 +333,14 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
    * cambiarImagen('/diagrams/planta-nivel-2.png');
    */
   const cambiarImagen = useCallback((ruta: string): void => {
+    // Revoke previous object URL to free memory (only object URLs, not path strings)
+    if (imagenActual.startsWith('blob:')) {
+      URL.revokeObjectURL(imagenActual);
+    }
     setImagenActual(ruta);
-  }, []);
+    // Persist to session so the sync useMemo doesn't overwrite it
+    dispatch({ type: 'ACTUALIZAR_SESION', payload: { imagenActual: ruta } });
+  }, [imagenActual, dispatch]);
 
   /**
    * Update zoom level.
@@ -531,6 +537,7 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
       iniciarDrag,
       actualizarDrag,
       finalizarDrag,
+      dispatch,
     ]
   );
 }
