@@ -118,11 +118,12 @@ assert(
 
 // Test 1.2: AnalisisFMEA with RPN calculation
 const fmeaData: AnalisisFMEA = {
-  componente: 'Bomba centrífuga P-201',
+  equipo: 'Bomba centrífuga P-201',
+  funcion: 'Evacuar agua acumulada del sistema',
   modoFalla: 'Pérdida de sello mecánico',
   efecto: 'Fuga de producto químico al ambiente',
   causa: 'Desgaste por operación sin lubricación',
-  controlesActuales: [
+  barrerasExistentes: [
     'Inspección visual semanal',
     'Sensor de vibración',
   ],
@@ -145,29 +146,43 @@ assert(
 // Test 1.3: AnalisisLOPA
 const lopaData: AnalisisLOPA = {
   escenario: 'Sobrepresión en separador V-301 por bloqueo de salida',
-  frecuenciaInicial: 0.1, // 1 evento cada 10 años
   consecuencia: 'Ruptura de recipiente con proyección de fragmentos',
+  receptorImpacto: 'Personal de operación',
+  S: 5,
+  riesgoTolerable: 0.00001, // 1E-5 eventos/año (tolerable)
+  causa: 'Bloqueo de salida por válvula cerrada',
+  frecuenciaInicial: 0.1, // 1 evento cada 10 años
   capasIPL: [
     { nombre: 'BPCS - Alarma de presión alta', pfd: 0.1 },
     { nombre: 'SIS - Parada de emergencia', pfd: 0.01 },
     { nombre: 'PSV - Válvula de alivio', pfd: 0.001 },
   ],
-  frecuenciaFinal: 0.000001, // 0.1 × 0.1 × 0.01 × 0.001
-  objetivoRiesgo: 0.00001, // 1E-5 eventos/año (tolerable)
+  pfdTotal: 0.000001,
+  riesgoEscenario: 0.0000001,
+  cumpleCriterio: true,
+  recomendaciones: ['Revisar procedimiento de bloqueo'],
 };
 
-const frecuenciaCalculada = lopaData.frecuenciaInicial * 
+const frecuenciaCalculada = lopaData.frecuenciaInicial *
   lopaData.capasIPL.reduce((acc, capa) => acc * capa.pfd, 1);
 
 assert(
-  frecuenciaCalculada <= lopaData.objetivoRiesgo,
-  `AnalisisLOPA: Frecuencia final (${frecuenciaCalculada}) cumple objetivo de riesgo (${lopaData.objetivoRiesgo})`
+  frecuenciaCalculada <= lopaData.riesgoTolerable,
+  `AnalisisLOPA: Frecuencia final (${frecuenciaCalculada}) cumple objetivo de riesgo (${lopaData.riesgoTolerable})`
 );
 
 // Test 1.4: AnalisisOCA
 const ocaData: AnalisisOCA = {
-  eventoIniciador: 'Pérdida de energía eléctrica',
-  consecuencia: 'Parada no controlada del proceso con posible reacción descontrolada',
+  compuesto: 'H2S',
+  cantidad: 1000,
+  viento: 1.5,
+  factorViento: 1.0,
+  estabilidad: 'F',
+  factorEscalabilidad: 1.5,
+  topografia: 'Urbana',
+  factorTopografia: 0.85,
+  tipoEscenario: 'Alternativo',
+  endpoint: 0.0017,
   barrerasExistentes: [
     'Sistema de energía ininterrumpida (UPS)',
     'Generador de emergencia',
@@ -234,6 +249,7 @@ console.log('='.repeat(60));
 const peligro: Peligro = {
   id: 'peligro-001',
   tipo: 'Peligro',
+  tipoPeligro: 'Inherente',
   titulo: 'Sobrepresión en Reactor R-101',
   descripcion: 'El reactor puede experimentar sobrepresión durante el llenado rápido',
   ubicacion: { x: 45, y: 30 }, // Position on plant diagram (percentages)
@@ -263,6 +279,7 @@ const barrera: Barrera = {
   analisisOrigenIds: ['hazop-001'],
   hallazgosRelacionadosIds: ['peligro-001'],
   tipoBarrera: 'Fisica',
+  tipoBarreraFuncion: 'Mitigativa',
   efectividadEstimada: 4, // Alta efectividad
   elementoProtegido: 'Reactor R-101',
 };
@@ -309,6 +326,10 @@ const sol: SOL = {
   capaNumero: 2,
   independiente: true,
   tipoTecnologia: 'Sistema lógico 1oo2 (1 out of 2)',
+  parametro: 'Presión',
+  valorMinimo: 0,
+  valorMaximo: 150,
+  unidad: 'psi',
 };
 
 assert(
@@ -530,7 +551,7 @@ console.log('INFORMACIÓN DE DEPURACIÓN');
 console.log('='.repeat(60));
 console.log('Muestra de datos creados:');
 console.log('- HAZOP Node:', hazopData.nodo);
-console.log('- FMEA Component:', fmeaData.componente);
+console.log('- FMEA Equipo:', fmeaData.equipo);
 console.log('- Peligro Title:', peligro.titulo);
 console.log('- Barrera Type:', barrera.tipoBarrera);
 console.log('- Session ID:', sesion.id);

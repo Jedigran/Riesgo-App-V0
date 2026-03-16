@@ -128,6 +128,7 @@ assert(
 sesionClonada.hallazgos.push({
   id: 'test',
   tipo: 'Peligro',
+  tipoPeligro: 'Inherente',
   titulo: 'Test',
   descripcion: 'Test',
   ubicacion: { x: 0, y: 0 },
@@ -190,6 +191,7 @@ const sesionConHuerfano = crearSesionVacia();
 sesionConHuerfano.hallazgos.push({
   id: 'huerfano-001',
   tipo: 'Peligro',
+  tipoPeligro: 'Inherente',
   titulo: 'Peligro sin relaciones',
   descripcion: 'Este peligro no tiene relaciones',
   ubicacion: { x: 50, y: 50 },

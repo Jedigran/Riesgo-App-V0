@@ -351,11 +351,12 @@ assert(
 console.log('\n--- FMEA → Hallazgos ---');
 
 const fmeaData: AnalisisFMEA = {
-  componente: 'Bomba centrífuga P-201',
+  equipo: 'Bomba centrífuga P-201',
+  funcion: 'Evacuar agua acumulada',
   modoFalla: 'Pérdida de sello mecánico',
   efecto: 'Fuga de producto químico al ambiente',
   causa: 'Desgaste por operación sin lubricación',
-  controlesActuales: ['Inspección visual semanal', 'Sensor de vibración'],
+  barrerasExistentes: ['Inspección visual semanal', 'Sensor de vibración'],
   S: 7, O: 4, D: 3,
   RPN: 84,
   accionesRecomendadas: ['Implementar programa de lubricación'],

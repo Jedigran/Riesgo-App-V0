@@ -129,11 +129,12 @@ function crearSesionEjemplo(): Sesion {
           analisisRelacionadosIds: ['hazop-001'],
         },
         datos: {
-          componente: 'Bomba P-201',
+          equipo: 'Bomba P-201',
+          funcion: 'Evacuar agua',
           modoFalla: 'Fuga',
           efecto: 'Pérdida de producto',
           causa: 'Desgaste',
-          controlesActuales: ['Inspección'],
+          barrerasExistentes: ['Inspección'],
           S: 7, O: 4, D: 3, RPN: 84,
           accionesRecomendadas: ['Lubricación'],
         } as AnalisisFMEA,
@@ -250,11 +251,12 @@ assert(
 console.log('\n--- validarAnalisisFMEA ---');
 
 const fmeaValido: AnalisisFMEA = {
-  componente: 'Bomba centrífuga P-201',
+  equipo: 'Bomba centrífuga P-201',
+  funcion: 'Evacuar agua acumulada',
   modoFalla: 'Pérdida de sello mecánico',
   efecto: 'Fuga de producto químico',
   causa: 'Desgaste por operación sin lubricación',
-  controlesActuales: ['Inspección visual semanal', 'Sensor de vibración'],
+  barrerasExistentes: ['Inspección visual semanal', 'Sensor de vibración'],
   S: 7, // Valid: 1-10
   O: 4, // Valid: 1-10
   D: 3, // Valid: 1-10
@@ -499,6 +501,7 @@ console.log('\n--- validarPeligro ---');
 const peligroValido: Peligro = {
   id: 'peligro-001',
   tipo: 'Peligro',
+  tipoPeligro: 'Inherente',
   titulo: 'Sobrepresión en Reactor',
   descripcion: 'Riesgo de sobrepresión durante llenado rápido',
   ubicacion: { x: 45, y: 30 },
@@ -555,6 +558,7 @@ const barreraValida: Barrera = {
   analisisOrigenIds: ['hazop-001'],
   hallazgosRelacionadosIds: ['peligro-001'],
   tipoBarrera: 'Fisica', // Valid
+  tipoBarreraFuncion: 'Mitigativa',
   efectividadEstimada: 4, // Valid: 1-5
   elementoProtegido: 'Reactor R-101',
 };
@@ -656,6 +660,10 @@ const solValido: SOL = {
   capaNumero: 2,
   independiente: true,
   tipoTecnologia: 'Sistema lógico 1oo2',
+  parametro: 'Presión',
+  valorMinimo: 0,
+  valorMaximo: 150,
+  unidad: 'psi',
 };
 
 const resultSOLValido = validarSOL(solValido);
