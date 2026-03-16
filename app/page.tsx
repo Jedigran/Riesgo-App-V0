@@ -23,12 +23,12 @@ import { useState, FormEvent, useCallback } from 'react';
 import { useAnalisis } from '@/src/controllers/useAnalisis';
 import { useHallazgo } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
-import { useMapa } from '@/src/controllers/useMapa';
 import { useSesion } from '@/src/controllers/useSesion';
 import { SiteHeader } from '@/components';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
+import EsquematicoPanel from '@/components/esquematico/EsquematicoPanel';
 
 // ============================================================================
 // TYPES
@@ -199,7 +199,6 @@ export default function RiesgoApp() {
   const { crearAnalisisHAZOP, crearAnalisisFMEA, crearAnalisisLOPA, crearAnalisisOCA, crearAnalisisIntuicion } = useAnalisis();
   const { crearPeligro, crearBarrera, crearPOE, crearSOL } = useHallazgo();
   const { agregarError, agregarNotificacion } = useUIEstado();
-  const { actualizarUbicacionHallazgo } = useMapa();
 
   // ========================================
   // OCA HELPER FUNCTIONS
@@ -289,22 +288,6 @@ export default function RiesgoApp() {
     const { name, value } = e.currentTarget;
     setConfigData((prev) => ({ ...prev, [name]: value }));
   };
-
-  const handleMapClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ubicacionEditando) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    setHallazgosForm((prev) =>
-      prev.map((h) =>
-        h.id === ubicacionEditando
-          ? { ...h, ubicacion: { x: Math.round(x), y: Math.round(y) } }
-          : h
-      )
-    );
-  }, [ubicacionEditando]);
 
   const agregarHallazgo = () => {
     const nuevoHallazgo: HallazgoFormData = {
@@ -1581,55 +1564,22 @@ export default function RiesgoApp() {
         {/* RIGHT PANEL - Single Tab (55%) */}
         <main className="flex-1 overflow-y-auto bg-knar-dark">
           <div className="p-6">
-            {/* Esquemático Tab with ACTUAL IMAGE */}
+            {/* Esquemático Tab */}
             {rightTabActive === 'esquematico' && (
-              <div className="knar-card">
-                <div className="knar-card-header">
-                  <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-                  <h3 className="knar-card-title">Esquemático - Sistema de Bombas de Achique</h3>
-                </div>
-                <div className="knar-card-content">
-                  <div
-                    onClick={handleMapClick}
-                    className={`relative bg-knar-charcoal rounded-lg border-2 overflow-hidden ${
-                      ubicacionEditando ? 'border-blue-500 cursor-crosshair' : 'border-knar-border cursor-default'
-                    }`}
-                  >
-                    {/* ACTUAL IMAGE HERE */}
-                    <img src="/ReferenceIamge/Sistema Bombas de Achique_V2.png" alt="Sistema de Bombas de Achique" className="w-full h-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                    
-                    {/* Fallback placeholder if image fails */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center text-knar-text-muted">
-                        <p className="text-3xl mb-2">🏭</p>
-                        <p className="text-xs">Sistema Bombas de Achique_V2.png</p>
-                        {ubicacionEditando && (<p className="text-xs text-blue-400 mt-2 animate-pulse">Click en el mapa para colocar hallazgo</p>)}
-                      </div>
-                    </div>
-                    
-                    {/* Edit mode indicator - ONLY show when editing */}
-                    {ubicacionEditando && (
-                      <div className="absolute top-2 right-2 px-2 py-1 bg-blue-500 bg-opacity-20 border border-blue-500 border-opacity-30 rounded text-xs text-blue-400 pointer-events-none">
-                        Modo edición: Ubicación activa
-                      </div>
-                    )}
-                    
-                    {/* HALLAZGO MARKERS - Show BOTH saved (session) AND in-progress (form) */}
-                    {[...(sesion?.hallazgos || []), ...hallazgosForm].map((h) => h.ubicacion && (
-                      <div
-                        key={h.id}
-                        className="absolute w-4 h-4 rounded-full border-2 border-white transform -translate-x-1/2 -translate-y-1/2 shadow-lg hover:scale-125 transition-transform cursor-pointer"
-                        style={{ 
-                          left: `${h.ubicacion.x}%`, 
-                          top: `${h.ubicacion.y}%`, 
-                          backgroundColor: h.tipo === 'Peligro' ? '#ef4444' : h.tipo === 'Barrera' ? '#3b82f6' : h.tipo === 'POE' ? '#10b981' : '#8b5cf6'
-                        }}
-                        title={`${h.tipo}: ${h.titulo}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <EsquematicoPanel
+                ubicacionEditando={ubicacionEditando}
+                onLocationSet={(id, x, y) => {
+                  // Update the in-form hallazgo location (pre-submit)
+                  setHallazgosForm((prev) =>
+                    prev.map((h) =>
+                      h.id === id ? { ...h, ubicacion: { x, y } } : h
+                    )
+                  );
+                  // Clear editing mode
+                  setUbicacionEditando(null);
+                }}
+                hallazgosForm={hallazgosForm}
+              />
             )}
 
             {/* Tabla Hallazgo Tab */}
