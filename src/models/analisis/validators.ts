@@ -208,6 +208,15 @@ export function validarAnalisisHAZOP(data: AnalisisHAZOP): ValidationResult {
   //   errores.push(recomendacionesError);
   // }
 
+  // Validate optional but recommended fields
+  if (!data.subnodo || data.subnodo.trim() === '') {
+    advertencias.push('subnodo: Es recomendado especificar el equipo/componente');
+  }
+
+  if (!data.receptorImpacto || data.receptorImpacto.trim() === '') {
+    advertencias.push('receptorImpacto: Es recomendado especificar el receptor con mayor impacto');
+  }
+
   // Validate content length
   if (data.causa && data.causa.length < 10) {
     advertencias.push('causa: La descripción parece muy corta (mínimo 10 caracteres recomendados)');
@@ -259,7 +268,8 @@ export function validarAnalisisFMEA(data: AnalisisFMEA): ValidationResult {
 
   // Validate required string fields
   const camposRequeridos = [
-    { value: data.componente, name: 'componente' },
+    { value: data.equipo, name: 'equipo' },
+    { value: data.funcion, name: 'funcion' },
     { value: data.modoFalla, name: 'modoFalla' },
     { value: data.efecto, name: 'efecto' },
     { value: data.causa, name: 'causa' },
@@ -284,20 +294,27 @@ export function validarAnalisisFMEA(data: AnalisisFMEA): ValidationResult {
   if (data.S !== undefined && data.O !== undefined && data.D !== undefined) {
     const rpnCalculado = data.S * data.O * data.D;
     if (data.RPN !== rpnCalculado) {
-      errores.push(`RPN inválido: debe ser ${rpnCalculado} (${data.S} × ${data.O} × ${data.D}), pero se obtuvo ${data.RPN}`);
+      errores.push(`NPR inválido: debe ser ${rpnCalculado} (${data.S} × ${data.O} × ${data.D}), pero se obtuvo ${data.RPN}`);
     }
-    
-    // Warn about high RPN
-    if (data.RPN >= 400) {
-      advertencias.push(`RPN alto (${data.RPN}): Se requieren acciones correctivas inmediatas`);
-    } else if (data.RPN >= 200) {
-      advertencias.push(`RPN moderado (${data.RPN}): Considerar acciones de mejora`);
+
+    // Warn about high RPN with color coding
+    if (data.RPN >= 201) {
+      advertencias.push(`NPR Crítico (${data.RPN}): Requiere acción inmediata`);
+    } else if (data.RPN >= 101) {
+      advertencias.push(`NPR Alto (${data.RPN}): Acción correctiva requerida`);
+    } else if (data.RPN >= 51) {
+      advertencias.push(`NPR Moderado (${data.RPN}): Considerar acciones de mejora`);
     }
   }
 
+  // Validate optional but recommended fields
+  if (!data.receptorImpacto || data.receptorImpacto.trim() === '') {
+    advertencias.push('receptorImpacto: Es recomendado especificar el receptor con mayor impacto');
+  }
+
   // Arrays are optional — warn if empty but do not block
-  if (!data.controlesActuales || data.controlesActuales.length === 0) {
-    advertencias.push('controlesActuales: Se recomienda registrar al menos un control actual');
+  if (!data.barrerasExistentes || data.barrerasExistentes.length === 0) {
+    advertencias.push('barrerasExistentes: Se recomienda registrar al menos una barrera existente');
   }
 
   if (!data.accionesRecomendadas || data.accionesRecomendadas.length === 0) {

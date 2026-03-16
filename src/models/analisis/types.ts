@@ -70,7 +70,7 @@ export interface AnalisisBase {
 
 /**
  * HAZOP (Hazard and Operability Study) Analysis
- * 
+ *
  * Systematic examination of a process to identify hazards and operability problems.
  * Uses guide words combined with parameters to identify deviations.
  */
@@ -78,17 +78,26 @@ export interface AnalisisHAZOP {
   /** Process node or section being analyzed (e.g., "Reactor R-101", "Pipeline P-203") */
   nodo: string;
 
+  /** Specific component/equipment within the node (e.g., "Bomba principal") */
+  subnodo?: string;
+
   /** Process parameter (e.g., "Flow", "Pressure", "Temperature", "Level") */
   parametro: string;
 
   /** Guide word applied to parameter (e.g., "No", "More", "Less", "Reverse") */
   palabraGuia: string;
 
+  /** Calculated deviation (Parametro + PalabraGuia combination) */
+  desviacion?: string;
+
   /** Possible cause of the deviation */
   causa: string;
 
   /** Consequence of the deviation if it occurs */
   consecuencia: string;
+
+  /** Person/community/equipment most vulnerable to impact */
+  receptorImpacto?: string;
 
   /** Existing safeguards that prevent or mitigate the deviation */
   salvaguardasExistentes: string[];
@@ -99,51 +108,57 @@ export interface AnalisisHAZOP {
 
 /**
  * FMEA (Failure Mode and Effects Analysis)
- * 
+ *
  * Step-by-step approach for identifying all possible failures in a design,
  * manufacturing process, or product/service.
  */
 export interface AnalisisFMEA {
-  /** Component or system element being analyzed */
-  componente: string;
+  /** Component/equipment being analyzed (e.g., "Bomba centrífuga P-201") */
+  equipo: string;
 
-  /** How the component can fail (failure mode) */
+  /** Operational purpose that must be fulfilled */
+  funcion: string;
+
+  /** Specific way the equipment can fail (e.g., "Motor no opera") */
   modoFalla: string;
 
-  /** Effect of the failure on the system or process */
+  /** Person/community/equipment most vulnerable to impact */
+  receptorImpacto?: string;
+
+  /** Impact on the system or process if failure occurs */
   efecto: string;
+
+  /**
+   * Severity rating (1-10)
+   * 10 = Hazardous without warning, 1 = No effect
+   */
+  S: number;
 
   /** Root cause of the failure mode */
   causa: string;
 
-  /** Current controls that prevent or detect the failure */
-  controlesActuales: string[];
-
-  /** 
-   * Severity rating (1-10)
-   * 1 = No effect, 10 = Catastrophic
-   */
-  S: number;
-
-  /** 
+  /**
    * Occurrence rating (1-10)
-   * 1 = Extremely unlikely, 10 = Inevitable
+   * 10 = 1 in 2 (almost certain), 1 = 1 in 1,500,000 (remote)
    */
   O: number;
 
-  /** 
+  /** Existing barriers/controls that prevent or detect the failure */
+  barrerasExistentes: string[];
+
+  /**
    * Detection rating (1-10)
-   * 1 = Certain detection, 10 = Absolute uncertainty
+   * 10 = Detect <40%, 1 = Detect 99.5%
    */
   D: number;
 
-  /** 
+  /**
    * Risk Priority Number (calculated field)
-   * RPN = S × O × D (range: 1-1000)
+   * NPR = S × O × D (range: 1-1000)
    */
   RPN: number;
 
-  /** Recommended actions to reduce RPN */
+  /** Recommended actions to reduce S, O, or D */
   accionesRecomendadas: string[];
 }
 

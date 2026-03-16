@@ -102,25 +102,29 @@ export default function RiesgoApp() {
   // HAZOP
   const [hazopData, setHazopData] = useState({
     nodo: '',
+    subnodo: '',
     parametro: '',
     palabraGuia: '',
     causa: '',
     consecuencia: '',
+    receptorImpacto: '',
     salvaguardasExistentes: [''],
     recomendaciones: [''],
   });
 
   // FMEA
   const [fmeaData, setFmeaData] = useState({
-    componente: '',
+    equipo: '',
+    funcion: '',
     modoFalla: '',
+    receptorImpacto: '',
     efecto: '',
     causa: '',
-    controlesActuales: [''],
     S: 1,
     O: 1,
     D: 1,
     RPN: 1,
+    barrerasExistentes: [''],
     accionesRecomendadas: [''],
   });
 
@@ -280,10 +284,12 @@ export default function RiesgoApp() {
       try {
         const resultadoAnalisis = crearAnalisisHAZOP({
           nodo: hazopData.nodo,
+          subnodo: hazopData.subnodo,
           parametro: hazopData.parametro,
           palabraGuia: hazopData.palabraGuia,
           causa: hazopData.causa,
           consecuencia: hazopData.consecuencia,
+          receptorImpacto: hazopData.receptorImpacto,
           salvaguardasExistentes: hazopData.salvaguardasExistentes.filter(s => s.trim()).length > 0 ? hazopData.salvaguardasExistentes.filter(s => s.trim()) : [''],
           recomendaciones: hazopData.recomendaciones.filter(r => r.trim()).length > 0 ? hazopData.recomendaciones.filter(r => r.trim()) : [''],
         });
@@ -295,7 +301,17 @@ export default function RiesgoApp() {
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
-        setHazopData({ nodo: '', parametro: '', palabraGuia: '', causa: '', consecuencia: '', salvaguardasExistentes: [''], recomendaciones: [''] });
+        setHazopData({
+        nodo: '',
+        subnodo: '',
+        parametro: '',
+        palabraGuia: '',
+        causa: '',
+        consecuencia: '',
+        receptorImpacto: '',
+        salvaguardasExistentes: [''],
+        recomendaciones: [''],
+      });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -304,18 +320,20 @@ export default function RiesgoApp() {
     }
     // ========== FMEA ==========
     else if (metodologiaSeleccionada === 'fmea') {
-      if (!fmeaData.componente.trim() || !fmeaData.modoFalla.trim() || !fmeaData.efecto.trim()) {
+      if (!fmeaData.equipo.trim() || !fmeaData.funcion.trim() || !fmeaData.modoFalla.trim() || !fmeaData.efecto.trim()) {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de FMEA' });
         return;
       }
 
       try {
         const resultadoAnalisis = crearAnalisisFMEA({
-          componente: fmeaData.componente,
+          equipo: fmeaData.equipo,
+          funcion: fmeaData.funcion,
           modoFalla: fmeaData.modoFalla,
+          receptorImpacto: fmeaData.receptorImpacto,
           efecto: fmeaData.efecto,
           causa: fmeaData.causa,
-          controlesActuales: fmeaData.controlesActuales.filter(c => c.trim()).length > 0 ? fmeaData.controlesActuales.filter(c => c.trim()) : [''],
+          barrerasExistentes: fmeaData.barrerasExistentes.filter(b => b.trim()).length > 0 ? fmeaData.barrerasExistentes.filter(b => b.trim()) : [''],
           S: fmeaData.S,
           O: fmeaData.O,
           D: fmeaData.D,
@@ -330,7 +348,20 @@ export default function RiesgoApp() {
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
-        setFmeaData({ componente: '', modoFalla: '', efecto: '', causa: '', controlesActuales: [''], S: 1, O: 1, D: 1, RPN: 1, accionesRecomendadas: [''] });
+        setFmeaData({
+          equipo: '',
+          funcion: '',
+          modoFalla: '',
+          receptorImpacto: '',
+          efecto: '',
+          causa: '',
+          S: 1,
+          O: 1,
+          D: 1,
+          RPN: 1,
+          barrerasExistentes: [''],
+          accionesRecomendadas: [''],
+        });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -525,13 +556,129 @@ export default function RiesgoApp() {
                             <h3 className="knar-card-title">HAZOP - Nodo de Análisis</h3>
                           </div>
                           <div className="knar-card-content space-y-3">
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">Nodo *</label><input type="text" value={hazopData.nodo} onChange={(e) => setHazopData({ ...hazopData, nodo: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Reactor R-101" /></div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div><label className="block text-xs text-knar-text-secondary mb-1">Parámetro *</label><select value={hazopData.parametro} onChange={(e) => setHazopData({ ...hazopData, parametro: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Flujo">Flujo</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Nivel">Nivel</option></select></div>
-                              <div><label className="block text-xs text-knar-text-secondary mb-1">Palabra Guía *</label><select value={hazopData.palabraGuia} onChange={(e) => setHazopData({ ...hazopData, palabraGuia: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="MÁS">Más de</option><option value="MENOS">Menos de</option><option value="NO">No</option><option value="INVERSO">Inverso</option></select></div>
+                            {/* Nodo */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">Nodo *</label>
+                              <input
+                                type="text"
+                                value={hazopData.nodo}
+                                onChange={(e) => setHazopData({ ...hazopData, nodo: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                placeholder="Ej: Sistema de Achique"
+                              />
                             </div>
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">Causa *</label><textarea value={hazopData.causa} onChange={(e) => setHazopData({ ...hazopData, causa: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Causa de la desviación" /></div>
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label><textarea value={hazopData.consecuencia} onChange={(e) => setHazopData({ ...hazopData, consecuencia: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Consecuencia si ocurre" /></div>
+
+                            {/* Subnodo/Equipo */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">Subnodo/Equipo</label>
+                              <input
+                                type="text"
+                                value={hazopData.subnodo}
+                                onChange={(e) => setHazopData({ ...hazopData, subnodo: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                placeholder="Ej: Bomba principal"
+                              />
+                            </div>
+
+                            {/* Parámetro y Palabra Guía */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs text-knar-text-secondary mb-1">Parámetro *</label>
+                                <select
+                                  value={hazopData.parametro}
+                                  onChange={(e) => setHazopData({ ...hazopData, parametro: e.target.value })}
+                                  className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                >
+                                  <option value="">Seleccionar</option>
+                                  <option value="Flujo">Flujo</option>
+                                  <option value="Presión">Presión</option>
+                                  <option value="Temperatura">Temperatura</option>
+                                  <option value="Nivel">Nivel</option>
+                                  <option value="Composición">Composición</option>
+                                  <option value="pH">pH</option>
+                                  <option value="Velocidad">Velocidad</option>
+                                  <option value="Vibración">Vibración</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-xs text-knar-text-secondary mb-1">Palabra Guía *</label>
+                                <select
+                                  value={hazopData.palabraGuia}
+                                  onChange={(e) => setHazopData({ ...hazopData, palabraGuia: e.target.value })}
+                                  className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                >
+                                  <option value="">Seleccionar</option>
+                                  <option value="NO">NO</option>
+                                  <option value="MÁS">MÁS</option>
+                                  <option value="MENOS">MENOS</option>
+                                  <option value="PARTE DE">PARTE DE</option>
+                                  <option value="ASÍ COMO">ASÍ COMO</option>
+                                  <option value="OTRO QUE">OTRO QUE</option>
+                                  <option value="REVERSO">REVERSO</option>
+                                  <option value="TEMPRANO">TEMPRANO</option>
+                                  <option value="TARDE">TARDE</option>
+                                  <option value="ANTES">ANTES</option>
+                                  <option value="DESPUÉS">DESPUÉS</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            {/* Desviación (calculado) */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">
+                                Desviación
+                                <span className="text-knar-text-muted ml-2">(calculado)</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={(() => {
+                                  if (!hazopData.parametro || !hazopData.palabraGuia) return '';
+                                  if (hazopData.palabraGuia === 'NO') return `Sin ${hazopData.parametro.toLowerCase()}`;
+                                  if (hazopData.palabraGuia === 'MÁS' || hazopData.palabraGuia === 'MENOS') {
+                                    return `${hazopData.palabraGuia} de ${hazopData.parametro.toLowerCase()}`;
+                                  }
+                                  return `${hazopData.palabraGuia} ${hazopData.parametro.toLowerCase()}`;
+                                })()}
+                                readOnly
+                                className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-muted focus:outline-none"
+                              />
+                            </div>
+
+                            {/* Causa */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                              <textarea
+                                value={hazopData.causa}
+                                onChange={(e) => setHazopData({ ...hazopData, causa: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                rows={2}
+                                placeholder="Ej: Falla eléctrica del motor"
+                              />
+                            </div>
+
+                            {/* Consecuencia */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label>
+                              <textarea
+                                value={hazopData.consecuencia}
+                                onChange={(e) => setHazopData({ ...hazopData, consecuencia: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                rows={2}
+                                placeholder="Ej: Acumulación de agua en el área"
+                              />
+                            </div>
+
+                            {/* Receptor con Mayor Impacto */}
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                              <input
+                                type="text"
+                                value={hazopData.receptorImpacto}
+                                onChange={(e) => setHazopData({ ...hazopData, receptorImpacto: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                placeholder="Ej: Personal/Operación/Medio Ambiente"
+                              />
+                            </div>
                           </div>
                         </div>
                       </>
@@ -545,18 +692,163 @@ export default function RiesgoApp() {
                           <h3 className="knar-card-title">FMEA - Análisis de Fallas</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Componente *</label><input type="text" value={fmeaData.componente} onChange={(e) => setFmeaData({ ...fmeaData, componente: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Bomba P-201" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Modo de Falla *</label><input type="text" value={fmeaData.modoFalla} onChange={(e) => setFmeaData({ ...fmeaData, modoFalla: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Pérdida de sello" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Efecto *</label><input type="text" value={fmeaData.efecto} onChange={(e) => setFmeaData({ ...fmeaData, efecto: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Fuga de producto" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Causa *</label><input type="text" value={fmeaData.causa} onChange={(e) => setFmeaData({ ...fmeaData, causa: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Causa raíz" /></div>
-                          <div className="grid grid-cols-3 gap-2">
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">S (1-10) *</label><input type="number" min="1" max="10" value={fmeaData.S} onChange={(e) => setFmeaData({ ...fmeaData, S: Number(e.target.value) })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">O (1-10) *</label><input type="number" min="1" max="10" value={fmeaData.O} onChange={(e) => setFmeaData({ ...fmeaData, O: Number(e.target.value) })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">D (1-10) *</label><input type="number" min="1" max="10" value={fmeaData.D} onChange={(e) => setFmeaData({ ...fmeaData, D: Number(e.target.value) })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
+                          {/* Equipo */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Equipo *</label>
+                            <input
+                              type="text"
+                              value={fmeaData.equipo}
+                              onChange={(e) => setFmeaData({ ...fmeaData, equipo: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: Bomba principal del Sistema de Achique"
+                            />
                           </div>
-                          <div className="bg-knar-dark rounded p-2 text-center">
-                            <span className="text-xs text-knar-text-muted">RPN = S × O × D = </span>
-                            <span className="text-sm font-bold text-knar-orange">{fmeaData.S * fmeaData.O * fmeaData.D}</span>
+
+                          {/* Función */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Función *</label>
+                            <textarea
+                              value={fmeaData.funcion}
+                              onChange={(e) => setFmeaData({ ...fmeaData, funcion: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Evacuar agua acumulada del sistema de drenaje"
+                            />
+                          </div>
+
+                          {/* Modo de Falla */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Modo de Falla *</label>
+                            <textarea
+                              value={fmeaData.modoFalla}
+                              onChange={(e) => setFmeaData({ ...fmeaData, modoFalla: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Motor no opera"
+                            />
+                          </div>
+
+                          {/* Receptor con Mayor Impacto */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                            <input
+                              type="text"
+                              value={fmeaData.receptorImpacto}
+                              onChange={(e) => setFmeaData({ ...fmeaData, receptorImpacto: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: Personal / Operación"
+                            />
+                          </div>
+
+                          {/* Efecto Potencial */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Efecto Potencial *</label>
+                            <textarea
+                              value={fmeaData.efecto}
+                              onChange={(e) => setFmeaData({ ...fmeaData, efecto: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Pérdida de bombeo"
+                            />
+                          </div>
+
+                          {/* Causa */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <textarea
+                              value={fmeaData.causa}
+                              onChange={(e) => setFmeaData({ ...fmeaData, causa: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Falla eléctrica del motor"
+                            />
+                          </div>
+
+                          {/* S, O, D */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">S (1-10) *</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={fmeaData.S}
+                                onChange={(e) => setFmeaData({ ...fmeaData, S: Number(e.target.value) })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">O (1-10) *</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={fmeaData.O}
+                                onChange={(e) => setFmeaData({ ...fmeaData, O: Number(e.target.value) })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-knar-text-secondary mb-1">D (1-10) *</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={fmeaData.D}
+                                onChange={(e) => setFmeaData({ ...fmeaData, D: Number(e.target.value) })}
+                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          {/* NPR (RPN) con color coding */}
+                          <div className={`rounded p-2 text-center ${
+                            fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'bg-red-900 bg-opacity-30 border border-red-500' :
+                            fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'bg-orange-900 bg-opacity-30 border border-orange-500' :
+                            fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'bg-yellow-900 bg-opacity-30 border border-yellow-500' :
+                            'bg-green-900 bg-opacity-30 border border-green-500'
+                          }`}>
+                            <span className="text-xs text-knar-text-muted">NPR = S × O × D = </span>
+                            <span className={`text-sm font-bold ${
+                              fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'text-red-500' :
+                              fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'text-orange-500' :
+                              fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'text-yellow-500' :
+                              'text-green-500'
+                            }`}>
+                              {fmeaData.S * fmeaData.O * fmeaData.D}
+                            </span>
+                            <span className="text-xs text-knar-text-muted ml-2">
+                              ({
+                                fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'Crítico' :
+                                fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'Alto' :
+                                fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'Moderado' :
+                                'Bajo'
+                              })
+                            </span>
+                          </div>
+
+                          {/* Causa */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <textarea
+                              value={fmeaData.causa}
+                              onChange={(e) => setFmeaData({ ...fmeaData, causa: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Falla eléctrica del motor"
+                            />
+                          </div>
+
+                          {/* Barreras Existentes */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Barreras Existentes</label>
+                            <input
+                              type="text"
+                              value={fmeaData.barrerasExistentes[0]}
+                              onChange={(e) => setFmeaData({ ...fmeaData, barrerasExistentes: [e.target.value] })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: Sensor de nivel, Alarma de alto nivel"
+                            />
                           </div>
                         </div>
                       </div>

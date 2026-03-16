@@ -215,19 +215,19 @@ export function analisisFMEAtoHallazgos(analisis: AnalisisFMEA): TransformResult
   hallazgos.push(peligro);
 
   // Create Barrera from current controls
-  for (const control of analisis.controlesActuales) {
+  for (const control of analisis.barrerasExistentes) {
     const barrera: Barrera = {
       id: generarIdHallazgo('Barrera'),
       tipo: 'Barrera',
       titulo: control,
-      descripcion: `Control actual para ${analisis.componente}`,
+      descripcion: `Control actual para ${analisis.equipo}`,
       ubicacion: generarCoordenadaAleatoria(),
       fechaCreacion: fechaISO,
       analisisOrigenIds: [],
       hallazgosRelacionadosIds: [peligro.id],
       tipoBarrera: 'Administrativa', // Default assumption
       efectividadEstimada: 3,
-      elementoProtegido: analisis.componente,
+      elementoProtegido: analisis.equipo,
     };
     hallazgos.push(barrera);
   }
