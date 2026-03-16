@@ -82,7 +82,7 @@ interface HallazgoFormData {
 
 export default function RiesgoApp() {
   // Get session for map markers
-  const { sesion } = useSesion();
+  const { sesion, dispatch } = useSesion();
 
   // Estado para tab izquierdo (EXCLUSIVO)
   const [leftTabActive, setLeftTabActive] = useState<LeftTab>('configuracion');
@@ -93,12 +93,12 @@ export default function RiesgoApp() {
   // Estado para metodología seleccionada en Censo
   const [metodologiaSeleccionada, setMetodologiaSeleccionada] = useState<Metodologia>(null);
 
-  // Estado para configuración del proyecto
+  // Estado para configuración del proyecto — seeded from session on first load
   const [configData, setConfigData] = useState<ConfigData>({
-    proyecto: '',
-    empresa: '',
-    responsable: '',
-    validez: '',
+    proyecto: sesion?.proyecto ?? '',
+    empresa: sesion?.empresa ?? '',
+    responsable: sesion?.responsable ?? '',
+    validez: sesion?.validez ?? '',
   });
 
   // ========================================
@@ -287,6 +287,7 @@ export default function RiesgoApp() {
   const handleConfigChange = (e: FormEvent<HTMLInputElement>) => {
     const { name, value } = e.currentTarget;
     setConfigData((prev) => ({ ...prev, [name]: value }));
+    dispatch({ type: 'ACTUALIZAR_SESION', payload: { [name]: value } });
   };
 
   const agregarHallazgo = () => {

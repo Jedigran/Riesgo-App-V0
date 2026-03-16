@@ -54,6 +54,16 @@ export interface Sesion {
   /** Unique session identifier (generated on session start) */
   id: string;
 
+  // ---- Project configuration metadata ----
+  /** Project name */
+  proyecto?: string;
+  /** Company name */
+  empresa?: string;
+  /** Responsible person */
+  responsable?: string;
+  /** Validity date (ISO string) */
+  validez?: string;
+
   /** All analysis forms created in this session */
   analisis: AnalisisOrigen[];
 
