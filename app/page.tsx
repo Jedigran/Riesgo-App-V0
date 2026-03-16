@@ -644,7 +644,7 @@ export default function RiesgoApp() {
   // ========================================
 
   return (
-    <div className="min-h-screen flex flex-col bg-knar-dark font-sans">
+    <div className="h-screen flex flex-col bg-knar-dark font-sans overflow-hidden">
       {/* HEADER */}
       <header style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }} className="px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
