@@ -177,6 +177,7 @@ function crearSesionEjemplo(): Sesion {
         fechaCreacion: fechaISO,
       } as RelacionHallazgo,
     ],
+    gruposProteccion: [],
     imagenActual: '/diagrams/test.png',
     filtrosActivos: ['Peligro', 'Barrera', 'POE', 'SOL'],
     vistaActiva: 'mapa',
