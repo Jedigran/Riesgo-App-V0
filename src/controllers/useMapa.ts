@@ -75,7 +75,7 @@ export interface PanPosition {
 // ============================================================================
 
 const DEFAULT_CONFIG: MapaConfig = {
-  imagenPorDefecto: '/diagrams/default-plant.png',
+  imagenPorDefecto: '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
   zoomMin: 0.5,
   zoomMax: 3,
   toleranciaClick: 5, // pixels
@@ -203,12 +203,13 @@ export function useMapa(config?: Partial<MapaConfig>): UseMapaReturn {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<Ubicacion | null>(null);
 
-  // Update imagenActual when session changes
+  // Update imagenActual when session changes — always resolve to default if session has no image
   useMemo(() => {
-    if (sesion?.imagenActual && sesion.imagenActual !== imagenActual) {
-      setImagenActual(sesion.imagenActual);
+    const resolved = sesion?.imagenActual || mergedConfig.imagenPorDefecto;
+    if (resolved !== imagenActual) {
+      setImagenActual(resolved);
     }
-  }, [sesion?.imagenActual, imagenActual]);
+  }, [sesion?.imagenActual, mergedConfig.imagenPorDefecto, imagenActual]);
 
   // ============================================================================
   // HALLAZGO LOCATION FUNCTIONS
