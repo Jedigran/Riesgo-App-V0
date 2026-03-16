@@ -276,6 +276,11 @@ export function validarPeligro(peligro: Peligro): ValidationResult {
     errores.push(`tipo debe ser 'Peligro', pero se obtuvo '${peligro.tipo}'`);
   }
 
+  // Validate tipoPeligro (required)
+  if (!peligro.tipoPeligro || !['Inherente', 'Diseño'].includes(peligro.tipoPeligro)) {
+    errores.push('tipoPeligro: Es requerido y debe ser "Inherente" o "Diseño"');
+  }
+
   // Validate consecuencia
   const consecuenciaError = validarStringRequerido(peligro.consecuencia, 'consecuencia');
   if (consecuenciaError) errores.push(consecuenciaError);
@@ -338,6 +343,11 @@ export function validarBarrera(barrera: Barrera): ValidationResult {
   const tiposBarreraValidos = ['Fisica', 'Administrativa', 'Humana'];
   if (!tiposBarreraValidos.includes(barrera.tipoBarrera)) {
     errores.push(`tipoBarrera inválido: ${barrera.tipoBarrera}. Debe ser: ${tiposBarreraValidos.join(', ')}`);
+  }
+
+  // Validate tipoBarreraFuncion (required)
+  if (!barrera.tipoBarreraFuncion || !['Preventiva', 'Detectiva', 'Mitigativa'].includes(barrera.tipoBarreraFuncion)) {
+    errores.push('tipoBarreraFuncion: Es requerido y debe ser "Preventiva", "Detectiva" o "Mitigativa"');
   }
 
   // Validate efectividadEstimada (1-5)
@@ -462,6 +472,21 @@ export function validarSOL(sol: SOL): ValidationResult {
   // Validate tipoTecnologia
   const techError = validarStringRequerido(sol.tipoTecnologia, 'tipoTecnologia');
   if (techError) errores.push(techError);
+
+  // Validate parametro (required)
+  const parametroError = validarStringRequerido(sol.parametro, 'parametro');
+  if (parametroError) errores.push(parametroError);
+
+  // Validate unidad
+  const unidadError = validarStringRequerido(sol.unidad, 'unidad');
+  if (unidadError) errores.push(unidadError);
+
+  // Validate valorMinimo and valorMaximo relationship
+  if (sol.valorMinimo !== undefined && sol.valorMaximo !== undefined) {
+    if (sol.valorMinimo > sol.valorMaximo) {
+      errores.push('valorMinimo no puede ser mayor que valorMaximo');
+    }
+  }
 
   // Warn about non-independent layers
   if (sol.independiente === false) {

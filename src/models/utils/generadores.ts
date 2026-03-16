@@ -394,6 +394,7 @@ export function crearSesionDemo(): Sesion {
       {
         id: peligroId,
         tipo: 'Peligro',
+        tipoPeligro: 'Inherente',
         titulo: 'Sobrepresión en Reactor',
         descripcion: 'Riesgo de sobrepresión durante operación',
         ubicacion: { x: 45, y: 30 },
@@ -407,13 +408,14 @@ export function crearSesionDemo(): Sesion {
       {
         id: barreraId,
         tipo: 'Barrera',
+        tipoBarrera: 'Fisica',
+        tipoBarreraFuncion: 'Mitigativa',
         titulo: 'Válvula de Alivio PSV-101',
         descripcion: 'Alivia presión cuando excede setpoint',
         ubicacion: { x: 47, y: 32 },
         fechaCreacion: fechaISO,
         analisisOrigenIds: [analisisId],
         hallazgosRelacionadosIds: [peligroId],
-        tipoBarrera: 'Fisica',
         efectividadEstimada: 4,
         elementoProtegido: 'Reactor R-101',
       },

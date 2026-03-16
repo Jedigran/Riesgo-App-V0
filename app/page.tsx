@@ -56,8 +56,10 @@ interface HallazgoFormData {
   consecuencia?: string;
   severidad?: number;
   causaRaiz?: string;
+  tipoPeligro?: 'Inherente' | 'Diseño';
   // Barrera
   tipoBarrera?: 'Fisica' | 'Administrativa' | 'Humana';
+  tipoBarreraFuncion?: 'Preventiva' | 'Detectiva' | 'Mitigativa';
   efectividadEstimada?: number;
   elementoProtegido?: string;
   // POE
@@ -68,6 +70,10 @@ interface HallazgoFormData {
   capaNumero?: number;
   independiente?: boolean;
   tipoTecnologia?: string;
+  parametro?: string;
+  valorMinimo?: number;
+  valorMaximo?: number;
+  unidad?: string;
 }
 
 // ============================================================================
@@ -149,8 +155,23 @@ export default function RiesgoApp() {
 
   // OCA
   const [ocaData, setOcaData] = useState({
-    eventoIniciador: '',
-    consecuencia: '',
+    compuesto: 'H2S',
+    cantidad: 1000,
+    viento: 1.5,
+    factorViento: 1.0,
+    estabilidad: 'F',
+    factorEscalabilidad: 1.5,
+    topografia: 'Urbana',
+    factorTopografia: 0.85,
+    tipoEscenario: 'Alternativo',
+    endpoint: 0.0017,
+    tasaLiberacion: 16.67,
+    distanciaEndpointMillas: 0,
+    distanciaEndpointKm: 0,
+    areaAfectadaMillas2: 0,
+    areaAfectadaKm2: 0,
+    programaRMP: '',
+    evaluacion: '',
     barrerasExistentes: [''],
     gaps: [''],
     recomendaciones: [''],
@@ -179,6 +200,86 @@ export default function RiesgoApp() {
   const { crearPeligro, crearBarrera, crearPOE, crearSOL } = useHallazgo();
   const { agregarError, agregarNotificacion } = useUIEstado();
   const { actualizarUbicacionHallazgo } = useMapa();
+
+  // ========================================
+  // OCA HELPER FUNCTIONS
+  // ========================================
+  
+  // Chemical compound endpoint lookup (mg/L)
+  const getEndpointPorCompuesto = (compuesto: string): number => {
+    const endpoints: Record<string, number> = {
+      'H2S': 0.0017,
+      'CO': 0.035,
+      'Cl2': 0.0035,
+      'SO2': 0.014,
+      'NH3': 0.14,
+      'PM10': 0.15,
+      'Diesel': 0.05,
+    };
+    return endpoints[compuesto] || 0.0017;
+  };
+
+  // Calculate wind factor: 1.5 / viento_real
+  const calcularFactorViento = (viento: number): number => {
+    if (viento <= 0) return 1.0;
+    return 1.5 / viento;
+  };
+
+  // Calculate scalability factor by stability class
+  const calcularFactorEscalabilidad = (estabilidad: string): number => {
+    const factores: Record<string, number> = {
+      'A': 0.5,
+      'B': 0.7,
+      'C': 0.9,
+      'D': 1.0,
+      'E': 1.2,
+      'F': 1.5,
+    };
+    return factores[estabilidad] || 1.0;
+  };
+
+  // Calculate topography factor
+  const calcularFactorTopografia = (topografia: string): number => {
+    return topografia === 'Urbana' ? 0.85 : 1.0;
+  };
+
+  // Calculate release rate: Cantidad / Tiempo
+  const calcularTasaLiberacion = (cantidad: number, tipoEscenario: string): number => {
+    const tiempo = tipoEscenario === 'Worst-Case' ? 10 : 60;
+    return cantidad / tiempo;
+  };
+
+  // Calculate distance to endpoint: 0.45 × LOG10(Tasa/Endpoint) × Factores
+  const calcularDistanciaEndpoint = (
+    tasa: number,
+    endpoint: number,
+    factorViento: number,
+    factorEscalabilidad: number,
+    factorTopografia: number
+  ): number => {
+    if (tasa <= 0 || endpoint <= 0) return 0;
+    const factores = factorViento * factorEscalabilidad * factorTopografia;
+    return 0.45 * Math.log10(tasa / endpoint) * factores;
+  };
+
+  // Calculate affected area: π × distancia²
+  const calcularArea = (distancia: number): number => {
+    return Math.PI * Math.pow(distancia, 2);
+  };
+
+  // Get EPA RMP program by distance
+  const obtenerProgramaRMP = (distanciaMillas: number): string => {
+    if (distanciaMillas < 1) return 'Programa 1';
+    if (distanciaMillas <= 5) return 'Programa 2';
+    return 'Programa 3';
+  };
+
+  // Get evaluation by distance
+  const obtenerEvaluacion = (distanciaMillas: number): string => {
+    if (distanciaMillas < 2) return '🟢 BAJA';
+    if (distanciaMillas <= 5) return '🟡 MODERADA';
+    return '🔴 ALTA';
+  };
 
   // ========================================
   // HANDLERS
@@ -239,6 +340,7 @@ export default function RiesgoApp() {
         crearPeligro({
           titulo: hallazgo.titulo || 'Sin título',
           descripcion: hallazgo.descripcion || 'Sin descripción',
+          tipoPeligro: hallazgo.tipoPeligro || 'Inherente',
           consecuencia: hallazgo.consecuencia || 'Por definir',
           severidad: (hallazgo.severidad || 3) as any,
           causaRaiz: hallazgo.causaRaiz || 'Por definir',
@@ -249,6 +351,7 @@ export default function RiesgoApp() {
           titulo: hallazgo.titulo || 'Sin título',
           descripcion: hallazgo.descripcion || 'Sin descripción',
           tipoBarrera: (hallazgo.tipoBarrera || 'Fisica') as any,
+          tipoBarreraFuncion: hallazgo.tipoBarreraFuncion || 'Preventiva',
           efectividadEstimada: (hallazgo.efectividadEstimada || 3) as any,
           elementoProtegido: hallazgo.elementoProtegido || 'Por definir',
           analisisOrigenIds: [analisisId],
@@ -269,6 +372,10 @@ export default function RiesgoApp() {
           capaNumero: hallazgo.capaNumero || 1,
           independiente: hallazgo.independiente ?? true,
           tipoTecnologia: hallazgo.tipoTecnologia || 'Por definir',
+          parametro: hallazgo.parametro || '',
+          valorMinimo: hallazgo.valorMinimo,
+          valorMaximo: hallazgo.valorMaximo,
+          unidad: hallazgo.unidad || '',
           analisisOrigenIds: [analisisId],
         }, ubicacion);
       }
@@ -439,15 +546,42 @@ export default function RiesgoApp() {
     }
     // ========== OCA ==========
     else if (metodologiaSeleccionada === 'oca') {
-      if (!ocaData.eventoIniciador.trim() || !ocaData.consecuencia.trim()) {
+      if (!ocaData.compuesto || !ocaData.cantidad || !ocaData.viento || !ocaData.estabilidad || !ocaData.topografia || !ocaData.tipoEscenario || !ocaData.endpoint) {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de OCA' });
         return;
       }
 
       try {
+        // Calculate all derived fields
+        const factorViento = calcularFactorViento(ocaData.viento);
+        const factorEscalabilidad = calcularFactorEscalabilidad(ocaData.estabilidad);
+        const factorTopografia = calcularFactorTopografia(ocaData.topografia);
+        const tasaLiberacion = calcularTasaLiberacion(ocaData.cantidad, ocaData.tipoEscenario);
+        const distanciaMillas = calcularDistanciaEndpoint(tasaLiberacion, ocaData.endpoint, factorViento, factorEscalabilidad, factorTopografia);
+        const distanciaKm = distanciaMillas * 1.60934;
+        const areaMillas2 = calcularArea(distanciaMillas);
+        const areaKm2 = calcularArea(distanciaKm);
+        const programaRMP = obtenerProgramaRMP(distanciaMillas);
+        const evaluacion = obtenerEvaluacion(distanciaMillas);
+
         const resultadoAnalisis = crearAnalisisOCA({
-          eventoIniciador: ocaData.eventoIniciador,
-          consecuencia: ocaData.consecuencia,
+          compuesto: ocaData.compuesto,
+          cantidad: ocaData.cantidad,
+          viento: ocaData.viento,
+          factorViento,
+          estabilidad: ocaData.estabilidad,
+          factorEscalabilidad,
+          topografia: ocaData.topografia,
+          factorTopografia,
+          tipoEscenario: ocaData.tipoEscenario,
+          endpoint: ocaData.endpoint,
+          tasaLiberacion,
+          distanciaEndpointMillas: distanciaMillas,
+          distanciaEndpointKm: distanciaKm,
+          areaAfectadaMillas2: areaMillas2,
+          areaAfectadaKm2: areaKm2,
+          programaRMP,
+          evaluacion,
           barrerasExistentes: ocaData.barrerasExistentes.filter(b => b.trim()).length > 0 ? ocaData.barrerasExistentes.filter(b => b.trim()) : [''],
           gaps: ocaData.gaps.filter(g => g.trim()).length > 0 ? ocaData.gaps.filter(g => g.trim()) : [''],
           recomendaciones: ocaData.recomendaciones.filter(r => r.trim()).length > 0 ? ocaData.recomendaciones.filter(r => r.trim()) : [''],
@@ -460,7 +594,28 @@ export default function RiesgoApp() {
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
-        setOcaData({ eventoIniciador: '', consecuencia: '', barrerasExistentes: [''], gaps: [''], recomendaciones: [''] });
+        setOcaData({
+          compuesto: 'H2S',
+          cantidad: 1000,
+          viento: 1.5,
+          factorViento: 1.0,
+          estabilidad: 'F',
+          factorEscalabilidad: 1.5,
+          topografia: 'Urbana',
+          factorTopografia: 0.85,
+          tipoEscenario: 'Alternativo',
+          endpoint: 0.0017,
+          tasaLiberacion: 16.67,
+          distanciaEndpointMillas: 0,
+          distanciaEndpointKm: 0,
+          areaAfectadaMillas2: 0,
+          areaAfectadaKm2: 0,
+          programaRMP: '',
+          evaluacion: '',
+          barrerasExistentes: [''],
+          gaps: [''],
+          recomendaciones: [''],
+        });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -1061,11 +1216,273 @@ export default function RiesgoApp() {
                       <div className="knar-card">
                         <div className="knar-card-header">
                           <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
-                          <h3 className="knar-card-title">OCA - Análisis de Consecuencias</h3>
+                          <h3 className="knar-card-title">OCA - Consecuencias</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Evento Iniciador *</label><input type="text" value={ocaData.eventoIniciador} onChange={(e) => setOcaData({ ...ocaData, eventoIniciador: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Pérdida de energía" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label><input type="text" value={ocaData.consecuencia} onChange={(e) => setOcaData({ ...ocaData, consecuencia: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Consecuencia potencial" /></div>
+                          {/* Compuesto */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Compuesto Químico *</label>
+                            <select
+                              value={ocaData.compuesto}
+                              onChange={(e) => {
+                                const compuesto = e.target.value;
+                                const endpoint = getEndpointPorCompuesto(compuesto);
+                                setOcaData({ ...ocaData, compuesto, endpoint });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                            >
+                              <option value="H2S">H2S (Ácido Sulfhídrico)</option>
+                              <option value="CO">CO (Monóxido de Carbono)</option>
+                              <option value="Cl2">Cl2 (Cloro)</option>
+                              <option value="SO2">SO2 (Dióxido de Azufre)</option>
+                              <option value="NH3">NH3 (Amoníaco)</option>
+                              <option value="PM10">PM10 (Material Particulado)</option>
+                              <option value="Diesel">Diesel</option>
+                            </select>
+                          </div>
+
+                          {/* Cantidad */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Cantidad (lb) *</label>
+                            <input
+                              type="number"
+                              value={ocaData.cantidad}
+                              onChange={(e) => setOcaData({ ...ocaData, cantidad: Number(e.target.value) })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: 1000"
+                            />
+                          </div>
+
+                          {/* Viento */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Viento (m/s) *</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={ocaData.viento}
+                              onChange={(e) => {
+                                const viento = Number(e.target.value);
+                                const factorViento = calcularFactorViento(viento);
+                                setOcaData({ ...ocaData, viento, factorViento });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: 1.50"
+                            />
+                          </div>
+
+                          {/* Factor del Viento (calculado) */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">
+                              Factor del Viento
+                              <span className="text-knar-text-muted ml-2">(calculado: 1.5 / viento)</span>
+                            </label>
+                            <input
+                              type="number"
+                              readOnly
+                              value={ocaData.factorViento.toFixed(2)}
+                              className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-muted focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Estabilidad */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Estabilidad Atmosférica *</label>
+                            <select
+                              value={ocaData.estabilidad}
+                              onChange={(e) => {
+                                const estabilidad = e.target.value;
+                                const factorEscalabilidad = calcularFactorEscalabilidad(estabilidad);
+                                setOcaData({ ...ocaData, estabilidad, factorEscalabilidad });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                            >
+                              <option value="A">A - Muy inestable</option>
+                              <option value="B">B - Inestable</option>
+                              <option value="C">C - Ligeramente inestable</option>
+                              <option value="D">D - Neutral (típico)</option>
+                              <option value="E">E - Ligeramente estable</option>
+                              <option value="F">F - Muy estable (worst-case)</option>
+                            </select>
+                          </div>
+
+                          {/* Factor de Escalabilidad (calculado) */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">
+                              Factor de Escalabilidad
+                              <span className="text-knar-text-muted ml-2">(calculado)</span>
+                            </label>
+                            <input
+                              type="number"
+                              readOnly
+                              value={ocaData.factorEscalabilidad.toFixed(2)}
+                              className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-muted focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Topografía */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Topografía *</label>
+                            <select
+                              value={ocaData.topografia}
+                              onChange={(e) => {
+                                const topografia = e.target.value;
+                                const factorTopografia = calcularFactorTopografia(topografia);
+                                setOcaData({ ...ocaData, topografia, factorTopografia });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                            >
+                              <option value="Urbana">Urbana</option>
+                              <option value="Rural">Rural</option>
+                            </select>
+                          </div>
+
+                          {/* Factor de Topografía (calculado) */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">
+                              Factor de Topografía
+                              <span className="text-knar-text-muted ml-2">(calculado)</span>
+                            </label>
+                            <input
+                              type="number"
+                              readOnly
+                              value={ocaData.factorTopografia.toFixed(2)}
+                              className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-muted focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Tipo de Escenario */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Tipo de Escenario *</label>
+                            <select
+                              value={ocaData.tipoEscenario}
+                              onChange={(e) => {
+                                const tipoEscenario = e.target.value;
+                                const tasaLiberacion = calcularTasaLiberacion(ocaData.cantidad, tipoEscenario);
+                                setOcaData({ ...ocaData, tipoEscenario, tasaLiberacion });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                            >
+                              <option value="Worst-Case">Worst-Case (10 min)</option>
+                              <option value="Alternativo">Alternativo (60 min)</option>
+                            </select>
+                          </div>
+
+                          {/* Endpoint */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Endpoint (mg/L) *</label>
+                            <input
+                              type="number"
+                              step="0.0001"
+                              value={ocaData.endpoint}
+                              onChange={(e) => setOcaData({ ...ocaData, endpoint: Number(e.target.value) })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Auto-fill según compuesto"
+                            />
+                          </div>
+
+                          {/* Tasa de Liberación (calculado) */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">
+                              Tasa de Liberación (lb/min)
+                              <span className="text-knar-text-muted ml-2">(calculado)</span>
+                            </label>
+                            <input
+                              type="number"
+                              readOnly
+                              value={ocaData.tasaLiberacion?.toFixed(2) || '0.00'}
+                              className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-muted focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Cálculos de Distancia y Área */}
+                          <div className="bg-knar-charcoal rounded p-3 space-y-2 border border-knar-border">
+                            <h4 className="text-xs font-medium text-knar-text-primary">Cálculos de Dispersión</h4>
+                            
+                            {/* Distancia en millas */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Distancia al Endpoint:</span>
+                              <span className="text-knar-text-primary font-mono">
+                                {(() => {
+                                  const distancia = calcularDistanciaEndpoint(
+                                    ocaData.tasaLiberacion || 0,
+                                    ocaData.endpoint,
+                                    ocaData.factorViento,
+                                    ocaData.factorEscalabilidad,
+                                    ocaData.factorTopografia
+                                  );
+                                  return distancia.toFixed(2) + ' millas';
+                                })()}
+                              </span>
+                            </div>
+
+                            {/* Distancia en km */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Distancia en km:</span>
+                              <span className="text-knar-text-primary font-mono">
+                                {(() => {
+                                  const distancia = calcularDistanciaEndpoint(
+                                    ocaData.tasaLiberacion || 0,
+                                    ocaData.endpoint,
+                                    ocaData.factorViento,
+                                    ocaData.factorEscalabilidad,
+                                    ocaData.factorTopografia
+                                  );
+                                  return (distancia * 1.60934).toFixed(2) + ' km';
+                                })()}
+                              </span>
+                            </div>
+
+                            {/* Área en millas² */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Área Afectada:</span>
+                              <span className="text-knar-text-primary font-mono">
+                                {(() => {
+                                  const distancia = calcularDistanciaEndpoint(
+                                    ocaData.tasaLiberacion || 0,
+                                    ocaData.endpoint,
+                                    ocaData.factorViento,
+                                    ocaData.factorEscalabilidad,
+                                    ocaData.factorTopografia
+                                  );
+                                  return calcularArea(distancia).toFixed(2) + ' miles²';
+                                })()}
+                              </span>
+                            </div>
+
+                            {/* Programa RMP */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Programa RMP:</span>
+                              <span className="text-knar-text-primary font-bold">
+                                {(() => {
+                                  const distancia = calcularDistanciaEndpoint(
+                                    ocaData.tasaLiberacion || 0,
+                                    ocaData.endpoint,
+                                    ocaData.factorViento,
+                                    ocaData.factorEscalabilidad,
+                                    ocaData.factorTopografia
+                                  );
+                                  return obtenerProgramaRMP(distancia);
+                                })()}
+                              </span>
+                            </div>
+
+                            {/* Evaluación */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Evaluación:</span>
+                              <span className="font-bold">
+                                {(() => {
+                                  const distancia = calcularDistanciaEndpoint(
+                                    ocaData.tasaLiberacion || 0,
+                                    ocaData.endpoint,
+                                    ocaData.factorViento,
+                                    ocaData.factorEscalabilidad,
+                                    ocaData.factorTopografia
+                                  );
+                                  return obtenerEvaluacion(distancia);
+                                })()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1114,12 +1531,22 @@ export default function RiesgoApp() {
                                 <div><label className="block text-xs text-knar-text-secondary mb-1">Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del hallazgo" /></div>
                                 <div><label className="block text-xs text-knar-text-secondary mb-1">Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
                                 {hallazgo.tipo === 'Peligro' && (<>
+                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>
                                   <div><label className="block text-xs text-knar-text-secondary mb-1">Consecuencia</label><input type="text" value={hallazgo.consecuencia || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'consecuencia', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
                                   <div><label className="block text-xs text-knar-text-secondary mb-1">Severidad (1-5)</label><select value={hallazgo.severidad || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'severidad', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Insignificante</option><option value="2">2 - Menor</option><option value="3">3 - Moderado</option><option value="4">4 - Mayor</option><option value="5">5 - Catastrófico</option></select></div>
                                 </>)}
                                 {hallazgo.tipo === 'Barrera' && (<>
                                   <div><label className="block text-xs text-knar-text-secondary mb-1">Tipo de Barrera</label><select value={hallazgo.tipoBarrera || 'Fisica'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarrera', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Fisica">Física</option><option value="Administrativa">Administrativa</option><option value="Humana">Humana</option></select></div>
+                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Función de Barrera *</label><select value={hallazgo.tipoBarreraFuncion || 'Preventiva'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarreraFuncion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Preventiva">Preventiva (evita que ocurra el evento)</option><option value="Detectiva">Detectiva (detecta el evento)</option><option value="Mitigativa">Mitigativa (mitiga consecuencias)</option></select></div>
                                   <div><label className="block text-xs text-knar-text-secondary mb-1">Efectividad (1-5)</label><select value={hallazgo.efectividadEstimada || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'efectividadEstimada', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Muy Baja</option><option value="2">2 - Baja</option><option value="3">3 - Media</option><option value="4">4 - Alta</option><option value="5">5 - Muy Alta</option></select></div>
+                                </>)}
+                                {hallazgo.tipo === 'SOL' && (<>
+                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Parámetro *</label><select value={hallazgo.parametro || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'parametro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Flujo">Flujo</option><option value="Nivel">Nivel</option><option value="pH">pH</option><option value="Velocidad">Velocidad</option><option value="Vibración">Vibración</option><option value="Concentración">Concentración</option><option value="dBA">dBA (Sonido/Ruido)</option></select></div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div><label className="block text-xs text-knar-text-secondary mb-1">Valor Mínimo</label><input type="number" value={hallazgo.valorMinimo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMinimo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="0" /></div>
+                                    <div><label className="block text-xs text-knar-text-secondary mb-1">Valor Máximo</label><input type="number" value={hallazgo.valorMaximo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMaximo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="100" /></div>
+                                  </div>
+                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Unidad</label><select value={hallazgo.unidad || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'unidad', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="psi">psi</option><option value="bar">bar</option><option value="kPa">kPa</option><option value="atm">atm</option><option value="°C">°C</option><option value="°F">°F</option><option value="K">K</option><option value="m³/h">m³/h</option><option value="L/min">L/min</option><option value="gal/min">gal/min</option><option value="%">%</option><option value="m">m</option><option value="ft">ft</option><option value="pH">pH (0-14)</option><option value="mm/s">mm/s</option><option value="g">g</option><option value="ppm">ppm</option><option value="mg/L">mg/L</option><option value="dBA">dBA</option></select></div>
                                 </>)}
                                 <div>
                                   <label className="block text-xs text-knar-text-secondary mb-1">Ubicación</label>

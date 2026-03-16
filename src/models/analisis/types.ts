@@ -249,16 +249,61 @@ export interface AnalisisLOPA {
 
 /**
  * OCA (Consequence Analysis)
- * 
+ *
  * Analysis focused on understanding the consequences of hazardous events
  * and identifying gaps in existing protection.
  */
 export interface AnalisisOCA {
-  /** Initiating event that could lead to consequences */
-  eventoIniciador: string;
+  /** Chemical compound released (e.g., "H2S", "CO", "Cl2") */
+  compuesto: string;
 
-  /** Description of potential consequences */
-  consecuencia: string;
+  /** Total mass available for release (lb) */
+  cantidad: number;
+
+  /** Wind speed at time of scenario (m/s) */
+  viento: number;
+
+  /** Wind correction factor (calculated) */
+  factorViento?: number;
+
+  /** Atmospheric stability class (A, B, C, D, E, F) */
+  estabilidad: string;
+
+  /** Scalability factor by stability class (calculated) */
+  factorEscalabilidad?: number;
+
+  /** Terrain classification (Urbana, Rural) */
+  topografia: string;
+
+  /** Topography adjustment factor (calculated) */
+  factorTopografia?: number;
+
+  /** Scenario conservatism level (Worst-Case, Alternativo) */
+  tipoEscenario: string;
+
+  /** Concentration/effect threshold that defines damage (mg/L or ppm) */
+  endpoint: number;
+
+  /** Mass released per unit time (calculated, lb/min) */
+  tasaLiberacion?: number;
+
+  /** Maximum radius where concentration = endpoint (calculated, miles) */
+  distanciaEndpointMillas?: number;
+
+  /** Distance converted to kilometers (calculated) */
+  distanciaEndpointKm?: number;
+
+  /** Theoretical affected circular surface area (calculated, miles²) */
+  areaAfectadaMillas2?: number;
+
+  /** Area converted to km² (calculated) */
+  areaAfectadaKm2?: number;
+
+  /** EPA regulatory classification (calculated) */
+  programaRMP?: string;
+
+  /** Qualitative consequence level classification (calculated) */
+  evaluacion?: string;
 
   /** Existing barriers that prevent or mitigate consequences */
   barrerasExistentes: string[];

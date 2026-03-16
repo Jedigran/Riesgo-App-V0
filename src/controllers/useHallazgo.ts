@@ -92,6 +92,7 @@ export interface ResultadoOperacionMultiple {
 export interface CrearPeligroDTO {
   titulo: string;
   descripcion: string;
+  tipoPeligro: 'Inherente' | 'Diseño';
   consecuencia: string;
   severidad: Severidad;
   causaRaiz: string;
@@ -106,6 +107,7 @@ export interface CrearBarreraDTO {
   titulo: string;
   descripcion: string;
   tipoBarrera: TipoBarrera;
+  tipoBarreraFuncion: 'Preventiva' | 'Detectiva' | 'Mitigativa';
   efectividadEstimada: Efectividad;
   elementoProtegido: string;
   analisisOrigenIds?: string[];
@@ -134,6 +136,10 @@ export interface CrearSOLDTO {
   capaNumero: number;
   independiente: boolean;
   tipoTecnologia: string;
+  parametro: string;
+  valorMinimo?: number;
+  valorMaximo?: number;
+  unidad: string;
   analisisOrigenIds?: string[];
   hallazgosRelacionadosIds?: string[];
 }
@@ -338,6 +344,7 @@ export function useHallazgo(): UseHallazgoReturn {
       const peligro: Peligro = {
         id,
         tipo: 'Peligro',
+        tipoPeligro: datos.tipoPeligro || 'Inherente',
         titulo: datos.titulo,
         descripcion: datos.descripcion,
         ubicacion: ubicacionFinal,
@@ -408,6 +415,7 @@ export function useHallazgo(): UseHallazgoReturn {
         analisisOrigenIds: datos.analisisOrigenIds || [],
         hallazgosRelacionadosIds: datos.hallazgosRelacionadosIds || [],
         tipoBarrera: datos.tipoBarrera,
+        tipoBarreraFuncion: datos.tipoBarreraFuncion || 'Preventiva',
         efectividadEstimada: datos.efectividadEstimada,
         elementoProtegido: datos.elementoProtegido,
       };
@@ -536,6 +544,10 @@ export function useHallazgo(): UseHallazgoReturn {
         capaNumero: datos.capaNumero,
         independiente: datos.independiente,
         tipoTecnologia: datos.tipoTecnologia,
+        parametro: datos.parametro || '',
+        valorMinimo: datos.valorMinimo,
+        valorMaximo: datos.valorMaximo,
+        unidad: datos.unidad || '',
       };
 
       // 4. Validate

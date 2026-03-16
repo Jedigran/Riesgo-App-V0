@@ -449,32 +449,51 @@ export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
   const errores: string[] = [];
   const advertencias: string[] = [];
 
-  // Validate required string fields
-  const eventoError = validarStringRequerido(data.eventoIniciador, 'eventoIniciador');
-  if (eventoError) errores.push(eventoError);
-
-  const consecuenciaError = validarStringRequerido(data.consecuencia, 'consecuencia');
-  if (consecuenciaError) errores.push(consecuenciaError);
-
-  // Arrays are optional — warn if empty but do not block
-  if (!data.barrerasExistentes || data.barrerasExistentes.length === 0) {
-    advertencias.push('barrerasExistentes: Se recomienda registrar al menos una barrera existente');
+  // Validate required fields
+  if (!data.compuesto || data.compuesto.trim() === '') {
+    errores.push('compuesto: Es requerido');
   }
 
-  if (!data.gaps || data.gaps.length === 0) {
-    advertencias.push('gaps: Se recomienda identificar al menos un gap de seguridad');
+  if (!data.cantidad || data.cantidad <= 0) {
+    errores.push('cantidad: Debe ser mayor a 0');
   }
 
-  if (!data.recomendaciones || data.recomendaciones.length === 0) {
-    advertencias.push('recomendaciones: Se recomienda registrar al menos una recomendación');
+  if (!data.viento || data.viento <= 0) {
+    errores.push('viento: Debe ser mayor a 0');
   }
 
-  // Check if recommendations cover all gaps
-  if (data.gaps && data.recomendaciones && data.gaps.length > data.recomendaciones.length) {
-    advertencias.push(
-      `Hay más gaps (${data.gaps.length}) que recomendaciones (${data.recomendaciones.length}). ` +
-      'Considere agregar más recomendaciones.'
-    );
+  if (!data.estabilidad || !['A', 'B', 'C', 'D', 'E', 'F'].includes(data.estabilidad)) {
+    errores.push('estabilidad: Debe ser A, B, C, D, E o F');
+  }
+
+  if (!data.topografia || !['Urbana', 'Rural'].includes(data.topografia)) {
+    errores.push('topografia: Debe ser Urbana o Rural');
+  }
+
+  if (!data.tipoEscenario || !['Worst-Case', 'Alternativo'].includes(data.tipoEscenario)) {
+    errores.push('tipoEscenario: Debe ser Worst-Case o Alternativo');
+  }
+
+  if (!data.endpoint || data.endpoint <= 0) {
+    errores.push('endpoint: Debe ser mayor a 0');
+  }
+
+  // Validate calculated fields if present
+  if (data.factorViento !== undefined && (data.factorViento <= 0 || data.factorViento > 2)) {
+    advertencias.push('factorViento: Valor inusual (rango típico: 0.5-2.0)');
+  }
+
+  if (data.distanciaEndpointMillas !== undefined && data.distanciaEndpointMillas > 10) {
+    advertencias.push(`distanciaEndpoint: ${data.distanciaEndpointMillas.toFixed(2)} millas es una distancia significativa`);
+  }
+
+  // Warn about high-risk scenarios
+  if (data.evaluacion === '🔴 ALTA') {
+    advertencias.push('Evaluación ALTA: Se requieren medidas de mitigación inmediatas');
+  }
+
+  if (data.programaRMP === 'Programa 3') {
+    advertencias.push('Programa RMP 3: Requiere gestión de riesgo más estricta');
   }
 
   return {

@@ -114,6 +114,7 @@ export function analisisHAZOPtoHallazgos(analisis: AnalisisHAZOP): TransformResu
   const peligro: Peligro = {
     id: generarIdHallazgo('Peligro'),
     tipo: 'Peligro',
+    tipoPeligro: 'Inherente',
     titulo: `${analisis.parametro} - ${analisis.palabraGuia}`,
     descripcion: `${analisis.causa} → ${analisis.consecuencia}`,
     ubicacion: { ...ubicacionBase },
@@ -138,6 +139,7 @@ export function analisisHAZOPtoHallazgos(analisis: AnalisisHAZOP): TransformResu
       analisisOrigenIds: [],
       hallazgosRelacionadosIds: [peligro.id],
       tipoBarrera: 'Fisica', // Default assumption
+      tipoBarreraFuncion: 'Mitigativa', // Default assumption
       efectividadEstimada: 4,
       elementoProtegido: analisis.nodo,
     };
@@ -202,6 +204,7 @@ export function analisisFMEAtoHallazgos(analisis: AnalisisFMEA): TransformResult
   const peligro: Peligro = {
     id: generarIdHallazgo('Peligro'),
     tipo: 'Peligro',
+    tipoPeligro: 'Inherente',
     titulo: `Falla: ${analisis.modoFalla}`,
     descripcion: `${analisis.causa} → ${analisis.efecto}`,
     ubicacion: generarCoordenadaAleatoria(),
@@ -226,6 +229,7 @@ export function analisisFMEAtoHallazgos(analisis: AnalisisFMEA): TransformResult
       analisisOrigenIds: [],
       hallazgosRelacionadosIds: [peligro.id],
       tipoBarrera: 'Administrativa', // Default assumption
+      tipoBarreraFuncion: 'Detectiva', // Default assumption
       efectividadEstimada: 3,
       elementoProtegido: analisis.equipo,
     };
@@ -268,6 +272,7 @@ export function analisisLOPAtoHallazgos(analisis: AnalisisLOPA): TransformResult
   const peligro: Peligro = {
     id: generarIdHallazgo('Peligro'),
     tipo: 'Peligro',
+    tipoPeligro: 'Inherente',
     titulo: `Escenario: ${analisis.escenario.substring(0, 50)}...`,
     descripcion: `${analisis.escenario} → ${analisis.consecuencia}`,
     ubicacion: generarCoordenadaAleatoria(),
@@ -294,6 +299,10 @@ export function analisisLOPAtoHallazgos(analisis: AnalisisLOPA): TransformResult
       capaNumero: index + 1,
       independiente: true, // By definition, IPLs are independent
       tipoTecnologia: capa.pfd < 0.01 ? 'SIS' : 'BPCS',
+      parametro: 'Presión', // Default assumption
+      valorMinimo: undefined,
+      valorMaximo: undefined,
+      unidad: 'psi', // Default assumption
     };
     hallazgos.push(sol);
   });
@@ -336,15 +345,16 @@ export function analisisOCAtoHallazgos(analisis: AnalisisOCA): TransformResult<H
   const peligro: Peligro = {
     id: generarIdHallazgo('Peligro'),
     tipo: 'Peligro',
-    titulo: `Evento: ${analisis.eventoIniciador.substring(0, 50)}...`,
-    descripcion: `${analisis.eventoIniciador} → ${analisis.consecuencia}`,
+    tipoPeligro: 'Inherente',
+    titulo: `Evento: ${analisis.compuesto} - ${analisis.tipoEscenario}`,
+    descripcion: `Liberación de ${analisis.compuesto} (${analisis.cantidad} lb)`,
     ubicacion: generarCoordenadaAleatoria(),
     fechaCreacion: fechaISO,
     analisisOrigenIds: [],
     hallazgosRelacionadosIds: [],
-    consecuencia: analisis.consecuencia,
-    severidad: 4,
-    causaRaiz: analisis.eventoIniciador,
+    consecuencia: `Dispersión de ${analisis.compuesto} hasta ${analisis.distanciaEndpointMillas?.toFixed(2) || '0'} millas`,
+    severidad: 3,
+    causaRaiz: `Falla que libera ${analisis.cantidad} lb de ${analisis.compuesto}`,
   };
   hallazgos.push(peligro);
 
@@ -354,14 +364,15 @@ export function analisisOCAtoHallazgos(analisis: AnalisisOCA): TransformResult<H
       id: generarIdHallazgo('Barrera'),
       tipo: 'Barrera',
       titulo: barreraStr,
-      descripcion: `Barrera existente para ${analisis.eventoIniciador}`,
+      descripcion: `Barrera existente para ${analisis.compuesto}`,
       ubicacion: generarCoordenadaAleatoria(),
       fechaCreacion: fechaISO,
       analisisOrigenIds: [],
       hallazgosRelacionadosIds: [peligro.id],
       tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Mitigativa',
       efectividadEstimada: 3,
-      elementoProtegido: analisis.consecuencia,
+      elementoProtegido: `Personal y operaciones cercanas a ${analisis.compuesto}`,
     };
     hallazgos.push(barrera);
   }
@@ -420,6 +431,7 @@ export function analisisIntuiciontoHallazgos(analisis: AnalisisIntuicion): Trans
     const peligro: Peligro = {
       id: generarIdHallazgo('Peligro'),
       tipo: 'Peligro',
+      tipoPeligro: 'Inherente',
       titulo: `${analisis.titulo} - Observación`,
       descripcion: `${analisis.descripcion}\n\nObservación: ${observacion}`,
       ubicacion: generarCoordenadaAleatoria(),

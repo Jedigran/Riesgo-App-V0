@@ -104,13 +104,16 @@ export interface HallazgoBase {
 
 /**
  * Peligro (Hazard)
- * 
+ *
  * A potential source of harm in the process. This is the fundamental
  * entity in risk mapping that needs to be controlled by barriers.
  */
 export interface Peligro extends HallazgoBase {
   /** Fixed type identifier */
   tipo: 'Peligro';
+
+  /** Type of hazard - inherent or design-related */
+  tipoPeligro: 'Inherente' | 'Diseño';
 
   /** Potential consequence if the hazard is realized */
   consecuencia: string;
@@ -124,7 +127,7 @@ export interface Peligro extends HallazgoBase {
 
 /**
  * Barrera (Barrier)
- * 
+ *
  * A protection measure designed to prevent or mitigate a hazard.
  * Can be physical, administrative, or human-based.
  */
@@ -132,8 +135,11 @@ export interface Barrera extends HallazgoBase {
   /** Fixed type identifier */
   tipo: 'Barrera';
 
-  /** Type of barrier */
+  /** Type of barrier - physical, administrative, or human */
   tipoBarrera: TipoBarrera;
+
+  /** Function of barrier - when it acts (preventive, detective, mitigative) */
+  tipoBarreraFuncion: 'Preventiva' | 'Detectiva' | 'Mitigativa';
 
   /** Estimated effectiveness rating (1-5) */
   efectividadEstimada: Efectividad;
@@ -180,6 +186,18 @@ export interface SOL extends HallazgoBase {
 
   /** Technology type used in this protection layer */
   tipoTecnologia: string;
+
+  /** Parameter being monitored/controlled */
+  parametro: string;
+
+  /** Minimum acceptable value for the parameter */
+  valorMinimo?: number;
+
+  /** Maximum acceptable value for the parameter */
+  valorMaximo?: number;
+
+  /** Unit of measurement for the parameter */
+  unidad: string;
 }
 
 // ============================================================================
