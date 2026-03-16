@@ -479,7 +479,7 @@ export default function EsquematicoPanel({
           >
             {/* Diagram image */}
             <img
-              src={imagenActual}
+              src={imagenActual || '/ReferenceIamge/Sistema Bombas de Achique_V2.png'}
               alt="Diagrama del sistema"
               draggable={false}
               style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
