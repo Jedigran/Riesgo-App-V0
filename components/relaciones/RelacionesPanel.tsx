@@ -88,14 +88,14 @@ export default function RelacionesPanel() {
     }
   }, [tipoRelacion, hallazgosPorTipo]);
 
-  // Obtener icono por tipo de hallazgo
-  const getIconoTipo = (tipo: Hallazgo['tipo']) => {
+  // Obtener etiqueta corta por tipo
+  const getIconoTipo = (tipo: Hallazgo['tipo']): string => {
     switch (tipo) {
-      case 'Peligro': return '🔴';
-      case 'Barrera': return '🛡️';
-      case 'POE': return '📋';
-      case 'SOL': return '⚙️';
-      default: return '📌';
+      case 'Peligro': return '[P]';
+      case 'Barrera': return '[B]';
+      case 'POE':     return '[E]';
+      case 'SOL':     return '[S]';
+      default:        return '[?]';
     }
   };
 
@@ -123,9 +123,7 @@ export default function RelacionesPanel() {
   if (!sesionCargada || !sesion) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-center text-knar-text-muted">
-          <p className="text-sm">Cargando relaciones...</p>
-        </div>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Cargando relaciones...</p>
       </div>
     );
   }
@@ -145,7 +143,7 @@ export default function RelacionesPanel() {
         <div className="knar-card-content space-y-3">
           {/* Tipo de Relación */}
           <div>
-            <label className="block text-xs text-knar-text-secondary mb-1">
+            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
               Tipo de Relación *
             </label>
             <select
@@ -155,24 +153,25 @@ export default function RelacionesPanel() {
                 setOrigenId('');
                 setDestinoId('');
               }}
-              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+              className="knar-select"
             >
-              <option value="mitiga">🛡️→🔴 mitiga (Barrera → Peligro)</option>
-              <option value="controla">📋→🔴 controla (POE → Peligro)</option>
-              <option value="protege">🛡️→🛡️/⚙️ protege (Barrera → Barrera/SOL)</option>
-              <option value="requiere">🔴→🛡️ requiere (Peligro → Barrera)</option>
+              <option value="mitiga">mitiga — Barrera mitigates Peligro</option>
+              <option value="controla">controla — POE controla Peligro</option>
+              <option value="protege">protege — Barrera protege Barrera/SOL</option>
+              <option value="requiere">requiere — Peligro requiere Barrera</option>
             </select>
           </div>
 
           {/* Hallazgo Origen */}
           <div>
-            <label className="block text-xs text-knar-text-secondary mb-1">
+            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
               Hallazgo Origen ({getIconoTipo(opcionesOrigen[0]?.tipo || 'Peligro')}) *
             </label>
             <select
               value={origenId}
               onChange={(e) => setOrigenId(e.target.value)}
-              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none disabled:opacity-50"
+              className="knar-select"
+              style={{ opacity: opcionesOrigen.length === 0 ? 0.5 : 1 }}
               disabled={opcionesOrigen.length === 0}
             >
               <option value="">Seleccionar...</option>
@@ -183,7 +182,7 @@ export default function RelacionesPanel() {
               ))}
             </select>
             {opcionesOrigen.length === 0 && (
-              <p className="text-xs text-knar-text-muted mt-1">
+              <p className="mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
                 No hay {opcionesOrigen[0]?.tipo || 'hallazgos'} disponibles
               </p>
             )}
@@ -191,20 +190,21 @@ export default function RelacionesPanel() {
 
           {/* Flecha */}
           <div className="flex items-center justify-center">
-            <svg className="w-4 h-4 text-knar-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: 14, height: 14, color: 'var(--text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </div>
 
           {/* Hallazgo Destino */}
           <div>
-            <label className="block text-xs text-knar-text-secondary mb-1">
+            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
               Hallazgo Destino ({getIconoTipo(opcionesDestino[0]?.tipo || 'Peligro')}) *
             </label>
             <select
               value={destinoId}
               onChange={(e) => setDestinoId(e.target.value)}
-              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none disabled:opacity-50"
+              className="knar-select"
+              style={{ opacity: opcionesDestino.length === 0 ? 0.5 : 1 }}
               disabled={opcionesDestino.length === 0}
             >
               <option value="">Seleccionar...</option>
@@ -215,7 +215,7 @@ export default function RelacionesPanel() {
               ))}
             </select>
             {opcionesDestino.length === 0 && (
-              <p className="text-xs text-knar-text-muted mt-1">
+              <p className="mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
                 No hay {opcionesDestino[0]?.tipo || 'hallazgos'} disponibles
               </p>
             )}
@@ -223,26 +223,26 @@ export default function RelacionesPanel() {
 
           {/* Descripción */}
           <div>
-            <label className="block text-xs text-knar-text-secondary mb-1">
+            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
               Descripción (opcional)
             </label>
             <input
               type="text"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+              className="knar-input"
               placeholder="Descripción de la relación"
             />
           </div>
 
           {/* Botones */}
-          <div className="flex items-center space-x-3 pt-2">
+          <div className="flex items-center gap-3 pt-2">
             <button
               onClick={handleCrear}
               disabled={!origenId || !destinoId}
               className="knar-btn knar-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              ✅ Crear Relación
+              Crear Relación
             </button>
             <button
               onClick={() => {
@@ -291,25 +291,27 @@ export default function RelacionesPanel() {
                 return (
                   <div
                     key={relacion.id}
-                    className="bg-knar-dark rounded border border-knar-border p-3 flex items-center justify-between"
+                    style={{ backgroundColor: 'var(--knar-dark)', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-2-5) var(--space-3)' }}
+                    className="flex items-center justify-between gap-2"
                   >
-                    <div className="flex items-center space-x-2 flex-1">
-                      <span className="text-sm">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }} className="truncate">
                         {getIconoTipo(origen.tipo)} {origen.titulo}
                       </span>
-                      <span className="text-xs text-knar-text-muted px-2 py-1 bg-knar-charcoal rounded">
+                      <span style={{ fontSize: 10, color: 'var(--accent)', backgroundColor: 'var(--knar-orange-10)', border: '0.5px solid var(--knar-orange-20)', borderRadius: 'var(--radius-sm)', padding: '1px 6px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                         {relacion.tipo}
                       </span>
-                      <span className="text-sm">
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }} className="truncate">
                         {getIconoTipo(destino.tipo)} {destino.titulo}
                       </span>
                     </div>
                     <button
                       onClick={() => eliminarRelacionHallazgo(relacion.id)}
-                      className="text-xs text-knar-text-muted hover:text-red-400 px-2 py-1"
+                      className="knar-btn knar-btn-ghost"
+                      style={{ padding: '2px 8px', fontSize: 10, flexShrink: 0 }}
                       title="Eliminar relación"
                     >
-                      × Eliminar
+                      Eliminar
                     </button>
                   </div>
                 );
@@ -338,7 +340,7 @@ export default function RelacionesPanel() {
               {hallazgosHuerfanos().map((h) => (
                 <span
                   key={h.id}
-                  className="px-2 py-1 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-secondary"
+                  style={{ padding: '2px 8px', backgroundColor: 'var(--knar-charcoal)', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)' }}
                 >
                   {getIconoTipo(h.tipo)} {h.titulo}
                 </span>

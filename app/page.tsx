@@ -645,24 +645,24 @@ export default function RiesgoApp() {
   return (
     <div className="min-h-screen flex flex-col bg-knar-dark font-sans">
       {/* HEADER */}
-      <header className="bg-knar-dark border-b border-knar-border px-6 py-3 flex-shrink-0">
+      <header style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }} className="px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <svg className="w-6 h-6 text-knar-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <svg style={{ color: 'var(--accent)' }} className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <h1 className="text-lg font-medium text-knar-text-primary">RiesgoApp</h1>
+              <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>RiesgoApp</h1>
             </div>
-            <span className="text-xs text-knar-text-muted">|</span>
-            <span className="text-xs text-knar-text-secondary">Sesión Activa</span>
+            <span style={{ width: '1px', height: '14px', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Sesión Activa</span>
           </div>
 
-          {/* Right Tab Switcher */}
-          <div className="flex items-center space-x-1 bg-knar-charcoal rounded-md p-1">
-            <button onClick={() => setRightTabActive('esquematico')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${rightTabActive === 'esquematico' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>🗺️ Esquemático</button>
-            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${rightTabActive === 'tabla-hallazgo' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>📊 Tabla Hallazgo</button>
-            <button onClick={() => setRightTabActive('tabla-analisis')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${rightTabActive === 'tabla-analisis' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>📋 Tabla Análisis</button>
+          {/* Right Tab Switcher — underline pattern */}
+          <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
+            <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
+            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Hallazgo</button>
+            <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Análisis</button>
           </div>
         </div>
       </header>
@@ -670,12 +670,12 @@ export default function RiesgoApp() {
       {/* MAIN CONTENT - Two Panels */}
       <div className="flex-1 flex overflow-hidden">
         {/* LEFT PANEL - Exclusive Tabs (45%) */}
-        <aside className="w-[45%] border-r border-knar-border overflow-y-auto bg-knar-charcoal">
-          {/* Left Tab Buttons */}
-          <div className="border-b border-knar-border px-4 py-2 flex space-x-2 flex-shrink-0">
-            <button onClick={() => setLeftTabActive('configuracion')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${leftTabActive === 'configuracion' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>⚙️ Configuración</button>
-            <button onClick={() => setLeftTabActive('censo')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${leftTabActive === 'censo' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>📋 Censo</button>
-            <button onClick={() => setLeftTabActive('relaciones')} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${leftTabActive === 'relaciones' ? 'bg-knar-orange text-knar-text-primary' : 'text-knar-text-secondary hover:text-knar-text-primary'}`}>🔗 Relaciones</button>
+        <aside style={{ backgroundColor: 'var(--knar-charcoal)', borderRight: '0.5px solid var(--border)' }} className="w-[45%] overflow-y-auto">
+          {/* Left Tab Buttons — underline pattern */}
+          <div className="knar-tabs-inline flex-shrink-0">
+            <button onClick={() => setLeftTabActive('configuracion')} className={`knar-tab-inline${leftTabActive === 'configuracion' ? ' active' : ''}`}>Configuración</button>
+            <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Censo</button>
+            <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button>
           </div>
 
           {/* Left Panel Content */}
@@ -690,10 +690,10 @@ export default function RiesgoApp() {
                   <h3 className="knar-card-title">Configuración del Proyecto</h3>
                 </div>
                 <div className="knar-card-content space-y-3">
-                  <div><label className="block text-xs text-knar-text-secondary mb-1">Proyecto *</label><input type="text" name="proyecto" value={configData.proyecto} onChange={handleConfigChange} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Nombre del proyecto" /></div>
-                  <div><label className="block text-xs text-knar-text-secondary mb-1">Empresa *</label><input type="text" name="empresa" value={configData.empresa} onChange={handleConfigChange} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Nombre de la empresa" /></div>
-                  <div><label className="block text-xs text-knar-text-secondary mb-1">Responsable *</label><input type="text" name="responsable" value={configData.responsable} onChange={handleConfigChange} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Nombre del responsable" /></div>
-                  <div><label className="block text-xs text-knar-text-secondary mb-1">Validez *</label><input type="date" name="validez" value={configData.validez} onChange={handleConfigChange} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
+                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Proyecto *</label><input type="text" name="proyecto" value={configData.proyecto} onChange={handleConfigChange} className="knar-input" placeholder="Nombre del proyecto" /></div>
+                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Empresa *</label><input type="text" name="empresa" value={configData.empresa} onChange={handleConfigChange} className="knar-input" placeholder="Nombre de la empresa" /></div>
+                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Responsable *</label><input type="text" name="responsable" value={configData.responsable} onChange={handleConfigChange} className="knar-input" placeholder="Nombre del responsable" /></div>
+                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Validez *</label><input type="date" name="validez" value={configData.validez} onChange={handleConfigChange} className="knar-input" /></div>
                 </div>
               </div>
             )}
@@ -711,17 +711,20 @@ export default function RiesgoApp() {
                       <h3 className="knar-card-title">Metodologías de Análisis</h3>
                     </div>
                     <div className="knar-card-content space-y-2">
-                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">💡 Intuición</button>
-                      <button onClick={() => setMetodologiaSeleccionada('hazop')} className="w-full knar-btn knar-btn-ghost justify-start">🔍 HAZOP</button>
-                      <button onClick={() => setMetodologiaSeleccionada('fmea')} className="w-full knar-btn knar-btn-ghost justify-start">⚙️ FMEA</button>
-                      <button onClick={() => setMetodologiaSeleccionada('lopa')} className="w-full knar-btn knar-btn-ghost justify-start">🛡️ LOPA</button>
-                      <button onClick={() => setMetodologiaSeleccionada('oca')} className="w-full knar-btn knar-btn-ghost justify-start">📊 OCA</button>
+                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Intuición</button>
+                      <button onClick={() => setMetodologiaSeleccionada('hazop')} className="w-full knar-btn knar-btn-ghost justify-start">HAZOP</button>
+                      <button onClick={() => setMetodologiaSeleccionada('fmea')} className="w-full knar-btn knar-btn-ghost justify-start">FMEA</button>
+                      <button onClick={() => setMetodologiaSeleccionada('lopa')} className="w-full knar-btn knar-btn-ghost justify-start">LOPA</button>
+                      <button onClick={() => setMetodologiaSeleccionada('oca')} className="w-full knar-btn knar-btn-ghost justify-start">OCA</button>
                     </div>
                   </div>
                 ) : (
                   /* Formulario de metodología */
                   <div className="space-y-4">
-                    <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">← Volver a metodologías</button>
+                    <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                      Volver a metodologías
+                    </button>
 
                     {/* ========== HAZOP FORM ========== */}
                     {metodologiaSeleccionada === 'hazop' && (
@@ -734,24 +737,24 @@ export default function RiesgoApp() {
                           <div className="knar-card-content space-y-3">
                             {/* Nodo */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">Nodo *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Nodo *</label>
                               <input
                                 type="text"
                                 value={hazopData.nodo}
                                 onChange={(e) => setHazopData({ ...hazopData, nodo: e.target.value })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                                 placeholder="Ej: Sistema de Achique"
                               />
                             </div>
 
                             {/* Subnodo/Equipo */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">Subnodo/Equipo</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Subnodo/Equipo</label>
                               <input
                                 type="text"
                                 value={hazopData.subnodo}
                                 onChange={(e) => setHazopData({ ...hazopData, subnodo: e.target.value })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                                 placeholder="Ej: Bomba principal"
                               />
                             </div>
@@ -759,11 +762,11 @@ export default function RiesgoApp() {
                             {/* Parámetro y Palabra Guía */}
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <label className="block text-xs text-knar-text-secondary mb-1">Parámetro *</label>
+                                <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Parámetro *</label>
                                 <select
                                   value={hazopData.parametro}
                                   onChange={(e) => setHazopData({ ...hazopData, parametro: e.target.value })}
-                                  className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                  className="knar-input"
                                 >
                                   <option value="">Seleccionar</option>
                                   <option value="Flujo">Flujo</option>
@@ -777,11 +780,11 @@ export default function RiesgoApp() {
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-xs text-knar-text-secondary mb-1">Palabra Guía *</label>
+                                <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Palabra Guía *</label>
                                 <select
                                   value={hazopData.palabraGuia}
                                   onChange={(e) => setHazopData({ ...hazopData, palabraGuia: e.target.value })}
-                                  className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                  className="knar-input"
                                 >
                                   <option value="">Seleccionar</option>
                                   <option value="NO">NO</option>
@@ -801,7 +804,7 @@ export default function RiesgoApp() {
 
                             {/* Desviación (calculado) */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                                 Desviación
                                 <span className="text-knar-text-muted ml-2">(calculado)</span>
                               </label>
@@ -822,11 +825,11 @@ export default function RiesgoApp() {
 
                             {/* Causa */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Causa *</label>
                               <textarea
                                 value={hazopData.causa}
                                 onChange={(e) => setHazopData({ ...hazopData, causa: e.target.value })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                                 rows={2}
                                 placeholder="Ej: Falla eléctrica del motor"
                               />
@@ -834,11 +837,11 @@ export default function RiesgoApp() {
 
                             {/* Consecuencia */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Consecuencia *</label>
                               <textarea
                                 value={hazopData.consecuencia}
                                 onChange={(e) => setHazopData({ ...hazopData, consecuencia: e.target.value })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                                 rows={2}
                                 placeholder="Ej: Acumulación de agua en el área"
                               />
@@ -846,12 +849,12 @@ export default function RiesgoApp() {
 
                             {/* Receptor con Mayor Impacto */}
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Receptor con Mayor Impacto</label>
                               <input
                                 type="text"
                                 value={hazopData.receptorImpacto}
                                 onChange={(e) => setHazopData({ ...hazopData, receptorImpacto: e.target.value })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                                 placeholder="Ej: Personal/Operación/Medio Ambiente"
                               />
                             </div>
@@ -870,23 +873,23 @@ export default function RiesgoApp() {
                         <div className="knar-card-content space-y-3">
                           {/* Equipo */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Equipo *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Equipo *</label>
                             <input
                               type="text"
                               value={fmeaData.equipo}
                               onChange={(e) => setFmeaData({ ...fmeaData, equipo: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: Bomba principal del Sistema de Achique"
                             />
                           </div>
 
                           {/* Función */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Función *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Función *</label>
                             <textarea
                               value={fmeaData.funcion}
                               onChange={(e) => setFmeaData({ ...fmeaData, funcion: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Evacuar agua acumulada del sistema de drenaje"
                             />
@@ -894,11 +897,11 @@ export default function RiesgoApp() {
 
                           {/* Modo de Falla */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Modo de Falla *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Modo de Falla *</label>
                             <textarea
                               value={fmeaData.modoFalla}
                               onChange={(e) => setFmeaData({ ...fmeaData, modoFalla: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Motor no opera"
                             />
@@ -906,23 +909,23 @@ export default function RiesgoApp() {
 
                           {/* Receptor con Mayor Impacto */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Receptor con Mayor Impacto</label>
                             <input
                               type="text"
                               value={fmeaData.receptorImpacto}
                               onChange={(e) => setFmeaData({ ...fmeaData, receptorImpacto: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: Personal / Operación"
                             />
                           </div>
 
                           {/* Efecto Potencial */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Efecto Potencial *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Efecto Potencial *</label>
                             <textarea
                               value={fmeaData.efecto}
                               onChange={(e) => setFmeaData({ ...fmeaData, efecto: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Pérdida de bombeo"
                             />
@@ -930,11 +933,11 @@ export default function RiesgoApp() {
 
                           {/* Causa */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Causa *</label>
                             <textarea
                               value={fmeaData.causa}
                               onChange={(e) => setFmeaData({ ...fmeaData, causa: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Falla eléctrica del motor"
                             />
@@ -943,73 +946,64 @@ export default function RiesgoApp() {
                           {/* S, O, D */}
                           <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">S (1-10) *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>S (1-10) *</label>
                               <input
                                 type="number"
                                 min="1"
                                 max="10"
                                 value={fmeaData.S}
                                 onChange={(e) => setFmeaData({ ...fmeaData, S: Number(e.target.value) })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">O (1-10) *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>O (1-10) *</label>
                               <input
                                 type="number"
                                 min="1"
                                 max="10"
                                 value={fmeaData.O}
                                 onChange={(e) => setFmeaData({ ...fmeaData, O: Number(e.target.value) })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-knar-text-secondary mb-1">D (1-10) *</label>
+                              <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>D (1-10) *</label>
                               <input
                                 type="number"
                                 min="1"
                                 max="10"
                                 value={fmeaData.D}
                                 onChange={(e) => setFmeaData({ ...fmeaData, D: Number(e.target.value) })}
-                                className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                                className="knar-input"
                               />
                             </div>
                           </div>
 
                           {/* NPR (RPN) con color coding */}
-                          <div className={`rounded p-2 text-center ${
-                            fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'bg-red-900 bg-opacity-30 border border-red-500' :
-                            fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'bg-orange-900 bg-opacity-30 border border-orange-500' :
-                            fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'bg-yellow-900 bg-opacity-30 border border-yellow-500' :
-                            'bg-green-900 bg-opacity-30 border border-green-500'
-                          }`}>
-                            <span className="text-xs text-knar-text-muted">NPR = S × O × D = </span>
-                            <span className={`text-sm font-bold ${
-                              fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'text-red-500' :
-                              fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'text-orange-500' :
-                              fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'text-yellow-500' :
-                              'text-green-500'
-                            }`}>
-                              {fmeaData.S * fmeaData.O * fmeaData.D}
-                            </span>
-                            <span className="text-xs text-knar-text-muted ml-2">
-                              ({
-                                fmeaData.S * fmeaData.O * fmeaData.D >= 201 ? 'Crítico' :
-                                fmeaData.S * fmeaData.O * fmeaData.D >= 101 ? 'Alto' :
-                                fmeaData.S * fmeaData.O * fmeaData.D >= 51 ? 'Moderado' :
-                                'Bajo'
-                              })
-                            </span>
-                          </div>
+                          {(() => {
+                            const npr = fmeaData.S * fmeaData.O * fmeaData.D;
+                            const [bg, border, textColor, label] =
+                              npr >= 201 ? ['rgba(220,38,38,0.12)', 'rgba(220,38,38,0.35)', '#f87171', 'Crítico'] :
+                              npr >= 101 ? ['rgba(234,88,12,0.12)', 'rgba(234,88,12,0.35)', 'var(--accent)', 'Alto'] :
+                              npr >= 51  ? ['rgba(202,138,4,0.12)', 'rgba(202,138,4,0.35)', '#facc15', 'Moderado'] :
+                                           ['rgba(22,163,74,0.12)', 'rgba(22,163,74,0.35)', '#4ade80', 'Bajo'];
+                            return (
+                              <div style={{ backgroundColor: bg, border: `0.5px solid ${border}`, borderRadius: 'var(--radius-md)', padding: 'var(--space-2)', textAlign: 'center' }}>
+                                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>{'NPR = S × O × D = '}</span>
+                                <span style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', color: textColor }}>{npr}</span>
+                                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)', marginLeft: 'var(--space-2)' }}>({label})</span>
+                              </div>
+                            );
+                          })()}
 
                           {/* Causa */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Causa *</label>
                             <textarea
                               value={fmeaData.causa}
                               onChange={(e) => setFmeaData({ ...fmeaData, causa: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Falla eléctrica del motor"
                             />
@@ -1017,12 +1011,12 @@ export default function RiesgoApp() {
 
                           {/* Barreras Existentes */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Barreras Existentes</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Barreras Existentes</label>
                             <input
                               type="text"
                               value={fmeaData.barrerasExistentes[0]}
                               onChange={(e) => setFmeaData({ ...fmeaData, barrerasExistentes: [e.target.value] })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: Sensor de nivel, Alarma de alto nivel"
                             />
                           </div>
@@ -1040,23 +1034,23 @@ export default function RiesgoApp() {
                         <div className="knar-card-content space-y-3">
                           {/* Escenario */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Escenario de Riesgo *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Escenario de Riesgo *</label>
                             <input
                               type="text"
                               value={lopaData.escenario}
                               onChange={(e) => setLopaData({ ...lopaData, escenario: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: Pérdida de bombeo de achique"
                             />
                           </div>
 
                           {/* Consecuencia */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Consecuencia *</label>
                             <textarea
                               value={lopaData.consecuencia}
                               onChange={(e) => setLopaData({ ...lopaData, consecuencia: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Acumulación de agua"
                             />
@@ -1064,49 +1058,49 @@ export default function RiesgoApp() {
 
                           {/* Receptor con Mayor Impacto */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Receptor con Mayor Impacto</label>
                             <input
                               type="text"
                               value={lopaData.receptorImpacto}
                               onChange={(e) => setLopaData({ ...lopaData, receptorImpacto: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: Personal / Operación"
                             />
                           </div>
 
                           {/* Severidad */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Severidad (S) 1-10 *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Severidad (S) 1-10 *</label>
                             <input
                               type="number"
                               min="1"
                               max="10"
                               value={lopaData.S}
                               onChange={(e) => setLopaData({ ...lopaData, S: Number(e.target.value) })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                             />
                           </div>
 
                           {/* Riesgo Tolerable */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Riesgo Tolerable (eventos/año) *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Riesgo Tolerable (eventos/año) *</label>
                             <input
                               type="number"
                               step="0.000001"
                               value={lopaData.riesgoTolerable}
                               onChange={(e) => setLopaData({ ...lopaData, riesgoTolerable: Number(e.target.value) })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: 0.00001"
                             />
                           </div>
 
                           {/* Causa */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Causa *</label>
                             <textarea
                               value={lopaData.causa}
                               onChange={(e) => setLopaData({ ...lopaData, causa: e.target.value })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               rows={2}
                               placeholder="Ej: Falla eléctrica del motor"
                             />
@@ -1114,20 +1108,20 @@ export default function RiesgoApp() {
 
                           {/* Frecuencia Inicial */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Frecuencia Inicial (eventos/año) *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Frecuencia Inicial (eventos/año) *</label>
                             <input
                               type="number"
                               step="0.0001"
                               value={lopaData.frecuenciaInicial}
                               onChange={(e) => setLopaData({ ...lopaData, frecuenciaInicial: Number(e.target.value) })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: 0.0707"
                             />
                           </div>
 
                           {/* Capas IPL - Simplified for now */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Capa IPL 1 - Nombre</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Capa IPL 1 - Nombre</label>
                             <input
                               type="text"
                               value={lopaData.capasIPL[0]?.nombre || ''}
@@ -1137,12 +1131,12 @@ export default function RiesgoApp() {
                                 nuevasCapas[0].nombre = e.target.value;
                                 setLopaData({ ...lopaData, capasIPL: nuevasCapas });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: BPCS - Alarma"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Capa IPL 1 - PFD</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Capa IPL 1 - PFD</label>
                             <input
                               type="number"
                               step="0.0001"
@@ -1153,7 +1147,7 @@ export default function RiesgoApp() {
                                 nuevasCapas[0].pfd = Number(e.target.value);
                                 setLopaData({ ...lopaData, capasIPL: nuevasCapas });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: 0.1"
                             />
                           </div>
@@ -1204,7 +1198,7 @@ export default function RiesgoApp() {
                         <div className="knar-card-content space-y-3">
                           {/* Compuesto */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Compuesto Químico *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Compuesto Químico *</label>
                             <select
                               value={ocaData.compuesto}
                               onChange={(e) => {
@@ -1212,7 +1206,7 @@ export default function RiesgoApp() {
                                 const endpoint = getEndpointPorCompuesto(compuesto);
                                 setOcaData({ ...ocaData, compuesto, endpoint });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                             >
                               <option value="H2S">H2S (Ácido Sulfhídrico)</option>
                               <option value="CO">CO (Monóxido de Carbono)</option>
@@ -1226,19 +1220,19 @@ export default function RiesgoApp() {
 
                           {/* Cantidad */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Cantidad (lb) *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Cantidad (lb) *</label>
                             <input
                               type="number"
                               value={ocaData.cantidad}
                               onChange={(e) => setOcaData({ ...ocaData, cantidad: Number(e.target.value) })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: 1000"
                             />
                           </div>
 
                           {/* Viento */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Viento (m/s) *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Viento (m/s) *</label>
                             <input
                               type="number"
                               step="0.01"
@@ -1248,14 +1242,14 @@ export default function RiesgoApp() {
                                 const factorViento = calcularFactorViento(viento);
                                 setOcaData({ ...ocaData, viento, factorViento });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Ej: 1.50"
                             />
                           </div>
 
                           {/* Factor del Viento (calculado) */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                               Factor del Viento
                               <span className="text-knar-text-muted ml-2">(calculado: 1.5 / viento)</span>
                             </label>
@@ -1269,7 +1263,7 @@ export default function RiesgoApp() {
 
                           {/* Estabilidad */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Estabilidad Atmosférica *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Estabilidad Atmosférica *</label>
                             <select
                               value={ocaData.estabilidad}
                               onChange={(e) => {
@@ -1277,7 +1271,7 @@ export default function RiesgoApp() {
                                 const factorEscalabilidad = calcularFactorEscalabilidad(estabilidad);
                                 setOcaData({ ...ocaData, estabilidad, factorEscalabilidad });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                             >
                               <option value="A">A - Muy inestable</option>
                               <option value="B">B - Inestable</option>
@@ -1290,7 +1284,7 @@ export default function RiesgoApp() {
 
                           {/* Factor de Escalabilidad (calculado) */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                               Factor de Escalabilidad
                               <span className="text-knar-text-muted ml-2">(calculado)</span>
                             </label>
@@ -1304,7 +1298,7 @@ export default function RiesgoApp() {
 
                           {/* Topografía */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Topografía *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Topografía *</label>
                             <select
                               value={ocaData.topografia}
                               onChange={(e) => {
@@ -1312,7 +1306,7 @@ export default function RiesgoApp() {
                                 const factorTopografia = calcularFactorTopografia(topografia);
                                 setOcaData({ ...ocaData, topografia, factorTopografia });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                             >
                               <option value="Urbana">Urbana</option>
                               <option value="Rural">Rural</option>
@@ -1321,7 +1315,7 @@ export default function RiesgoApp() {
 
                           {/* Factor de Topografía (calculado) */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                               Factor de Topografía
                               <span className="text-knar-text-muted ml-2">(calculado)</span>
                             </label>
@@ -1335,7 +1329,7 @@ export default function RiesgoApp() {
 
                           {/* Tipo de Escenario */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Tipo de Escenario *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Escenario *</label>
                             <select
                               value={ocaData.tipoEscenario}
                               onChange={(e) => {
@@ -1343,7 +1337,7 @@ export default function RiesgoApp() {
                                 const tasaLiberacion = calcularTasaLiberacion(ocaData.cantidad, tipoEscenario);
                                 setOcaData({ ...ocaData, tipoEscenario, tasaLiberacion });
                               }}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                             >
                               <option value="Worst-Case">Worst-Case (10 min)</option>
                               <option value="Alternativo">Alternativo (60 min)</option>
@@ -1352,20 +1346,20 @@ export default function RiesgoApp() {
 
                           {/* Endpoint */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">Endpoint (mg/L) *</label>
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Endpoint (mg/L) *</label>
                             <input
                               type="number"
                               step="0.0001"
                               value={ocaData.endpoint}
                               onChange={(e) => setOcaData({ ...ocaData, endpoint: Number(e.target.value) })}
-                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              className="knar-input"
                               placeholder="Auto-fill según compuesto"
                             />
                           </div>
 
                           {/* Tasa de Liberación (calculado) */}
                           <div>
-                            <label className="block text-xs text-knar-text-secondary mb-1">
+                            <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
                               Tasa de Liberación (lb/min)
                               <span className="text-knar-text-muted ml-2">(calculado)</span>
                             </label>
@@ -1478,8 +1472,8 @@ export default function RiesgoApp() {
                           <h3 className="knar-card-title">Intuición - Hallazgo Directo</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del hallazgo" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={3} placeholder="Descripción detallada de la observación" /></div>
+                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="knar-input" placeholder="Título del hallazgo" /></div>
+                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
                         </div>
                       </div>
                     )}
@@ -1492,7 +1486,7 @@ export default function RiesgoApp() {
                       </div>
                       <div className="knar-card-content space-y-4">
                         <div className="flex items-center space-x-2">
-                          <select value={hallazgoTipoSeleccionado} onChange={(e) => setHallazgoTipoSeleccionado(e.target.value as HallazgoTipo)} className="flex-1 px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none">
+                          <select value={hallazgoTipoSeleccionado} onChange={(e) => setHallazgoTipoSeleccionado(e.target.value as HallazgoTipo)} className="knar-select flex-1">
                             <option value="Peligro">Peligro</option>
                             <option value="Barrera">Barrera</option>
                             <option value="POE">POE</option>
@@ -1511,28 +1505,28 @@ export default function RiesgoApp() {
                                   <span className="text-xs font-medium text-knar-text-primary">Hallazgo {index + 1}: {hallazgo.tipo}</span>
                                   <button onClick={() => eliminarHallazgo(hallazgo.id)} className="text-xs text-knar-text-muted hover:text-red-400">× Eliminar</button>
                                 </div>
-                                <div><label className="block text-xs text-knar-text-secondary mb-1">Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del hallazgo" /></div>
-                                <div><label className="block text-xs text-knar-text-secondary mb-1">Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
+                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del hallazgo" /></div>
+                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
                                 {hallazgo.tipo === 'Peligro' && (<>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Consecuencia</label><input type="text" value={hallazgo.consecuencia || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'consecuencia', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Severidad (1-5)</label><select value={hallazgo.severidad || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'severidad', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Insignificante</option><option value="2">2 - Menor</option><option value="3">3 - Moderado</option><option value="4">4 - Mayor</option><option value="5">5 - Catastrófico</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Consecuencia</label><input type="text" value={hallazgo.consecuencia || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'consecuencia', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Severidad (1-5)</label><select value={hallazgo.severidad || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'severidad', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Insignificante</option><option value="2">2 - Menor</option><option value="3">3 - Moderado</option><option value="4">4 - Mayor</option><option value="5">5 - Catastrófico</option></select></div>
                                 </>)}
                                 {hallazgo.tipo === 'Barrera' && (<>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Tipo de Barrera</label><select value={hallazgo.tipoBarrera || 'Fisica'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarrera', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Fisica">Física</option><option value="Administrativa">Administrativa</option><option value="Humana">Humana</option></select></div>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Función de Barrera *</label><select value={hallazgo.tipoBarreraFuncion || 'Preventiva'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarreraFuncion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Preventiva">Preventiva (evita que ocurra el evento)</option><option value="Detectiva">Detectiva (detecta el evento)</option><option value="Mitigativa">Mitigativa (mitiga consecuencias)</option></select></div>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Efectividad (1-5)</label><select value={hallazgo.efectividadEstimada || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'efectividadEstimada', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Muy Baja</option><option value="2">2 - Baja</option><option value="3">3 - Media</option><option value="4">4 - Alta</option><option value="5">5 - Muy Alta</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Barrera</label><select value={hallazgo.tipoBarrera || 'Fisica'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarrera', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Fisica">Física</option><option value="Administrativa">Administrativa</option><option value="Humana">Humana</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Función de Barrera *</label><select value={hallazgo.tipoBarreraFuncion || 'Preventiva'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarreraFuncion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Preventiva">Preventiva (evita que ocurra el evento)</option><option value="Detectiva">Detectiva (detecta el evento)</option><option value="Mitigativa">Mitigativa (mitiga consecuencias)</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Efectividad (1-5)</label><select value={hallazgo.efectividadEstimada || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'efectividadEstimada', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Muy Baja</option><option value="2">2 - Baja</option><option value="3">3 - Media</option><option value="4">4 - Alta</option><option value="5">5 - Muy Alta</option></select></div>
                                 </>)}
                                 {hallazgo.tipo === 'SOL' && (<>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Parámetro *</label><select value={hallazgo.parametro || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'parametro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Flujo">Flujo</option><option value="Nivel">Nivel</option><option value="pH">pH</option><option value="Velocidad">Velocidad</option><option value="Vibración">Vibración</option><option value="Concentración">Concentración</option><option value="dBA">dBA (Sonido/Ruido)</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Parámetro *</label><select value={hallazgo.parametro || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'parametro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Flujo">Flujo</option><option value="Nivel">Nivel</option><option value="pH">pH</option><option value="Velocidad">Velocidad</option><option value="Vibración">Vibración</option><option value="Concentración">Concentración</option><option value="dBA">dBA (Sonido/Ruido)</option></select></div>
                                   <div className="grid grid-cols-2 gap-2">
-                                    <div><label className="block text-xs text-knar-text-secondary mb-1">Valor Mínimo</label><input type="number" value={hallazgo.valorMinimo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMinimo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="0" /></div>
-                                    <div><label className="block text-xs text-knar-text-secondary mb-1">Valor Máximo</label><input type="number" value={hallazgo.valorMaximo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMaximo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="100" /></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Mínimo</label><input type="number" value={hallazgo.valorMinimo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMinimo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="0" /></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Máximo</label><input type="number" value={hallazgo.valorMaximo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMaximo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="100" /></div>
                                   </div>
-                                  <div><label className="block text-xs text-knar-text-secondary mb-1">Unidad</label><select value={hallazgo.unidad || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'unidad', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="psi">psi</option><option value="bar">bar</option><option value="kPa">kPa</option><option value="atm">atm</option><option value="°C">°C</option><option value="°F">°F</option><option value="K">K</option><option value="m³/h">m³/h</option><option value="L/min">L/min</option><option value="gal/min">gal/min</option><option value="%">%</option><option value="m">m</option><option value="ft">ft</option><option value="pH">pH (0-14)</option><option value="mm/s">mm/s</option><option value="g">g</option><option value="ppm">ppm</option><option value="mg/L">mg/L</option><option value="dBA">dBA</option></select></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Unidad</label><select value={hallazgo.unidad || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'unidad', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="psi">psi</option><option value="bar">bar</option><option value="kPa">kPa</option><option value="atm">atm</option><option value="°C">°C</option><option value="°F">°F</option><option value="K">K</option><option value="m³/h">m³/h</option><option value="L/min">L/min</option><option value="gal/min">gal/min</option><option value="%">%</option><option value="m">m</option><option value="ft">ft</option><option value="pH">pH (0-14)</option><option value="mm/s">mm/s</option><option value="g">g</option><option value="ppm">ppm</option><option value="mg/L">mg/L</option><option value="dBA">dBA</option></select></div>
                                 </>)}
                                 <div>
-                                  <label className="block text-xs text-knar-text-secondary mb-1">Ubicación</label>
+                                  <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Ubicación</label>
                                   <div className="flex items-center space-x-2">
                                     <button onClick={() => setUbicacionEditando(hallazgo.id)} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${ubicacionEditando === hallazgo.id ? 'bg-blue-500 text-white' : 'bg-knar-charcoal text-knar-text-secondary hover:text-knar-text-primary'}`}>🗺️ {hallazgo.ubicacion ? 'Cambiar ubicación' : 'Ubicar en mapa'}</button>
                                     {hallazgo.ubicacion && (<span className="text-xs text-knar-text-muted">({hallazgo.ubicacion.x}, {hallazgo.ubicacion.y})</span>)}
