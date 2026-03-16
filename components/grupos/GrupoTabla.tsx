@@ -169,6 +169,11 @@ export default function GrupoTabla({
               const peligros = grupo.peligrosIds.map(getHallazgo).filter(Boolean) as Hallazgo[];
               const protectores = grupo.protectoresIds.map(getHallazgo).filter(Boolean) as Hallazgo[];
               
+              // Classify protectors by type
+              const barreras = protectores.filter(p => p.tipo === 'Barrera');
+              const poes = protectores.filter(p => p.tipo === 'POE');
+              const sols = protectores.filter(p => p.tipo === 'SOL');
+              
               return (
                 <tr
                   key={grupo.id}
@@ -309,69 +314,226 @@ export default function GrupoTabla({
                     )}
                   </td>
                   
-                  {/* Protectores */}
+                  {/* Protectores - classified by type */}
                   <td
                     style={{
                       padding: '10px 12px',
+                      verticalAlign: 'top',
                     }}
                   >
                     {protectores.length > 0 ? (
                       <div
                         style={{
                           display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: '4px',
+                          flexDirection: 'column',
+                          gap: '6px',
                         }}
                       >
-                        {protectores.slice(0, 3).map((p) => {
-                          const tipoColor =
-                            p.tipo === 'Barrera' ? '#3b82f6' :
-                            p.tipo === 'POE' ? '#10b981' :
-                            '#8b5cf6';
-                          
-                          return (
-                            <span
-                              key={p.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onHallazgoClick?.(p.id);
-                              }}
+                        {/* Barreras */}
+                        {barreras.length > 0 && (
+                          <div>
+                            <div
                               style={{
-                                fontSize: '10px',
-                                fontWeight: 300,
-                                color: tipoColor,
-                                background: `${tipoColor}15`,
-                                border: `0.5px solid ${tipoColor}30`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: onHallazgoClick ? 'pointer' : 'default',
-                                transition: 'all 150ms ease',
+                                fontSize: '8px',
+                                fontWeight: 400,
+                                color: '#3b82f6',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.02em',
+                                marginBottom: '3px',
                               }}
-                              onMouseEnter={(e) => {
-                                if (onHallazgoClick) {
-                                  e.currentTarget.style.background = `${tipoColor}25`;
-                                }
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = `${tipoColor}15`;
-                              }}
-                              title={p.descripcion}
                             >
-                              {p.titulo.length > 20 ? p.titulo.substring(0, 20) + '...' : p.titulo}
-                            </span>
-                          );
-                        })}
-                        {protectores.length > 3 && (
-                          <span
-                            style={{
-                              fontSize: '10px',
-                              fontWeight: 300,
-                              color: 'var(--text-muted)',
-                              padding: '2px 4px',
-                            }}
-                          >
-                            +{protectores.length - 3}
-                          </span>
+                              Barreras ({barreras.length})
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '3px',
+                              }}
+                            >
+                              {barreras.slice(0, 2).map((p) => (
+                                <span
+                                  key={p.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onHallazgoClick?.(p.id);
+                                  }}
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: '#3b82f6',
+                                    background: '#3b82f615',
+                                    border: '0.5px solid #3b82f630',
+                                    borderRadius: '3px',
+                                    padding: '1px 4px',
+                                    cursor: onHallazgoClick ? 'pointer' : 'default',
+                                    transition: 'all 150ms ease',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (onHallazgoClick) {
+                                      e.currentTarget.style.background = '#3b82f625';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#3b82f615';
+                                  }}
+                                  title={p.descripcion}
+                                >
+                                  {p.titulo.length > 18 ? p.titulo.substring(0, 18) + '...' : p.titulo}
+                                </span>
+                              ))}
+                              {barreras.length > 2 && (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: 'var(--text-muted)',
+                                    padding: '1px 4px',
+                                  }}
+                                >
+                                  +{barreras.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* POEs */}
+                        {poes.length > 0 && (
+                          <div>
+                            <div
+                              style={{
+                                fontSize: '8px',
+                                fontWeight: 400,
+                                color: '#10b981',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.02em',
+                                marginBottom: '3px',
+                              }}
+                            >
+                              POEs ({poes.length})
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '3px',
+                              }}
+                            >
+                              {poes.slice(0, 2).map((p) => (
+                                <span
+                                  key={p.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onHallazgoClick?.(p.id);
+                                  }}
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: '#10b981',
+                                    background: '#10b98115',
+                                    border: '0.5px solid #10b98130',
+                                    borderRadius: '3px',
+                                    padding: '1px 4px',
+                                    cursor: onHallazgoClick ? 'pointer' : 'default',
+                                    transition: 'all 150ms ease',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (onHallazgoClick) {
+                                      e.currentTarget.style.background = '#10b98125';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#10b98115';
+                                  }}
+                                  title={p.descripcion}
+                                >
+                                  {p.titulo.length > 18 ? p.titulo.substring(0, 18) + '...' : p.titulo}
+                                </span>
+                              ))}
+                              {poes.length > 2 && (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: 'var(--text-muted)',
+                                    padding: '1px 4px',
+                                  }}
+                                >
+                                  +{poes.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SOLs */}
+                        {sols.length > 0 && (
+                          <div>
+                            <div
+                              style={{
+                                fontSize: '8px',
+                                fontWeight: 400,
+                                color: '#8b5cf6',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.02em',
+                                marginBottom: '3px',
+                              }}
+                            >
+                              SOLs ({sols.length})
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '3px',
+                              }}
+                            >
+                              {sols.slice(0, 2).map((p) => (
+                                <span
+                                  key={p.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onHallazgoClick?.(p.id);
+                                  }}
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: '#8b5cf6',
+                                    background: '#8b5cf615',
+                                    border: '0.5px solid #8b5cf630',
+                                    borderRadius: '3px',
+                                    padding: '1px 4px',
+                                    cursor: onHallazgoClick ? 'pointer' : 'default',
+                                    transition: 'all 150ms ease',
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (onHallazgoClick) {
+                                      e.currentTarget.style.background = '#8b5cf625';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '#8b5cf615';
+                                  }}
+                                  title={p.descripcion}
+                                >
+                                  {p.titulo.length > 18 ? p.titulo.substring(0, 18) + '...' : p.titulo}
+                                </span>
+                              ))}
+                              {sols.length > 2 && (
+                                <span
+                                  style={{
+                                    fontSize: '9px',
+                                    fontWeight: 300,
+                                    color: 'var(--text-muted)',
+                                    padding: '1px 4px',
+                                  }}
+                                >
+                                  +{sols.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         )}
                       </div>
                     ) : (

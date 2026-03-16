@@ -68,10 +68,15 @@ export default function GrupoCard({
   const peligros = grupo.peligrosIds
     .map(id => hallazgos.find(h => h.id === id))
     .filter((h): h is Hallazgo => h !== undefined);
-  
+
   const protectores = grupo.protectoresIds
     .map(id => hallazgos.find(h => h.id === id))
     .filter((h): h is Hallazgo => h !== undefined);
+
+  // Classify protectors by type
+  const barreras = protectores.filter(p => p.tipo === 'Barrera');
+  const poes = protectores.filter(p => p.tipo === 'POE');
+  const sols = protectores.filter(p => p.tipo === 'SOL');
   
   // Format member list for display (show first 3, then "+X more")
   const formatMembers = (members: Hallazgo[], maxVisible = 3) => {
@@ -295,7 +300,7 @@ export default function GrupoCard({
               Peligros ({peligros.length})
             </span>
           </div>
-          
+
           {peligros.length > 0 ? (
             <div>{formatMembers(peligros)}</div>
           ) : (
@@ -311,15 +316,15 @@ export default function GrupoCard({
             </p>
           )}
         </div>
-        
-        {/* Protectores section */}
+
+        {/* Protectores section - classified by type */}
         <div>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              marginBottom: '6px',
+              marginBottom: '8px',
             }}
           >
             <span
@@ -333,22 +338,128 @@ export default function GrupoCard({
             >
               Protectores ({protectores.length})
             </span>
-          </div>
-          
-          {protectores.length > 0 ? (
-            <div>{formatMembers(protectores)}</div>
-          ) : (
-            <p
+            <div
               style={{
-                fontSize: '10px',
-                fontWeight: 300,
-                color: 'var(--text-disabled)',
-                fontStyle: 'italic',
+                flex: 1,
+                height: '0.5px',
+                background: 'var(--border-8)',
+              }}
+            />
+          </div>
+
+          {/* Barreras subsection */}
+          <div style={{ marginBottom: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '4px',
               }}
             >
-              Sin protectores registrados
-            </p>
-          )}
+              <span
+                style={{
+                  fontSize: '8px',
+                  fontWeight: 400,
+                  color: '#3b82f6',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                Barreras ({barreras.length})
+              </span>
+            </div>
+            {barreras.length > 0 ? (
+              <div>{formatMembers(barreras)}</div>
+            ) : (
+              <p
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 300,
+                  color: 'var(--text-disabled)',
+                  fontStyle: 'italic',
+                }}
+              >
+                Sin barreras
+              </p>
+            )}
+          </div>
+
+          {/* POEs subsection */}
+          <div style={{ marginBottom: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '4px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '8px',
+                  fontWeight: 400,
+                  color: '#10b981',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                POEs ({poes.length})
+              </span>
+            </div>
+            {poes.length > 0 ? (
+              <div>{formatMembers(poes)}</div>
+            ) : (
+              <p
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 300,
+                  color: 'var(--text-disabled)',
+                  fontStyle: 'italic',
+                }}
+              >
+                Sin POEs
+              </p>
+            )}
+          </div>
+
+          {/* SOLs subsection */}
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginBottom: '4px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '8px',
+                  fontWeight: 400,
+                  color: '#8b5cf6',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                SOLs ({sols.length})
+              </span>
+            </div>
+            {sols.length > 0 ? (
+              <div>{formatMembers(sols)}</div>
+            ) : (
+              <p
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 300,
+                  color: 'var(--text-disabled)',
+                  fontStyle: 'italic',
+                }}
+              >
+                Sin SOLs
+              </p>
+            )}
+          </div>
         </div>
       </div>
       

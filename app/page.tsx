@@ -313,6 +313,232 @@ export default function RiesgoApp() {
   };
 
   // ========================================
+  // TEST DATA LOADER (FOR TESTING GRUPOS TAB)
+  // ========================================
+  const cargarDatosEjemplo = () => {
+    // Create 5 Peligros
+    crearPeligro({
+      titulo: 'Sobrepresión en Reactor',
+      descripcion: 'Riesgo de sobrepresión durante operación normal',
+      tipoPeligro: 'Inherente',
+      consecuencia: 'Ruptura del reactor con liberación de material tóxico',
+      severidad: 5,
+      causaRaiz: 'Falla en válvula de control PIC-101',
+      analisisOrigenIds: [],
+    }, { x: 45, y: 30 });
+
+    crearPeligro({
+      titulo: 'Fuga de Gas H2S',
+      descripcion: 'Liberación de gas sulfhídrico por corrosión en tubería',
+      tipoPeligro: 'Diseño',
+      consecuencia: 'Intoxicación del personal y contaminación ambiental',
+      severidad: 5,
+      causaRaiz: 'Corrosión acelerada por ambiente marino',
+      analisisOrigenIds: [],
+    }, { x: 55, y: 25 });
+
+    crearPeligro({
+      titulo: 'Incendio en Tanque de Diesel',
+      descripcion: 'Riesgo de ignición en tanque de almacenamiento',
+      tipoPeligro: 'Inherente',
+      consecuencia: 'Pérdida total del tanque y propagación a equipos cercanos',
+      severidad: 4,
+      causaRaiz: 'Acumulación de vapores inflamables',
+      analisisOrigenIds: [],
+    }, { x: 30, y: 45 });
+
+    crearPeligro({
+      titulo: 'Derrame de Producto Químico',
+      descripcion: 'Liberación no controlada de ácido sulfúrico',
+      tipoPeligro: 'Inherente',
+      consecuencia: 'Quemaduras químicas y contaminación de suelos',
+      severidad: 4,
+      causaRaiz: 'Falla en bomba de transferencia',
+      analisisOrigenIds: [],
+    }, { x: 65, y: 55 });
+
+    crearPeligro({
+      titulo: 'Exposición a Ruido Excesivo',
+      descripcion: 'Niveles de ruido superiores a 85 dB en área de compresores',
+      tipoPeligro: 'Diseño',
+      consecuencia: 'Pérdida auditiva permanente del personal',
+      severidad: 3,
+      causaRaiz: 'Equipos sin aislamiento acústico adecuado',
+      analisisOrigenIds: [],
+    }, { x: 20, y: 60 });
+
+    // Create 5 Barreras
+    crearBarrera({
+      titulo: 'Válvula de Alivio PSV-101',
+      descripcion: 'Alivia presión cuando excede el setpoint de diseño',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Mitigativa',
+      efectividadEstimada: 4,
+      elementoProtegido: 'Reactor R-101',
+      analisisOrigenIds: [],
+    }, { x: 47, y: 32 });
+
+    crearBarrera({
+      titulo: 'Detector de Gas H2S',
+      descripcion: 'Sistema de detección continua de gas sulfhídrico',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Detectiva',
+      efectividadEstimada: 4,
+      elementoProtegido: 'Personal en área de proceso',
+      analisisOrigenIds: [],
+    }, { x: 57, y: 27 });
+
+    crearBarrera({
+      titulo: 'Sistema de Espuma',
+      descripcion: 'Sistema fijo de generación de espuma para tanques',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Mitigativa',
+      efectividadEstimada: 5,
+      elementoProtegido: 'Tanque de Diesel T-201',
+      analisisOrigenIds: [],
+    }, { x: 32, y: 47 });
+
+    crearBarrera({
+      titulo: 'Dique de Contención',
+      descripcion: 'Barrera física para contener derrames',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Mitigativa',
+      efectividadEstimada: 4,
+      elementoProtegido: 'Área de almacenamiento de químicos',
+      analisisOrigenIds: [],
+    }, { x: 67, y: 57 });
+
+    crearBarrera({
+      titulo: 'Cabinas Insonorizadas',
+      descripcion: 'Cabinas con aislamiento acústico para operadores',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Preventiva',
+      efectividadEstimada: 3,
+      elementoProtegido: 'Operadores de sala de control',
+      analisisOrigenIds: [],
+    }, { x: 22, y: 62 });
+
+    // Create 5 POEs
+    crearPOE({
+      titulo: 'POE-001 Inspección de Válvulas',
+      descripcion: 'Procedimiento para inspección periódica de válvulas de seguridad',
+      procedimientoReferencia: 'PRO-INS-001',
+      frecuenciaAplicacion: 'Mensual',
+      responsable: 'Jefe de Mantenimiento',
+      analisisOrigenIds: [],
+    }, { x: 40, y: 35 });
+
+    crearPOE({
+      titulo: 'POE-002 Monitoreo de Gases',
+      descripcion: 'Procedimiento para monitoreo continuo de H2S',
+      procedimientoReferencia: 'PRO-SEG-002',
+      frecuenciaAplicacion: 'Diario',
+      responsable: 'Supervisor de Seguridad',
+      analisisOrigenIds: [],
+    }, { x: 52, y: 30 });
+
+    crearPOE({
+      titulo: 'POE-003 Prevención de Incendios',
+      descripcion: 'Procedimiento para prevención y control de incendios',
+      procedimientoReferencia: 'PRO-SEG-003',
+      frecuenciaAplicacion: 'Permanente',
+      responsable: 'Brigada de Emergencia',
+      analisisOrigenIds: [],
+    }, { x: 35, y: 42 });
+
+    crearPOE({
+      titulo: 'POE-004 Manejo de Químicos',
+      descripcion: 'Procedimiento para manejo seguro de ácidos',
+      procedimientoReferencia: 'PRO-OPR-004',
+      frecuenciaAplicacion: 'Por turno',
+      responsable: 'Operador de Planta',
+      analisisOrigenIds: [],
+    }, { x: 62, y: 52 });
+
+    crearPOE({
+      titulo: 'POE-005 Control de Ruido',
+      descripcion: 'Procedimiento para control de exposición a ruido',
+      procedimientoReferencia: 'PRO-SEG-005',
+      frecuenciaAplicacion: 'Semanal',
+      responsable: 'Higienista Industrial',
+      analisisOrigenIds: [],
+    }, { x: 25, y: 58 });
+
+    // Create 5 SOLs
+    crearSOL({
+      titulo: 'SIS-001 Parada de Emergencia del Reactor',
+      descripcion: 'Sistema instrumentado de seguridad para parada segura',
+      capaNumero: 1,
+      independiente: true,
+      tipoTecnologia: 'Sensor de presión + Válvula de bloqueo',
+      parametro: 'Presión',
+      valorMinimo: 0,
+      valorMaximo: 150,
+      unidad: 'psig',
+      analisisOrigenIds: [],
+    }, { x: 48, y: 33 });
+
+    crearSOL({
+      titulo: 'SIS-002 Parada de Bomba',
+      descripcion: 'Parada automática por nivel bajo',
+      capaNumero: 2,
+      independiente: true,
+      tipoTecnologia: 'Sensor de nivel + Contactador',
+      parametro: 'Nivel',
+      valorMinimo: 10,
+      valorMaximo: 90,
+      unidad: '%',
+      analisisOrigenIds: [],
+    }, { x: 58, y: 28 });
+
+    crearSOL({
+      titulo: 'SIS-003 Alarma de Gas',
+      descripcion: 'Alarma sonora por alta concentración de gas',
+      capaNumero: 1,
+      independiente: true,
+      tipoTecnologia: 'Detector puntual + Sirena',
+      parametro: 'Concentración H2S',
+      valorMinimo: 0,
+      valorMaximo: 10,
+      unidad: 'ppm',
+      analisisOrigenIds: [],
+    }, { x: 53, y: 26 });
+
+    crearSOL({
+      titulo: 'SIS-004 Control de Temperatura',
+      descripcion: 'Parada por alta temperatura en reactor',
+      capaNumero: 1,
+      independiente: true,
+      tipoTecnologia: 'Termopar + Válvula de vapor',
+      parametro: 'Temperatura',
+      valorMinimo: 20,
+      valorMaximo: 180,
+      unidad: '°C',
+      analisisOrigenIds: [],
+    }, { x: 43, y: 38 });
+
+    crearSOL({
+      titulo: 'SIS-005 Protección contra Sobreflujo',
+      descripcion: 'Parada por alto nivel en tanque',
+      capaNumero: 2,
+      independiente: true,
+      tipoTecnologia: 'Switch de nivel + Válvula de entrada',
+      parametro: 'Nivel',
+      valorMinimo: 0,
+      valorMaximo: 95,
+      unidad: '%',
+      analisisOrigenIds: [],
+    }, { x: 38, y: 48 });
+
+    agregarNotificacion({
+      tipo: 'success',
+      titulo: 'Datos de Ejemplo Cargados',
+      mensaje: 'Se crearon 5 Peligros, 5 Barreras, 5 POEs y 5 SOLs',
+      duracion: 4000,
+    });
+  };
+
+  // ========================================
   // SHARED HALLAZGO CREATOR (all types)
   // ========================================
   const crearHallazgosDeFormulario = (analisisId: string) => {
@@ -1559,7 +1785,41 @@ export default function RiesgoApp() {
 
             {/* Grupos Tab */}
             {leftTabActive === 'grupos' && (
-              <GruposPanel />
+              <div>
+                {/* TEST BUTTON - REMOVE LATER */}
+                <button
+                  onClick={cargarDatosEjemplo}
+                  style={{
+                    marginBottom: '12px',
+                    padding: '8px 16px',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 400,
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.filter = 'brightness(1.1)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.filter = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                  </svg>
+                  Cargar Datos de Ejemplo (5 de cada tipo) - TESTING ONLY
+                </button>
+                <GruposPanel />
+              </div>
             )}
           </div>
         </aside>

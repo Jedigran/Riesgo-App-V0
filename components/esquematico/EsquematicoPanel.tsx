@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useMemo } from 'react';
 import { useMapa } from '@/src/controllers/useMapa';
 import { useFiltrosHallazgos } from '@/src/controllers/useFiltrosHallazgos';
+import { useGrupo } from '@/src/controllers/useGrupo';
 import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
 
 // ============================================================================
@@ -71,9 +72,15 @@ export default function EsquematicoPanel({
     limpiarFiltros,
   } = useFiltrosHallazgos();
 
+  const { grupos, obtenerGruposPorHallazgo } = useGrupo();
+
   // Tooltip state
   const [tooltipHallazgo, setTooltipHallazgo] = useState<Hallazgo | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [tooltipGrupos, setTooltipGrupos] = useState<any[]>([]);
+
+  // Group filter state
+  const [grupoFiltroActivo, setGrupoFiltroActivo] = useState<string | null>(null);
 
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
@@ -89,6 +96,23 @@ export default function EsquematicoPanel({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // ============================================================================
+  // DERIVED DATA - Group mapping (needed before callbacks)
+  // ============================================================================
+
+  // Create a map of hallazgo ID to its groups for quick lookup
+  const hallazgoGruposMap = useMemo(() => {
+    const map = new Map<string, typeof grupos>();
+    const allMarkersForMap = [
+      ...hallazgosFiltrados(),
+      ...hallazgosForm.filter((h) => h.ubicacion).map((h) => ({ ...h, ubicacion: h.ubicacion! })),
+    ];
+    allMarkersForMap.forEach((h) => {
+      map.set(h.id, obtenerGruposPorHallazgo(h.id));
+    });
+    return map;
+  }, [hallazgosForm, obtenerGruposPorHallazgo]);
 
   // ============================================================================
   // MAP CLICK — place hallazgo
@@ -117,8 +141,10 @@ export default function EsquematicoPanel({
   const handleMarkerClick = useCallback(
     (e: React.MouseEvent, hallazgo: Hallazgo) => {
       e.stopPropagation();
+      const gruposDelHallazgo = hallazgoGruposMap.get(hallazgo.id) || [];
       if (tooltipHallazgo?.id === hallazgo.id) {
         setTooltipHallazgo(null);
+        setTooltipGrupos([]);
         return;
       }
       const rect = containerRef.current?.getBoundingClientRect();
@@ -129,8 +155,9 @@ export default function EsquematicoPanel({
         });
       }
       setTooltipHallazgo(hallazgo);
+      setTooltipGrupos(gruposDelHallazgo);
     },
-    [tooltipHallazgo]
+    [tooltipHallazgo, hallazgoGruposMap]
   );
 
   // ============================================================================
@@ -242,6 +269,36 @@ export default function EsquematicoPanel({
       ubicacion: h.ubicacion!,
     })),
   ];
+
+  // Create map of hallazgo to groups
+  const markersConGrupos = useMemo(() => {
+    const map = new Map<string, typeof grupos>();
+    allMarkers.forEach((h) => {
+      map.set(h.id, obtenerGruposPorHallazgo(h.id));
+    });
+    return map;
+  }, [allMarkers, obtenerGruposPorHallazgo]);
+
+  // Apply group filter
+  const markersFiltrados = useMemo(() => {
+    if (!grupoFiltroActivo) return allMarkers;
+    return allMarkers.filter((h) => {
+      const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
+      return gruposDelHallazgo.some((g) => g.id === grupoFiltroActivo);
+    });
+  }, [allMarkers, grupoFiltroActivo, markersConGrupos]);
+
+  // Count hallazgos por grupo
+  const gruposCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    grupos.forEach((g) => {
+      counts[g.id] = allMarkers.filter((h) => {
+        const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
+        return gruposDelHallazgo.some((grp) => grp.id === g.id);
+      }).length;
+    });
+    return counts;
+  }, [allMarkers, grupos, markersConGrupos]);
 
   const isEditMode = ubicacionEditando !== null;
   const zoomPct = Math.round(zoom * 100);
@@ -409,12 +466,85 @@ export default function EsquematicoPanel({
           Todos
         </button>
 
+        {/* Group filter divider */}
+        {grupos.length > 0 && (
+          <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
+        )}
+
+        {/* Group filter pills */}
+        {grupos.length > 0 && (
+          <>
+            <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              Grupos:
+            </span>
+            {grupos.map((grupo) => {
+              const active = grupoFiltroActivo === grupo.id;
+              const count = gruposCount[grupo.id] || 0;
+              return (
+                <button
+                  key={grupo.id}
+                  onClick={() => setGrupoFiltroActivo(active ? null : grupo.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    border: `0.5px solid ${active ? grupo.color : 'var(--border-8)'}`,
+                    backgroundColor: active ? `${grupo.color}20` : 'transparent',
+                    color: active ? grupo.color : 'var(--text-muted)',
+                    fontSize: '11px',
+                    fontWeight: 300,
+                    cursor: 'pointer',
+                    transition: 'all 150ms ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={`Filtrar por grupo: ${grupo.nombre}`}
+                >
+                  {/* Color square */}
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '1px',
+                      flexShrink: 0,
+                      background: active ? grupo.color : 'var(--text-disabled)',
+                      boxShadow: active ? `0 0 4px ${grupo.color}60` : 'none',
+                    }}
+                  />
+                  {grupo.nombre.length > 15 ? grupo.nombre.substring(0, 15) + '...' : grupo.nombre}
+                  {/* Count badge */}
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '16px',
+                      height: '14px',
+                      padding: '0 4px',
+                      borderRadius: '9999px',
+                      fontSize: '10px',
+                      fontWeight: 400,
+                      background: active ? `${grupo.color}30` : 'rgba(255,255,255,0.06)',
+                      color: active ? grupo.color : 'var(--text-muted)',
+                      border: `0.5px solid ${active ? `${grupo.color}40` : 'var(--border-6)'}`,
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </>
+        )}
+
         {/* Marker count */}
         <span
           className="ml-auto"
           style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)' }}
         >
-          {allMarkers.filter((h) => h.ubicacion).length} ubicados
+          {markersFiltrados.filter((h) => h.ubicacion).length} ubicados
         </span>
       </div>
 
@@ -441,6 +571,52 @@ export default function EsquematicoPanel({
           <span style={{ fontSize: '11px', fontWeight: 300, color: '#93c5fd' }}>
             Modo colocacion activo — haz clic en el diagrama para ubicar el hallazgo
           </span>
+        </div>
+      )}
+
+      {/* ── Group filter banner ───────────────────────────────────────────── */}
+      {grupoFiltroActivo && (
+        <div
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-1.5"
+          style={{
+            background: `rgba(${grupos.find(g => g.id === grupoFiltroActivo)?.color || '59,130,246'}15)`,
+            borderBottom: `0.5px solid ${grupos.find(g => g.id === grupoFiltroActivo)?.color || 'rgba(59,130,246,0.18)'}`,
+          }}
+        >
+          <div
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '2px',
+              background: grupos.find(g => g.id === grupoFiltroActivo)?.color || '#3b82f6',
+              boxShadow: `0 0 6px ${grupos.find(g => g.id === grupoFiltroActivo)?.color || '#3b82f6'}60`,
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+            Viendo grupo: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
+          </span>
+          <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
+            ({gruposCount[grupoFiltroActivo] || 0} hallazgos)
+          </span>
+          <button
+            onClick={() => setGrupoFiltroActivo(null)}
+            style={{
+              marginLeft: 'auto',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-muted)',
+              padding: '2px 6px',
+              fontSize: '11px',
+              fontWeight: 300,
+              transition: 'color 150ms ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+          >
+            Limpiar filtro
+          </button>
         </div>
       )}
 
@@ -487,12 +663,15 @@ export default function EsquematicoPanel({
             />
 
             {/* Hallazgo markers */}
-            {allMarkers.map((h) => {
+            {markersFiltrados.map((h) => {
               const ub = h.ubicacion;
               if (!ub || (ub.x === 0 && ub.y === 0)) return null;
               const color = MARKER_COLORS[h.tipo];
               const label = MARKER_LABELS[h.tipo];
               const isActive = tooltipHallazgo?.id === h.id;
+              const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
+              const tieneGrupos = gruposDelHallazgo.length > 0;
+              const estaEnFiltro = grupoFiltroActivo && gruposDelHallazgo.some(g => g.id === grupoFiltroActivo);
 
               return (
                 <div
@@ -506,18 +685,46 @@ export default function EsquematicoPanel({
                   }}
                   onClick={(e) => handleMarkerClick(e, h as Hallazgo)}
                 >
-                  {/* Outer ring */}
-                  <div style={{
-                    position: 'absolute',
-                    width: '20px',
-                    height: '20px',
-                    top: '-4px',
-                    left: '-4px',
-                    borderRadius: '9999px',
-                    background: `${color}18`,
-                    border: `0.5px solid ${color}40`,
-                    transition: 'transform 0.15s',
-                  }} />
+                  {/* Group rings (only if hallazgo belongs to groups) */}
+                  {tieneGrupos && gruposDelHallazgo.map((grupo, index) => {
+                    const ringSize = 20 + (index * 6); // Increment size for each ring
+                    const offset = -4 + (index * 3);
+                    return (
+                      <div
+                        key={grupo.id}
+                        style={{
+                          position: 'absolute',
+                          width: `${ringSize}px`,
+                          height: `${ringSize}px`,
+                          top: `${offset}px`,
+                          left: `${offset}px`,
+                          borderRadius: '9999px',
+                          background: `${grupo.color}10`,
+                          border: `1px solid ${grupo.color}60`,
+                          boxShadow: `0 0 4px ${grupo.color}40`,
+                          transition: 'all 0.15s ease',
+                          pointerEvents: 'none',
+                        }}
+                        title={grupo.nombre}
+                      />
+                    );
+                  })}
+
+                  {/* Outer ring (type-based, shown when no groups) */}
+                  {!tieneGrupos && (
+                    <div style={{
+                      position: 'absolute',
+                      width: '20px',
+                      height: '20px',
+                      top: '-4px',
+                      left: '-4px',
+                      borderRadius: '9999px',
+                      background: `${color}18`,
+                      border: `0.5px solid ${color}40`,
+                      transition: 'transform 0.15s',
+                    }} />
+                  )}
+
                   {/* Marker dot */}
                   <div style={{
                     position: 'relative',
@@ -569,7 +776,8 @@ export default function EsquematicoPanel({
             <MarkerTooltip
               hallazgo={tooltipHallazgo}
               pos={tooltipPos}
-              onClose={() => setTooltipHallazgo(null)}
+              onClose={() => { setTooltipHallazgo(null); setTooltipGrupos([]); }}
+              grupos={tooltipGrupos}
             />
           )}
 
@@ -735,10 +943,12 @@ interface MarkerTooltipProps {
   hallazgo: Hallazgo;
   pos: { x: number; y: number };
   onClose: () => void;
+  grupos: any[];
 }
 
-function MarkerTooltip({ hallazgo, pos, onClose }: MarkerTooltipProps) {
+function MarkerTooltip({ hallazgo, pos, onClose, grupos }: MarkerTooltipProps) {
   const color = MARKER_COLORS[hallazgo.tipo];
+  const tieneGrupos = grupos.length > 0;
 
   return (
     <div
@@ -746,7 +956,7 @@ function MarkerTooltip({ hallazgo, pos, onClose }: MarkerTooltipProps) {
         position: 'absolute',
         left: `${Math.min(pos.x + 10, pos.x - 10)}px`,
         top: `${pos.y + 14}px`,
-        maxWidth: '210px',
+        maxWidth: '250px',
         zIndex: 30,
         background: 'var(--knar-dark)',
         border: `0.5px solid ${color}25`,
@@ -799,6 +1009,64 @@ function MarkerTooltip({ hallazgo, pos, onClose }: MarkerTooltipProps) {
           </p>
         )}
         <TooltipExtraFields hallazgo={hallazgo} />
+
+        {/* Group membership section */}
+        {tieneGrupos && (
+          <div
+            style={{
+              marginTop: '6px',
+              paddingTop: '6px',
+              borderTop: '0.5px solid var(--border-6)',
+            }}
+          >
+            <p style={{ fontSize: '9px', fontWeight: 400, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              Grupos de Proteccion
+            </p>
+            {grupos.map((grupo) => (
+              <div
+                key={grupo.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '3px 6px',
+                  marginBottom: '2px',
+                  background: `${grupo.color}15`,
+                  border: `0.5px solid ${grupo.color}30`,
+                  borderRadius: '3px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '2px',
+                    background: grupo.color,
+                    boxShadow: `0 0 4px ${grupo.color}60`,
+                  }}
+                />
+                <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-secondary)' }}>
+                  {grupo.nombre}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!tieneGrupos && (
+          <div
+            style={{
+              marginTop: '6px',
+              paddingTop: '6px',
+              borderTop: '0.5px solid var(--border-6)',
+            }}
+          >
+            <p style={{ fontSize: '9px', fontWeight: 300, color: 'var(--text-disabled)', fontStyle: 'italic' }}>
+              Sin grupos de proteccion
+            </p>
+          </div>
+        )}
+
         <p style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)', marginTop: '2px' }}>
           ({Math.round(hallazgo.ubicacion.x)}, {Math.round(hallazgo.ubicacion.y)})
         </p>
