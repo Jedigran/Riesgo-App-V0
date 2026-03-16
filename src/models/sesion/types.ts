@@ -16,6 +16,7 @@
 import type { AnalisisOrigen } from '../analisis/types';
 import type { Hallazgo, TipoHallazgo } from '../hallazgo/types';
 import type { Relacion } from '../relaciones/types';
+import type { GrupoProteccion } from '../grupos/types';
 
 // ============================================================================
 // VIEW MODE ENUMERATIONS
@@ -73,6 +74,9 @@ export interface Sesion {
   /** All relationships between findings and analyses */
   relaciones: Relacion[];
 
+  /** All protection groups (relating hazards to protectors) */
+  gruposProteccion: GrupoProteccion[];
+
   /** Path to the currently displayed plant diagram image */
   imagenActual: string;
 
@@ -111,6 +115,7 @@ export function crearSesionVacia(imagenInicial?: string): Sesion {
     analisis: [],
     hallazgos: [],
     relaciones: [],
+    gruposProteccion: [],
     imagenActual: imagenInicial ?? '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
     filtrosActivos: ['Peligro', 'Barrera', 'POE', 'SOL'],
     vistaActiva: 'mapa',
@@ -228,6 +233,9 @@ export interface SesionStats {
 
   /** Total number of relationships */
   totalRelaciones: number;
+
+  /** Total number of protection groups */
+  totalGrupos: number;
 
   /** Count by finding type */
   porTipo: Record<TipoHallazgo, number>;

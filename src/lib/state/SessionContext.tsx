@@ -20,6 +20,7 @@
 
 import React, { createContext, useContext, useReducer, useMemo, ReactNode } from 'react';
 import type { Sesion } from '../../models/sesion/types';
+import type { GrupoProteccion } from '../../models/grupos/types';
 import { crearSesionVacia, crearSesionDemo } from '../../models/utils/generadores';
 import { clonarSesion } from '../../models/utils/transformadores';
 
@@ -43,7 +44,10 @@ type SesionAction =
   | { type: 'ACTUALIZAR_HALLAZGO'; payload: { id: string; datos: Partial<any> } }
   | { type: 'ELIMINAR_HALLAZGO'; payload: string }
   | { type: 'AGREGAR_RELACION'; payload: any } // Relacion
-  | { type: 'ELIMINAR_RELACION'; payload: string };
+  | { type: 'ELIMINAR_RELACION'; payload: string }
+  | { type: 'AGREGAR_GRUPO'; payload: GrupoProteccion }
+  | { type: 'ACTUALIZAR_GRUPO'; payload: { id: string; datos: Partial<GrupoProteccion> } }
+  | { type: 'ELIMINAR_GRUPO'; payload: string };
 
 // ============================================================================
 // STATE INTERFACE
@@ -214,6 +218,43 @@ function sesionReducer(state: SesionState, action: SesionAction): SesionState {
         sesion: {
           ...state.sesion,
           relaciones: state.sesion.relaciones.filter((r) => r.id !== action.payload),
+        },
+      };
+    }
+
+    case 'AGREGAR_GRUPO': {
+      if (!state.sesion) return state;
+      return {
+        ...state,
+        sesion: {
+          ...state.sesion,
+          gruposProteccion: [...state.sesion.gruposProteccion, action.payload],
+        },
+      };
+    }
+
+    case 'ACTUALIZAR_GRUPO': {
+      if (!state.sesion) return state;
+      return {
+        ...state,
+        sesion: {
+          ...state.sesion,
+          gruposProteccion: state.sesion.gruposProteccion.map((g) =>
+            g.id === action.payload.id
+              ? { ...g, ...action.payload.datos }
+              : g
+          ),
+        },
+      };
+    }
+
+    case 'ELIMINAR_GRUPO': {
+      if (!state.sesion) return state;
+      return {
+        ...state,
+        sesion: {
+          ...state.sesion,
+          gruposProteccion: state.sesion.gruposProteccion.filter((g) => g.id !== action.payload),
         },
       };
     }

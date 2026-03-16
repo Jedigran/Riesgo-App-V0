@@ -24,17 +24,19 @@ import { useAnalisis } from '@/src/controllers/useAnalisis';
 import { useHallazgo } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useSesion } from '@/src/controllers/useSesion';
+import { useGrupo } from '@/src/controllers/useGrupo';
 import { SiteHeader } from '@/components';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
+import GruposPanel from '@/components/grupos/GruposPanel';
 import EsquematicoPanel from '@/components/esquematico/EsquematicoPanel';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-type LeftTab = 'configuracion' | 'censo' | 'relaciones';
+type LeftTab = 'configuracion' | 'censo' | 'relaciones' | 'grupos';
 type RightTab = 'esquematico' | 'tabla-hallazgo' | 'tabla-analisis';
 type Metodologia = 'intuicion' | 'hazop' | 'fmea' | 'lopa' | 'oca' | null;
 type HallazgoTipo = 'Peligro' | 'Barrera' | 'POE' | 'SOL';
@@ -677,6 +679,7 @@ export default function RiesgoApp() {
             <button onClick={() => setLeftTabActive('configuracion')} className={`knar-tab-inline${leftTabActive === 'configuracion' ? ' active' : ''}`}>Configuración</button>
             <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Censo</button>
             <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button>
+            <button onClick={() => setLeftTabActive('grupos')} className={`knar-tab-inline${leftTabActive === 'grupos' ? ' active' : ''}`}>Grupos</button>
           </div>
 
           {/* Left Panel Content */}
@@ -1552,6 +1555,11 @@ export default function RiesgoApp() {
             {/* Relaciones Tab */}
             {leftTabActive === 'relaciones' && (
               <RelacionesPanel />
+            )}
+
+            {/* Grupos Tab */}
+            {leftTabActive === 'grupos' && (
+              <GruposPanel />
             )}
           </div>
         </aside>
