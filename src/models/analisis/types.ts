@@ -164,36 +164,87 @@ export interface AnalisisFMEA {
 
 /**
  * LOPA (Layer of Protection Analysis)
- * 
+ *
  * Semi-quantitative tool to evaluate if there are sufficient layers of protection
  * against a specific accident scenario.
  */
+export interface CapaIPL {
+  /** Name of the protection layer (e.g., "BPCS", "SIS", "Relief Valve") */
+  nombre: string;
+
+  /** Probability of Failure on Demand (PFD) for this layer */
+  pfd: number;
+}
+
 export interface AnalisisLOPA {
-  /** Description of the accident scenario being analyzed */
+  /** Risk scenario being analyzed (e.g., "Pérdida de bombeo de achique") */
   escenario: string;
 
-  /** Initial event frequency (events per year) */
-  frecuenciaInicial: number;
-
-  /** Description of the consequence if all protections fail */
+  /** Potential impact if scenario occurs */
   consecuencia: string;
 
-  /** 
-   * Independent Protection Layers (IPLs)
-   * Each layer reduces the frequency of the consequence
+  /** Person/community/equipment most vulnerable to impact */
+  receptorImpacto?: string;
+
+  /**
+   * Severity rating (1-10)
+   * Based on FMEA scale
    */
-  capasIPL: {
-    /** Name of the protection layer (e.g., "BPCS", "SIS", "Relief Valve") */
-    nombre: string;
-    /** Probability of Failure on Demand (PFD) for this layer */
-    pfd: number;
-  }[];
+  S: number;
 
-  /** Final frequency after all IPLs are applied (events per year) */
-  frecuenciaFinal: number;
+  /** Maximum acceptable frequency (events/year) */
+  riesgoTolerable: number;
 
-  /** Target risk frequency (tolerable risk criterion) */
-  objetivoRiesgo: number;
+  /** Root cause that triggers the scenario */
+  causa: string;
+
+  /** Initial event frequency (events/year) */
+  frecuenciaInicial: number;
+
+  /** Independent Protection Layers */
+  capasIPL: CapaIPL[];
+
+  /**
+   * Total Probability of Failure on Demand (calculated)
+   * PfD Total = PRODUCT(PfD_IPL_1, PfD_IPL_2, ..., PfD_IPL_n)
+   */
+  pfdTotal?: number;
+
+  /**
+   * Scenario risk (calculated)
+   * Riesgo = Frecuencia_Causa × PfD_Total
+   */
+  riesgoEscenario?: number;
+
+  /**
+   * Whether risk meets tolerance criterion (calculated)
+   * Cumple = Riesgo_Escenario ≤ Riesgo_Tolerable
+   */
+  cumpleCriterio?: boolean;
+
+  /**
+   * Target PFD for additional IPL (calculated, only if NO cumple)
+   * PfD_Objetivo = Riesgo_Tolerable / Frecuencia_Causa
+   */
+  pfdObjetivo?: number;
+
+  /**
+   * Risk Reduction Factor required (calculated, only if NO cumple)
+   * RRF = 1 / PfD_Objetivo
+   */
+  rrf?: number;
+
+  /**
+   * Required SIL level (calculated, only if NO cumple)
+   * SIL 1: PfD 0.1-0.01 (RRF 10-100)
+   * SIL 2: PfD 0.01-0.001 (RRF 100-1,000)
+   * SIL 3: PfD 0.001-0.0001 (RRF 1,000-10,000)
+   * SIL 4: PfD 0.0001-0.000001 (RRF 10,000-100,000)
+   */
+  silRequerido?: number;
+
+  /** Recommended actions to reduce risk */
+  recomendaciones: string[];
 }
 
 /**

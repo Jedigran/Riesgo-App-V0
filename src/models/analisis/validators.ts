@@ -369,13 +369,21 @@ export function validarAnalisisLOPA(data: AnalisisLOPA): ValidationResult {
   const consecuenciaError = validarStringRequerido(data.consecuencia, 'consecuencia');
   if (consecuenciaError) errores.push(consecuenciaError);
 
+  const causaError = validarStringRequerido(data.causa, 'causa');
+  if (causaError) errores.push(causaError);
+
   // Validate frequencies
   const freqInicialError = validarRangoNumerico(data.frecuenciaInicial, 0.0000001, 1000, 'frecuenciaInicial');
   if (freqInicialError) errores.push(freqInicialError);
 
-  if (data.frecuenciaInicial !== undefined && data.frecuenciaInicial <= 0) {
-    errores.push('frecuenciaInicial debe ser mayor a 0');
+  // Validate riesgoTolerable
+  if (data.riesgoTolerable === undefined || data.riesgoTolerable <= 0) {
+    errores.push('riesgoTolerable debe ser mayor a 0');
   }
+
+  // Validate S (Severidad)
+  const sError = validarRangoNumerico(data.S, 1, 10, 'S (Severidad)');
+  if (sError) errores.push(sError);
 
   // capasIPL is optional — warn if empty but do not block
   if (!data.capasIPL || data.capasIPL.length === 0) {
@@ -390,33 +398,27 @@ export function validarAnalisisLOPA(data: AnalisisLOPA): ValidationResult {
       }
     }
 
-    // Validate frecuenciaFinal only when capas are present and named
+    // Validate calculated fields if present
     if (data.frecuenciaInicial !== undefined && capasConNombre.length > 0) {
       const frecuenciaCalculada = data.frecuenciaInicial *
         capasConNombre.reduce((acc, capa) => acc * capa.pfd, 1);
-      const tolerancia = 0.0000001;
-      if (data.frecuenciaFinal !== undefined &&
-          Math.abs(data.frecuenciaFinal - frecuenciaCalculada) > tolerancia) {
+      
+      if (data.riesgoEscenario !== undefined &&
+          Math.abs(data.riesgoEscenario - frecuenciaCalculada) > 0.0000001) {
         advertencias.push(
-          `frecuenciaFinal sugerida: ${frecuenciaCalculada.toExponential(2)} ` +
-          `(${data.frecuenciaInicial} × ${capasConNombre.map(c => c.pfd).join(' × ')})`
+          `riesgoEscenario calculado: ${frecuenciaCalculada.toExponential(2)}`
         );
       }
-    }
-  }
 
-  // Validate objetivoRiesgo
-  if (data.objetivoRiesgo === undefined || data.objetivoRiesgo <= 0) {
-    errores.push('objetivoRiesgo debe ser mayor a 0');
-  }
-
-  // Check if risk target is met
-  if (data.frecuenciaFinal !== undefined && data.objetivoRiesgo !== undefined) {
-    if (data.frecuenciaFinal > data.objetivoRiesgo) {
-      advertencias.push(
-        `El riesgo final (${data.frecuenciaFinal.toExponential(2)}) excede el objetivo (${data.objetivoRiesgo.toExponential(2)}). ` +
-        'Se requieren capas de protección adicionales.'
-      );
+      // Check if risk target is met
+      if (data.riesgoTolerable !== undefined) {
+        if (frecuenciaCalculada > data.riesgoTolerable) {
+          advertencias.push(
+            `El riesgo (${frecuenciaCalculada.toExponential(2)}) excede el tolerable (${data.riesgoTolerable.toExponential(2)}). ` +
+            'Se requieren capas de protección adicionales.'
+          );
+        }
+      }
     }
   }
 

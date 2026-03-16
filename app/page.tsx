@@ -131,11 +131,20 @@ export default function RiesgoApp() {
   // LOPA
   const [lopaData, setLopaData] = useState({
     escenario: '',
-    frecuenciaInicial: 0.1,
     consecuencia: '',
+    receptorImpacto: '',
+    S: 1,
+    riesgoTolerable: 0.00001,
+    causa: '',
+    frecuenciaInicial: 0.1,
     capasIPL: [{ nombre: '', pfd: 0.1 }],
-    frecuenciaFinal: 0.01,
-    objetivoRiesgo: 0.001,
+    pfdTotal: 0.1,
+    riesgoEscenario: 0.01,
+    cumpleCriterio: false,
+    pfdObjetivo: 0,
+    rrf: 0,
+    silRequerido: 0,
+    recomendaciones: [''],
   });
 
   // OCA
@@ -370,19 +379,32 @@ export default function RiesgoApp() {
     }
     // ========== LOPA ==========
     else if (metodologiaSeleccionada === 'lopa') {
-      if (!lopaData.escenario.trim() || !lopaData.consecuencia.trim()) {
+      if (!lopaData.escenario.trim() || !lopaData.consecuencia.trim() || !lopaData.causa.trim()) {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de LOPA' });
         return;
       }
 
       try {
+        const pfdTotal = lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1);
+        const riesgoEscenario = lopaData.frecuenciaInicial * pfdTotal;
+        const cumpleCriterio = riesgoEscenario <= lopaData.riesgoTolerable;
+
         const resultadoAnalisis = crearAnalisisLOPA({
           escenario: lopaData.escenario,
-          frecuenciaInicial: lopaData.frecuenciaInicial,
           consecuencia: lopaData.consecuencia,
+          receptorImpacto: lopaData.receptorImpacto,
+          S: lopaData.S,
+          riesgoTolerable: lopaData.riesgoTolerable,
+          causa: lopaData.causa,
+          frecuenciaInicial: lopaData.frecuenciaInicial,
           capasIPL: lopaData.capasIPL.filter(c => c.nombre.trim()).length > 0 ? lopaData.capasIPL.filter(c => c.nombre.trim()) : [{ nombre: '', pfd: 0.1 }],
-          frecuenciaFinal: lopaData.frecuenciaFinal,
-          objetivoRiesgo: lopaData.objetivoRiesgo,
+          pfdTotal,
+          riesgoEscenario,
+          cumpleCriterio,
+          pfdObjetivo: cumpleCriterio ? 0 : lopaData.riesgoTolerable / lopaData.frecuenciaInicial,
+          rrf: cumpleCriterio ? 0 : 1 / (lopaData.riesgoTolerable / lopaData.frecuenciaInicial),
+          silRequerido: 0,
+          recomendaciones: lopaData.recomendaciones.filter(r => r.trim()).length > 0 ? lopaData.recomendaciones.filter(r => r.trim()) : [''],
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
@@ -392,7 +414,23 @@ export default function RiesgoApp() {
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
-        setLopaData({ escenario: '', frecuenciaInicial: 0.1, consecuencia: '', capasIPL: [{ nombre: '', pfd: 0.1 }], frecuenciaFinal: 0.01, objetivoRiesgo: 0.001 });
+        setLopaData({
+          escenario: '',
+          consecuencia: '',
+          receptorImpacto: '',
+          S: 1,
+          riesgoTolerable: 0.00001,
+          causa: '',
+          frecuenciaInicial: 0.1,
+          capasIPL: [{ nombre: '', pfd: 0.1 }],
+          pfdTotal: 0.1,
+          riesgoEscenario: 0.01,
+          cumpleCriterio: false,
+          pfdObjetivo: 0,
+          rrf: 0,
+          silRequerido: 0,
+          recomendaciones: [''],
+        });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -862,11 +900,157 @@ export default function RiesgoApp() {
                           <h3 className="knar-card-title">LOPA - Capas de Protección</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Escenario *</label><input type="text" value={lopaData.escenario} onChange={(e) => setLopaData({ ...lopaData, escenario: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Ej: Sobrepresión en separador" /></div>
-                          <div><label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label><input type="text" value={lopaData.consecuencia} onChange={(e) => setLopaData({ ...lopaData, consecuencia: e.target.value })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Consecuencia si fallan todas las capas" /></div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">Frecuencia Inicial (eventos/año)</label><input type="number" step="0.0001" value={lopaData.frecuenciaInicial} onChange={(e) => setLopaData({ ...lopaData, frecuenciaInicial: Number(e.target.value) })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
-                            <div><label className="block text-xs text-knar-text-secondary mb-1">Objetivo de Riesgo</label><input type="number" step="0.0001" value={lopaData.objetivoRiesgo} onChange={(e) => setLopaData({ ...lopaData, objetivoRiesgo: Number(e.target.value) })} className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
+                          {/* Escenario */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Escenario de Riesgo *</label>
+                            <input
+                              type="text"
+                              value={lopaData.escenario}
+                              onChange={(e) => setLopaData({ ...lopaData, escenario: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: Pérdida de bombeo de achique"
+                            />
+                          </div>
+
+                          {/* Consecuencia */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Consecuencia *</label>
+                            <textarea
+                              value={lopaData.consecuencia}
+                              onChange={(e) => setLopaData({ ...lopaData, consecuencia: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Acumulación de agua"
+                            />
+                          </div>
+
+                          {/* Receptor con Mayor Impacto */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Receptor con Mayor Impacto</label>
+                            <input
+                              type="text"
+                              value={lopaData.receptorImpacto}
+                              onChange={(e) => setLopaData({ ...lopaData, receptorImpacto: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: Personal / Operación"
+                            />
+                          </div>
+
+                          {/* Severidad */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Severidad (S) 1-10 *</label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="10"
+                              value={lopaData.S}
+                              onChange={(e) => setLopaData({ ...lopaData, S: Number(e.target.value) })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Riesgo Tolerable */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Riesgo Tolerable (eventos/año) *</label>
+                            <input
+                              type="number"
+                              step="0.000001"
+                              value={lopaData.riesgoTolerable}
+                              onChange={(e) => setLopaData({ ...lopaData, riesgoTolerable: Number(e.target.value) })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: 0.00001"
+                            />
+                          </div>
+
+                          {/* Causa */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Causa *</label>
+                            <textarea
+                              value={lopaData.causa}
+                              onChange={(e) => setLopaData({ ...lopaData, causa: e.target.value })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              rows={2}
+                              placeholder="Ej: Falla eléctrica del motor"
+                            />
+                          </div>
+
+                          {/* Frecuencia Inicial */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Frecuencia Inicial (eventos/año) *</label>
+                            <input
+                              type="number"
+                              step="0.0001"
+                              value={lopaData.frecuenciaInicial}
+                              onChange={(e) => setLopaData({ ...lopaData, frecuenciaInicial: Number(e.target.value) })}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: 0.0707"
+                            />
+                          </div>
+
+                          {/* Capas IPL - Simplified for now */}
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Capa IPL 1 - Nombre</label>
+                            <input
+                              type="text"
+                              value={lopaData.capasIPL[0]?.nombre || ''}
+                              onChange={(e) => {
+                                const nuevasCapas = [...lopaData.capasIPL];
+                                if (!nuevasCapas[0]) nuevasCapas[0] = { nombre: '', pfd: 0.1 };
+                                nuevasCapas[0].nombre = e.target.value;
+                                setLopaData({ ...lopaData, capasIPL: nuevasCapas });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: BPCS - Alarma"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-knar-text-secondary mb-1">Capa IPL 1 - PFD</label>
+                            <input
+                              type="number"
+                              step="0.0001"
+                              value={lopaData.capasIPL[0]?.pfd || 0.1}
+                              onChange={(e) => {
+                                const nuevasCapas = [...lopaData.capasIPL];
+                                if (!nuevasCapas[0]) nuevasCapas[0] = { nombre: '', pfd: 0.1 };
+                                nuevasCapas[0].pfd = Number(e.target.value);
+                                setLopaData({ ...lopaData, capasIPL: nuevasCapas });
+                              }}
+                              className="w-full px-2 py-1.5 bg-knar-dark border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
+                              placeholder="Ej: 0.1"
+                            />
+                          </div>
+
+                          {/* Cálculos automáticos */}
+                          <div className="bg-knar-charcoal rounded p-3 space-y-2 border border-knar-border">
+                            <h4 className="text-xs font-medium text-knar-text-primary">Cálculos de Riesgo</h4>
+                            
+                            {/* PfD Total */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">PfD Total:</span>
+                              <span className="text-knar-text-primary font-mono">
+                                {lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1).toExponential(2)}
+                              </span>
+                            </div>
+
+                            {/* Riesgo del Escenario */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">Riesgo Escenario:</span>
+                              <span className="text-knar-text-primary font-mono">
+                                {(lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)).toExponential(2)}
+                              </span>
+                            </div>
+
+                            {/* ¿Cumple Criterio? */}
+                            <div className="flex justify-between text-xs">
+                              <span className="text-knar-text-muted">¿Cumple Criterio?</span>
+                              <span className={`font-bold ${
+                                (lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)) <= lopaData.riesgoTolerable
+                                  ? 'text-green-500'
+                                  : 'text-red-500'
+                              }`}>
+                                {(lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)) <= lopaData.riesgoTolerable ? '✅ SÍ' : '❌ NO'}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
