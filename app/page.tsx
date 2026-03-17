@@ -986,7 +986,7 @@ export default function RiesgoApp() {
     <div className="h-screen flex flex-col bg-knar-dark font-sans overflow-hidden">
       {/* HEADER */}
       <KnarHeader
-        title="Risk-Sensus"
+        title="Risk Census"
         subtitle="Gestión de Riesgos de Proceso"
         rightContent={
           <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0, height: '100%' }}>
@@ -1000,11 +1000,11 @@ export default function RiesgoApp() {
       {/* MAIN CONTENT - Two Panels */}
       <div className="flex-1 flex overflow-hidden">
         {/* LEFT PANEL - Exclusive Tabs (45%) */}
-        <aside style={{ backgroundColor: 'var(--knar-charcoal)', borderRight: '0.5px solid var(--border)' }} className="w-[45%] overflow-y-auto">
+        <aside style={{ backgroundColor: 'var(--knar-charcoal)', borderRight: '0.5px solid var(--border)' }} className="w-[30%] overflow-y-auto">
           {/* Left Tab Buttons — underline pattern */}
           <div className="knar-tabs-inline flex-shrink-0">
             <button onClick={() => setLeftTabActive('configuracion')} className={`knar-tab-inline${leftTabActive === 'configuracion' ? ' active' : ''}`}>Configuración</button>
-            <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Censo</button>
+            <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Elementos de análisis</button>
             {/* <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button> */}
             <button onClick={() => setLeftTabActive('grupos')} className={`knar-tab-inline${leftTabActive === 'grupos' ? ' active' : ''}`}>Relaciones</button>
           </div>
@@ -1075,7 +1075,7 @@ export default function RiesgoApp() {
                       <h3 className="knar-card-title">Elementos de Análisis</h3>
                     </div>
                     <div className="knar-card-content space-y-2">
-                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Registro directo</button>
+                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-ghost justify-start">Registro directo</button>
                       <button onClick={() => setMetodologiaSeleccionada('hazop')} className="w-full knar-btn knar-btn-ghost justify-start">HAZOP</button>
                       <button onClick={() => setMetodologiaSeleccionada('fmea')} className="w-full knar-btn knar-btn-ghost justify-start">FMEA</button>
                       <button onClick={() => setMetodologiaSeleccionada('lopa')} className="w-full knar-btn knar-btn-ghost justify-start">LOPA</button>
