@@ -296,11 +296,12 @@ export default function EsquematicoPanel({
   // Apply analisis filter on top of group filter
   const markersFiltrados = useMemo(() => {
     if (!analisisFiltroActivo) return markersConGrupoFiltro;
+    const hallazgos = sesion?.hallazgos ?? [];
     return markersConGrupoFiltro.filter((h) => {
-      const hallazgo = sesion.hallazgos.find((s) => s.id === h.id);
+      const hallazgo = hallazgos.find((s) => s.id === h.id);
       return hallazgo?.analisisOrigenIds?.includes(analisisFiltroActivo) ?? false;
     });
-  }, [markersConGrupoFiltro, analisisFiltroActivo, sesion.hallazgos]);
+  }, [markersConGrupoFiltro, analisisFiltroActivo, sesion?.hallazgos]);
 
   // Count hallazgos por grupo
   const gruposCount = useMemo(() => {
@@ -317,14 +318,15 @@ export default function EsquematicoPanel({
   // Count hallazgos por analisis
   const analisisCount = useMemo(() => {
     const counts: Record<string, number> = {};
-    sesion.analisis.forEach((a) => {
+    const hallazgos = sesion?.hallazgos ?? [];
+    (sesion?.analisis ?? []).forEach((a) => {
       counts[a.base.id] = allMarkers.filter((h) => {
-        const hallazgo = sesion.hallazgos.find((s) => s.id === h.id);
+        const hallazgo = hallazgos.find((s) => s.id === h.id);
         return hallazgo?.analisisOrigenIds?.includes(a.base.id) ?? false;
       }).length;
     });
     return counts;
-  }, [allMarkers, sesion.analisis, sesion.hallazgos]);
+  }, [allMarkers, sesion?.analisis, sesion?.hallazgos]);
 
   const isEditMode = ubicacionEditando !== null;
   const zoomPct = Math.round(zoom * 100);
@@ -566,12 +568,12 @@ export default function EsquematicoPanel({
         )}
 
         {/* Analisis filter divider */}
-        {sesion.analisis.length > 0 && (
+        {(sesion?.analisis?.length ?? 0) > 0 && (
           <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
         )}
 
         {/* Analisis filter dropdown */}
-        {sesion.analisis.length > 0 && (
+        {(sesion?.analisis?.length ?? 0) > 0 && (
           <select
             value={analisisFiltroActivo ?? ''}
             onChange={(e) => setAnalisisFiltroActivo(e.target.value || null)}
@@ -589,7 +591,7 @@ export default function EsquematicoPanel({
             }}
           >
             <option value="">Análisis: todos</option>
-            {sesion.analisis.map((analisis) => {
+            {(sesion?.analisis ?? []).map((analisis) => {
               const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
               const count = analisisCount[analisis.base.id] || 0;
               const label = analisis.base.nombre
