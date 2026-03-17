@@ -84,11 +84,12 @@ export default function EsquematicoPanel({
   // Group filter state (multi-select)
   const [grupoFiltrosActivos, setGrupoFiltrosActivos] = useState<string[]>([]);
 
-  // Analisis filter state
-  const [analisisFiltroActivo, setAnalisisFiltroActivo] = useState<string | null>(null);
+  // Analisis filter state (multi-select)
+  const [analisisFiltrosActivos, setAnalisisFiltrosActivos] = useState<string[]>([]);
 
   // Dropdown state
   const [grupoDropdownOpen, setGrupoDropdownOpen] = useState(false);
+  const [analisisDropdownOpen, setAnalisisDropdownOpen] = useState(false);
 
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
@@ -105,11 +106,15 @@ export default function EsquematicoPanel({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const analisisDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
       setGrupoDropdownOpen(false);
+    }
+    if (analisisDropdownRef.current && !analisisDropdownRef.current.contains(event.target as Node)) {
+      setAnalisisDropdownOpen(false);
     }
   }, []);
 
@@ -326,15 +331,29 @@ export default function EsquematicoPanel({
     setGrupoFiltrosActivos([]);
   }, []);
 
-  // Apply analisis filter on top of group filter
+  // Apply analisis filter on top of group filter (multi-select)
   const markersFiltrados = useMemo(() => {
-    if (!analisisFiltroActivo) return markersConGrupoFiltro;
+    if (analisisFiltrosActivos.length === 0) return markersConGrupoFiltro;
     const hallazgos = sesion?.hallazgos ?? [];
     return markersConGrupoFiltro.filter((h) => {
       const hallazgo = hallazgos.find((s) => s.id === h.id);
-      return hallazgo?.analisisOrigenIds?.includes(analisisFiltroActivo) ?? false;
+      return analisisFiltrosActivos.some((id) => hallazgo?.analisisOrigenIds?.includes(id) ?? false);
     });
-  }, [markersConGrupoFiltro, analisisFiltroActivo, sesion?.hallazgos]);
+  }, [markersConGrupoFiltro, analisisFiltrosActivos, sesion?.hallazgos]);
+
+  // Toggle analisis filter selection
+  const toggleAnalisisFiltro = useCallback((analisisId: string) => {
+    setAnalisisFiltrosActivos((prev) =>
+      prev.includes(analisisId)
+        ? prev.filter((id) => id !== analisisId)
+        : [...prev, analisisId]
+    );
+  }, []);
+
+  // Clear analisis filters
+  const clearAnalisisFiltros = useCallback(() => {
+    setAnalisisFiltrosActivos([]);
+  }, []);
 
   // Count hallazgos por grupo
   const gruposCount = useMemo(() => {
@@ -723,43 +742,183 @@ export default function EsquematicoPanel({
           </div>
         )}
 
-        {/* Analisis filter divider */}
+        {/* Elementos de análisis filter divider */}
         {(sesion?.analisis?.length ?? 0) > 0 && (
           <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
         )}
 
-        {/* Analisis filter dropdown */}
+        {/* Elementos de análisis filter dropdown (multi-select) */}
         {(sesion?.analisis?.length ?? 0) > 0 && (
-          <select
-            value={analisisFiltroActivo ?? ''}
-            onChange={(e) => setAnalisisFiltroActivo(e.target.value || null)}
-            style={{
-              fontSize: '11px',
-              fontWeight: 300,
-              color: analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--text-muted)',
-              background: analisisFiltroActivo ? 'rgba(255,140,0,0.10)' : 'var(--surface-2)',
-              border: `0.5px solid ${analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--border-8)'}`,
-              borderRadius: '6px',
-              padding: '3px 8px',
-              outline: 'none',
-              cursor: 'pointer',
-              maxWidth: '200px',
-            }}
-          >
-            <option value="">Análisis: todos</option>
-            {(sesion?.analisis ?? []).map((analisis) => {
-              const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
-              const count = analisisCount[analisis.base.id] || 0;
-              const label = analisis.base.nombre
-                ? `${tipo} — ${analisis.base.nombre} (${count})`
-                : `${tipo} (${count})`;
-              return (
-                <option key={analisis.base.id} value={analisis.base.id}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
+          <div style={{ position: 'relative' }} ref={analisisDropdownRef}>
+            <button
+              onClick={() => setAnalisisDropdownOpen(!analisisDropdownOpen)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                fontWeight: 300,
+                color: analisisFiltrosActivos.length > 0 ? 'var(--knar-orange)' : 'var(--text-muted)',
+                background: analisisFiltrosActivos.length > 0 ? 'rgba(255,140,0,0.10)' : 'var(--knar-dark)',
+                border: `0.5px solid ${analisisFiltrosActivos.length > 0 ? 'var(--knar-orange)' : 'var(--border-8)'}`,
+                borderRadius: '6px',
+                padding: '3px 10px',
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+              title="Filtrar por elementos de análisis"
+            >
+              <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Elementos de análisis
+              {analisisFiltrosActivos.length > 0 && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '18px',
+                    height: '16px',
+                    padding: '0 5px',
+                    borderRadius: '9999px',
+                    fontSize: '10px',
+                    fontWeight: 400,
+                    background: 'var(--knar-orange)',
+                    color: 'white',
+                  }}
+                >
+                  {analisisFiltrosActivos.length}
+                </span>
+              )}
+              <svg style={{ width: '10px', height: '10px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={analisisDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+              </svg>
+            </button>
+
+            {/* Dropdown panel */}
+            {analisisDropdownOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  marginTop: '4px',
+                  zIndex: 100,
+                  minWidth: '240px',
+                  maxHeight: '280px',
+                  overflowY: 'auto',
+                  background: 'var(--knar-charcoal)',
+                  border: '0.5px solid var(--border-8)',
+                  borderRadius: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                  padding: '6px',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '6px 8px',
+                    borderBottom: '0.5px solid var(--border-8)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    Filtrar por análisis
+                  </span>
+                  {analisisFiltrosActivos.length > 0 && (
+                    <button
+                      onClick={clearAnalisisFiltros}
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 300,
+                        color: 'var(--knar-orange)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '2px 6px',
+                      }}
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+
+                {/* Options */}
+                {(sesion?.analisis ?? []).map((analisis) => {
+                  const checked = analisisFiltrosActivos.includes(analisis.base.id);
+                  const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
+                  const count = analisisCount[analisis.base.id] || 0;
+                  const nombre = analisis.base.nombre
+                    ? `${tipo} — ${analisis.base.nombre}`
+                    : tipo;
+                  return (
+                    <label
+                      key={analisis.base.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        background: checked ? 'rgba(255,140,0,0.12)' : 'transparent',
+                        border: checked ? '0.5px solid rgba(255,140,0,0.25)' : '0.5px solid transparent',
+                        transition: 'all 150ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!checked) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!checked) e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleAnalisisFiltro(analisis.base.id)}
+                        style={{
+                          width: '14px',
+                          height: '14px',
+                          cursor: 'pointer',
+                          accentColor: 'var(--knar-orange)',
+                        }}
+                      />
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: '11px',
+                          fontWeight: 300,
+                          color: checked ? 'var(--knar-orange)' : 'var(--text-primary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {nombre.length > 30 ? nombre.substring(0, 30) + '...' : nombre}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 400,
+                          color: checked ? 'var(--knar-orange)' : 'var(--text-muted)',
+                          background: checked ? 'rgba(255,140,0,0.18)' : 'rgba(255,255,255,0.06)',
+                          borderRadius: '9999px',
+                          padding: '1px 6px',
+                        }}
+                      >
+                        {count}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Marker count */}
@@ -817,6 +976,45 @@ export default function EsquematicoPanel({
           </span>
           <button
             onClick={clearGrupoFiltros}
+            style={{
+              marginLeft: 'auto',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--knar-orange)',
+              padding: '2px 6px',
+              fontSize: '11px',
+              fontWeight: 300,
+              transition: 'color 150ms ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#ff8800'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--knar-orange)'}
+          >
+            Limpiar filtro
+          </button>
+        </div>
+      )}
+
+      {/* ── Analisis filter banner ───────────────────────────────────────── */}
+      {analisisFiltrosActivos.length > 0 && (
+        <div
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-1.5"
+          style={{
+            background: 'rgba(255,140,0,0.08)',
+            borderBottom: '0.5px solid rgba(255,140,0,0.2)',
+          }}
+        >
+          <svg style={{ width: '14px', height: '14px', color: 'var(--knar-orange)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)' }}>
+            Filtrando por <strong>{analisisFiltrosActivos.length}</strong> elemento{analisisFiltrosActivos.length !== 1 ? 's' : ''} de análisis
+          </span>
+          <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
+            ({markersFiltrados.filter(h => h.ubicacion).length} entidades mostradas)
+          </span>
+          <button
+            onClick={clearAnalisisFiltros}
             style={{
               marginLeft: 'auto',
               background: 'none',
@@ -1013,7 +1211,7 @@ export default function EsquematicoPanel({
             </div>
           )}
 
-          {/* ── Zoom controls overlay — bottom-right ──────────────────────── */}
+          {/* ── Zoom controls overlay — bottom-right ────────────────────��─── */}
           <div
             style={{
               position: 'absolute',
