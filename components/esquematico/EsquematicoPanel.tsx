@@ -26,15 +26,15 @@ export interface EsquematicoPanelProps {
 const MARKER_COLORS: Record<TipoHallazgo, string> = {
   Peligro: '#ef4444',
   Barrera: '#3b82f6',
-  POE:     '#10b981',
-  SOL:     '#8b5cf6',
+  POE: '#10b981',
+  SOL: '#8b5cf6',
 };
 
 const MARKER_LABELS: Record<TipoHallazgo, string> = {
   Peligro: 'P',
   Barrera: 'B',
-  POE:     'E',
-  SOL:     'S',
+  POE: 'E',
+  SOL: 'S',
 };
 
 const TIPOS: TipoHallazgo[] = ['Peligro', 'Barrera', 'POE', 'SOL'];
@@ -594,7 +594,7 @@ export default function EsquematicoPanel({
             }}
           />
           <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-              Viendo relación: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
+            Viendo relación: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
             ({gruposCount[grupoFiltroActivo] || 0} entidades)
@@ -1020,7 +1020,7 @@ function MarkerTooltip({ hallazgo, pos, onClose, grupos }: MarkerTooltipProps) {
             }}
           >
             <p style={{ fontSize: '9px', fontWeight: 400, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Relaciones de Protección
+              Relaciones
             </p>
             {grupos.map((grupo) => (
               <div
