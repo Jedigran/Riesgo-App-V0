@@ -207,7 +207,7 @@ export default function GrupoForm({
           </svg>
         </div>
         <h3 className="knar-card-title">
-          {grupoExistente ? 'Editar Relación de Protección' : 'Nueva Relación de Protección'}
+          {grupoExistente ? 'Editar Relación' : 'Nueva Relación'}
         </h3>
       </div>
       
@@ -293,7 +293,7 @@ export default function GrupoForm({
           <textarea
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Describa el propósito de esta relación de protección..."
+            placeholder="Describa el propósito de esta relación..."
             rows={2}
             style={{
               width: '100%',

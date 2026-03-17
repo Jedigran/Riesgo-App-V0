@@ -77,7 +77,7 @@ export default function GrupoTabla({
             color: 'var(--text-muted)',
           }}
         >
-          No hay relaciones de protección creadas
+          No hay relaciones creadas
         </p>
       </div>
     );

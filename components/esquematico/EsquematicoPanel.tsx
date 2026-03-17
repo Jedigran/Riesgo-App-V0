@@ -1062,7 +1062,7 @@ function MarkerTooltip({ hallazgo, pos, onClose, grupos }: MarkerTooltipProps) {
             }}
           >
             <p style={{ fontSize: '9px', fontWeight: 300, color: 'var(--text-disabled)', fontStyle: 'italic' }}>
-              Sin relaciones de protección
+              Sin relaciones
             </p>
           </div>
         )}
