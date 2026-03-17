@@ -67,11 +67,7 @@ function CamposEspecificos({ hallazgo }: { hallazgo: Hallazgo }) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {/* Common fields */}
-      <div className="flex flex-col gap-1">
-        <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>Título</span>
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 400 }}>{hallazgo.titulo}</span>
-      </div>
+      {/* Description — shown in full since it's truncated in the row */}
       <div className="flex flex-col gap-1 col-span-2">
         <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>Descripción</span>
         <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 300 }}>{hallazgo.descripcion}</span>
@@ -395,14 +391,6 @@ export default function TablaHallazgos() {
                             }}
                           >
                             <div className="max-w-5xl mx-auto space-y-4">
-                              {/* Type badge + title */}
-                              <div className="flex items-center gap-3 pb-3" style={{ borderBottom: '0.5px solid var(--border)' }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
-                                <h4 style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--text-primary)' }}>
-                                  {hallazgo.tipo} — {hallazgo.titulo}
-                                </h4>
-                              </div>
-
                               {/* All fields */}
                               <CamposEspecificos hallazgo={hallazgo} />
 
