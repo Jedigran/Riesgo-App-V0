@@ -94,6 +94,15 @@ export default function EsquematicoPanel({
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
 
+  // Image fit mode ('contain' | 'cover')
+  const [imagenFitMode, setImagenFitMode] = useState<'contain' | 'cover'>('contain');
+
+  // Image loading state
+  const [imagenCargada, setImagenCargada] = useState(false);
+
+  // Image natural dimensions
+  const [imagenDimensions, setImagenDimensions] = useState({ width: 0, height: 0 });
+
   // Drag-over-canvas state (for file drop)
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -231,7 +240,8 @@ export default function EsquematicoPanel({
     (e: React.WheelEvent<HTMLDivElement>) => {
       e.preventDefault();
       const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
-      actualizarZoom(zoom + delta);
+      const newZoom = Math.min(3, Math.max(0.5, zoom + delta));  // ← Zoom limits
+      actualizarZoom(newZoom);
     },
     [zoom, actualizarZoom]
   );
@@ -243,9 +253,22 @@ export default function EsquematicoPanel({
   const loadImageFile = useCallback(
     (file: File) => {
       if (!file.type.startsWith('image/')) return;
+      setImagenCargada(false);
+      
       const objectUrl = URL.createObjectURL(file);
       cambiarImagen(objectUrl);
       setImagenNombre(file.name);
+      
+      // Get image dimensions for dynamic height
+      const img = new Image();
+      img.onload = () => {
+        setImagenDimensions({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+        URL.revokeObjectURL(objectUrl);
+      };
+      img.src = objectUrl;
     },
     [cambiarImagen]
   );
@@ -1035,14 +1058,14 @@ export default function EsquematicoPanel({
       )}
 
       {/* ── Map canvas ───────────────────────────────────────────────���────── */}
-      <div className="knar-card-content flex-1" style={{ padding: '12px' }}>
+      <div className="knar-card-content flex-1" style={{ padding: '12px', height: 'calc(100vh - 180px)', minHeight: '500px' }}>
         <div
           ref={containerRef}
           style={{
             position: 'relative',
             overflow: 'hidden',
             borderRadius: '6px',
-            height: '420px',
+            height: '100%',
             background: 'var(--knar-dark)',
             border: isEditMode
               ? '1px solid rgba(59,130,246,0.35)'
@@ -1060,7 +1083,7 @@ export default function EsquematicoPanel({
           <div
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-              transformOrigin: '0 0',
+              transformOrigin: 'center center',
               width: '100%',
               height: '100%',
               position: 'relative',
@@ -1072,8 +1095,23 @@ export default function EsquematicoPanel({
               src={imagenActual || '/ReferenceIamge/Sistema Bombas de Achique_V2.png'}
               alt="Diagrama del sistema"
               draggable={false}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-              onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
+              onLoad={(e) => {
+                const img = e.target as HTMLImageElement;
+                setImagenDimensions({
+                  width: img.naturalWidth,
+                  height: img.naturalHeight
+                });
+                setImagenCargada(true);
+              }}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: imagenFitMode,
+                display: 'block'
+              }}
+              onError={(e) => { 
+                (e.target as HTMLImageElement).style.opacity = '0';
+              }}
             />
 
             {/* Hallazgo markers */}
@@ -1225,9 +1263,32 @@ export default function EsquematicoPanel({
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
+            {/* Fit mode toggle */}
+            <button
+              onClick={() => setImagenFitMode(imagenFitMode === 'contain' ? 'cover' : 'contain')}
+              title={imagenFitMode === 'contain' ? 'Ajustar: Contener' : 'Ajustar: Llenar'}
+              style={{
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: imagenFitMode === 'contain' ? 'var(--knar-charcoal)' : 'rgba(255,140,0,0.15)',
+                border: `0.5px solid ${imagenFitMode === 'contain' ? 'var(--border-10)' : 'var(--knar-orange)'}`,
+                borderRadius: '4px',
+                color: imagenFitMode === 'contain' ? 'var(--text-secondary)' : 'var(--knar-orange)',
+                fontSize: '10px',
+                fontWeight: 400,
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+            >
+              {imagenFitMode === 'contain' ? '▢' : '◫'}
+            </button>
+
             {/* Zoom in */}
             <button
-              onClick={() => actualizarZoom(zoom + ZOOM_STEP)}
+              onClick={() => actualizarZoom(Math.min(3, zoom + ZOOM_STEP))}
               title="Acercar"
               style={{
                 width: '26px',
@@ -1269,7 +1330,7 @@ export default function EsquematicoPanel({
 
             {/* Zoom out */}
             <button
-              onClick={() => actualizarZoom(zoom - ZOOM_STEP)}
+              onClick={() => actualizarZoom(Math.max(0.5, zoom - ZOOM_STEP))}
               title="Alejar"
               style={{
                 width: '26px',
