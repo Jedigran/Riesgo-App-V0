@@ -1119,10 +1119,6 @@ export default function RiesgoApp() {
         agregarError({ severidad: 'error', mensaje: 'Complete los campos requeridos de HAZOP' });
         return;
       }
-      if (hallazgosForm.length === 0) {
-        agregarError({ severidad: 'warning', mensaje: 'Agregue al menos una entidad' });
-        return;
-      }
 
       try {
         const resultadoAnalisis = crearAnalisisHAZOP({
@@ -1142,8 +1138,20 @@ export default function RiesgoApp() {
           return;
         }
 
-        crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        // Create entities only if they exist
+        if (hallazgosForm.length > 0) {
+          crearHallazgosDeFormulario(resultadoAnalisis.id);
+        }
+
+        const entidadesCount = hallazgosForm.length;
+        agregarNotificacion({ 
+          tipo: 'success', 
+          titulo: 'HAZOP Guardado', 
+          mensaje: entidadesCount > 0 
+            ? `Análisis y ${entidadesCount} entidades guardadas`
+            : 'Análisis guardado (puede agregar entidades después)', 
+          duracion: 3000 
+        });
         setHazopData({
           nodo: '',
           subnodo: '',
@@ -1188,8 +1196,20 @@ export default function RiesgoApp() {
           return;
         }
 
-        crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        // Create entities only if they exist
+        if (hallazgosForm.length > 0) {
+          crearHallazgosDeFormulario(resultadoAnalisis.id);
+        }
+
+        const entidadesCount = hallazgosForm.length;
+        agregarNotificacion({ 
+          tipo: 'success', 
+          titulo: 'FMEA Guardado', 
+          mensaje: entidadesCount > 0 
+            ? `Análisis y ${entidadesCount} entidades guardadas`
+            : 'Análisis guardado (puede agregar entidades después)', 
+          duracion: 3000 
+        });
         setFmeaData({
           equipo: '',
           funcion: '',
@@ -1244,8 +1264,20 @@ export default function RiesgoApp() {
           return;
         }
 
-        crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        // Create entities only if they exist
+        if (hallazgosForm.length > 0) {
+          crearHallazgosDeFormulario(resultadoAnalisis.id);
+        }
+
+        const entidadesCount = hallazgosForm.length;
+        agregarNotificacion({ 
+          tipo: 'success', 
+          titulo: 'LOPA Guardado', 
+          mensaje: entidadesCount > 0 
+            ? `Análisis y ${entidadesCount} entidades guardadas`
+            : 'Análisis guardado (puede agregar entidades después)', 
+          duracion: 3000 
+        });
         setLopaData({
           escenario: '',
           consecuencia: '',
@@ -1316,8 +1348,20 @@ export default function RiesgoApp() {
           return;
         }
 
-        crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        // Create entities only if they exist
+        if (hallazgosForm.length > 0) {
+          crearHallazgosDeFormulario(resultadoAnalisis.id);
+        }
+
+        const entidadesCount = hallazgosForm.length;
+        agregarNotificacion({ 
+          tipo: 'success', 
+          titulo: 'OCA Guardado', 
+          mensaje: entidadesCount > 0 
+            ? `Análisis y ${entidadesCount} entidades guardadas`
+            : 'Análisis guardado (puede agregar entidades después)', 
+          duracion: 3000 
+        });
         setOcaData({
           compuesto: 'H2S',
           cantidad: 1000,
@@ -1363,8 +1407,20 @@ export default function RiesgoApp() {
           return;
         }
 
-        crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'Registro directo Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        // Create entities only if they exist
+        if (hallazgosForm.length > 0) {
+          crearHallazgosDeFormulario(resultadoAnalisis.id);
+        }
+
+        const entidadesCount = hallazgosForm.length;
+        agregarNotificacion({ 
+          tipo: 'success', 
+          titulo: 'Registro directo Guardado', 
+          mensaje: entidadesCount > 0 
+            ? `Análisis y ${entidadesCount} entidades guardadas`
+            : 'Análisis guardado (puede agregar entidades después)', 
+          duracion: 3000 
+        });
         setIntuicionData({ descripcion: '', observaciones: [''] });
         resetFormState();
       } catch (error) {
@@ -2238,7 +2294,7 @@ export default function RiesgoApp() {
                     <div className="knar-card">
                       <div className="knar-card-header">
                         <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg></div>
-                        <h3 className="knar-card-title">Crear Entidades</h3>
+                        <h3 className="knar-card-title">Crear Entidades (opcional)</h3>
                       </div>
                       <div className="knar-card-content space-y-4">
                         <div className="flex items-center space-x-2">

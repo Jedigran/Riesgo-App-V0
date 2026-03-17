@@ -484,7 +484,13 @@ export default function TablaAnalisis() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-knar-text-muted font-mono">
-                          {new Date(analisis.base.fechaCreacion).toLocaleDateString('es-ES')}
+                          {new Date(analisis.base.fechaCreacion).toLocaleString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
                         </span>
                       </td>
                     </tr>
