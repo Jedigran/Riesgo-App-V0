@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState, useMemo } from 'react';
+import { useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import { useMapa } from '@/src/controllers/useMapa';
 import { useFiltrosHallazgos } from '@/src/controllers/useFiltrosHallazgos';
 import { useGrupo } from '@/src/controllers/useGrupo';
@@ -81,11 +81,14 @@ export default function EsquematicoPanel({
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [tooltipGrupos, setTooltipGrupos] = useState<any[]>([]);
 
-  // Group filter state
-  const [grupoFiltroActivo, setGrupoFiltroActivo] = useState<string | null>(null);
+  // Group filter state (multi-select)
+  const [grupoFiltrosActivos, setGrupoFiltrosActivos] = useState<string[]>([]);
 
   // Analisis filter state
   const [analisisFiltroActivo, setAnalisisFiltroActivo] = useState<string | null>(null);
+
+  // Dropdown state
+  const [grupoDropdownOpen, setGrupoDropdownOpen] = useState(false);
 
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
@@ -101,6 +104,22 @@ export default function EsquematicoPanel({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setGrupoDropdownOpen(false);
+    }
+  }, []);
+
+  // Register click outside listener
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
 
   // ============================================================================
   // DERIVED DATA - Group mapping (needed before callbacks)
@@ -284,14 +303,28 @@ export default function EsquematicoPanel({
     return map;
   }, [allMarkers, obtenerGruposPorHallazgo]);
 
-  // Apply group filter
+  // Apply group filter (multi-select)
   const markersConGrupoFiltro = useMemo(() => {
-    if (!grupoFiltroActivo) return allMarkers;
+    if (grupoFiltrosActivos.length === 0) return allMarkers;
     return allMarkers.filter((h) => {
       const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
-      return gruposDelHallazgo.some((g) => g.id === grupoFiltroActivo);
+      return gruposDelHallazgo.some((g) => grupoFiltrosActivos.includes(g.id));
     });
-  }, [allMarkers, grupoFiltroActivo, markersConGrupos]);
+  }, [allMarkers, grupoFiltrosActivos, markersConGrupos]);
+
+  // Toggle group filter selection
+  const toggleGrupoFiltro = useCallback((grupoId: string) => {
+    setGrupoFiltrosActivos((prev) =>
+      prev.includes(grupoId)
+        ? prev.filter((id) => id !== grupoId)
+        : [...prev, grupoId]
+    );
+  }, []);
+
+  // Clear group filters
+  const clearGrupoFiltros = useCallback(() => {
+    setGrupoFiltrosActivos([]);
+  }, []);
 
   // Apply analisis filter on top of group filter
   const markersFiltrados = useMemo(() => {
@@ -499,72 +532,195 @@ export default function EsquematicoPanel({
           <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
         )}
 
-        {/* Group filter pills */}
+        {/* Group filter dropdown (multi-select) */}
         {grupos.length > 0 && (
-          <>
-            <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Relaciones:
-            </span>
-            {grupos.map((grupo) => {
-              const active = grupoFiltroActivo === grupo.id;
-              const count = gruposCount[grupo.id] || 0;
-              return (
-                <button
-                  key={grupo.id}
-                  onClick={() => setGrupoFiltroActivo(active ? null : grupo.id)}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setGrupoDropdownOpen(!grupoDropdownOpen)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                fontWeight: 300,
+                color: grupoFiltrosActivos.length > 0 ? 'var(--knar-orange)' : 'var(--text-muted)',
+                background: grupoFiltrosActivos.length > 0 ? 'rgba(255,140,0,0.10)' : 'var(--knar-dark)',
+                border: `0.5px solid ${grupoFiltrosActivos.length > 0 ? 'var(--knar-orange)' : 'var(--border-8)'}`,
+                borderRadius: '6px',
+                padding: '3px 10px',
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+              title="Filtrar por relaciones"
+            >
+              <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+              </svg>
+              Relaciones
+              {grupoFiltrosActivos.length > 0 && (
+                <span
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    padding: '3px 8px',
+                    justifyContent: 'center',
+                    minWidth: '18px',
+                    height: '16px',
+                    padding: '0 5px',
                     borderRadius: '9999px',
-                    border: `0.5px solid ${active ? grupo.color : 'var(--border-8)'}`,
-                    backgroundColor: active ? `${grupo.color}20` : 'transparent',
-                    color: active ? grupo.color : 'var(--text-muted)',
-                    fontSize: '11px',
-                    fontWeight: 300,
-                    cursor: 'pointer',
-                    transition: 'all 150ms ease',
-                    whiteSpace: 'nowrap',
+                    fontSize: '10px',
+                    fontWeight: 400,
+                    background: 'var(--knar-orange)',
+                    color: 'white',
                   }}
-                  title={`Filtrar por relación: ${grupo.nombre}`}
                 >
-                  {/* Color square */}
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '1px',
-                      flexShrink: 0,
-                      background: active ? grupo.color : 'var(--text-disabled)',
-                      boxShadow: active ? `0 0 4px ${grupo.color}60` : 'none',
-                    }}
-                  />
-                  {grupo.nombre.length > 15 ? grupo.nombre.substring(0, 15) + '...' : grupo.nombre}
-                  {/* Count badge */}
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: '16px',
-                      height: '14px',
-                      padding: '0 4px',
-                      borderRadius: '9999px',
-                      fontSize: '10px',
-                      fontWeight: 400,
-                      background: active ? `${grupo.color}30` : 'rgba(255,255,255,0.06)',
-                      color: active ? grupo.color : 'var(--text-muted)',
-                      border: `0.5px solid ${active ? `${grupo.color}40` : 'var(--border-6)'}`,
-                    }}
-                  >
-                    {count}
+                  {grupoFiltrosActivos.length}
+                </span>
+              )}
+              <svg style={{ width: '10px', height: '10px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={grupoDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+              </svg>
+            </button>
+
+            {/* Dropdown menu */}
+            {grupoDropdownOpen && (
+              <div
+                ref={dropdownRef}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  marginTop: '4px',
+                  zIndex: 100,
+                  minWidth: '220px',
+                  maxHeight: '280px',
+                  overflowY: 'auto',
+                  background: 'var(--knar-charcoal)',
+                  border: '0.5px solid var(--border-8)',
+                  borderRadius: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                  padding: '6px',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '6px 8px',
+                    borderBottom: '0.5px solid var(--border-8)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    Filtrar por relación
                   </span>
-                </button>
-              );
-            })}
-          </>
+                  {grupoFiltrosActivos.length > 0 && (
+                    <button
+                      onClick={clearGrupoFiltros}
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 300,
+                        color: 'var(--knar-orange)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '2px 6px',
+                      }}
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+
+                {/* Options */}
+                {grupos.map((grupo) => {
+                  const checked = grupoFiltrosActivos.includes(grupo.id);
+                  const count = gruposCount[grupo.id] || 0;
+                  return (
+                    <label
+                      key={grupo.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        background: checked ? `${grupo.color}15` : 'transparent',
+                        border: checked ? `0.5px solid ${grupo.color}30` : '0.5px solid transparent',
+                        transition: 'all 150ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!checked) {
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!checked) {
+                          e.currentTarget.style.background = 'transparent';
+                        }
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleGrupoFiltro(grupo.id)}
+                        style={{
+                          width: '14px',
+                          height: '14px',
+                          cursor: 'pointer',
+                          accentColor: grupo.color,
+                        }}
+                      />
+                      <span
+                        style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '2px',
+                          background: grupo.color,
+                          boxShadow: checked ? `0 0 4px ${grupo.color}60` : 'none',
+                        }}
+                      />
+                      <span
+                        style={{
+                          flex: 1,
+                          fontSize: '11px',
+                          fontWeight: 300,
+                          color: checked ? grupo.color : 'var(--text-primary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {grupo.nombre.length > 25 ? grupo.nombre.substring(0, 25) + '...' : grupo.nombre}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 400,
+                          color: checked ? grupo.color : 'var(--text-muted)',
+                          background: checked ? `${grupo.color}22` : 'rgba(255,255,255,0.06)',
+                          borderRadius: '9999px',
+                          padding: '1px 6px',
+                        }}
+                      >
+                        {count}
+                      </span>
+                    </label>
+                  );
+                })}
+
+                {/* Footer */}
+                {grupos.length === 0 && (
+                  <p style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)', padding: '12px', textAlign: 'center' }}>
+                    No hay relaciones creadas
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Analisis filter divider */}
@@ -642,45 +798,38 @@ export default function EsquematicoPanel({
       )}
 
       {/* ── Group filter banner ───────────────────────────────────────────── */}
-      {grupoFiltroActivo && (
+      {grupoFiltrosActivos.length > 0 && (
         <div
           className="flex-shrink-0 flex items-center gap-2 px-4 py-1.5"
           style={{
-            background: `rgba(${grupos.find(g => g.id === grupoFiltroActivo)?.color || '59,130,246'}15)`,
-            borderBottom: `0.5px solid ${grupos.find(g => g.id === grupoFiltroActivo)?.color || 'rgba(59,130,246,0.18)'}`,
+            background: 'rgba(255,140,0,0.08)',
+            borderBottom: '0.5px solid rgba(255,140,0,0.2)',
           }}
         >
-          <div
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '2px',
-              background: grupos.find(g => g.id === grupoFiltroActivo)?.color || '#3b82f6',
-              boxShadow: `0 0 6px ${grupos.find(g => g.id === grupoFiltroActivo)?.color || '#3b82f6'}60`,
-              flexShrink: 0,
-            }}
-          />
+          <svg style={{ width: '14px', height: '14px', color: 'var(--knar-orange)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+          </svg>
           <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-            Viendo relación: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
+            Filtrando por <strong>{grupoFiltrosActivos.length}</strong> relación{grupoFiltrosActivos.length !== 1 ? 'es' : ''}
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
-            ({gruposCount[grupoFiltroActivo] || 0} entidades)
+            ({markersConGrupoFiltro.filter(h => h.ubicacion).length} entidades mostradas)
           </span>
           <button
-            onClick={() => setGrupoFiltroActivo(null)}
+            onClick={clearGrupoFiltros}
             style={{
               marginLeft: 'auto',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: 'var(--text-muted)',
+              color: 'var(--knar-orange)',
               padding: '2px 6px',
               fontSize: '11px',
               fontWeight: 300,
               transition: 'color 150ms ease',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#ff8800'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--knar-orange)'}
           >
             Limpiar filtro
           </button>
@@ -738,7 +887,7 @@ export default function EsquematicoPanel({
               const isActive = tooltipHallazgo?.id === h.id;
               const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
               const tieneGrupos = gruposDelHallazgo.length > 0;
-              const estaEnFiltro = grupoFiltroActivo && gruposDelHallazgo.some(g => g.id === grupoFiltroActivo);
+              const estaEnFiltro = grupoFiltrosActivos.length > 0 && gruposDelHallazgo.some(g => grupoFiltrosActivos.includes(g.id));
 
               return (
                 <div

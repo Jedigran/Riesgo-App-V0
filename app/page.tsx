@@ -2003,7 +2003,15 @@ export default function RiesgoApp() {
                                   <div>
                                     <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Ubicación</label>
                                     <div className="flex items-center space-x-2">
-                                      <button onClick={() => setUbicacionEditando(hallazgo.id)} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${ubicacionEditando === hallazgo.id ? 'bg-blue-500 text-white' : 'bg-knar-charcoal text-knar-text-secondary hover:text-knar-text-primary'}`}>🗺️ {hallazgo.ubicacion ? 'Cambiar ubicación' : 'Ubicar en mapa'}</button>
+                                      <button
+                                        onClick={() => {
+                                          setUbicacionEditando(hallazgo.id);
+                                          setRightTabActive('esquematico');
+                                        }}
+                                        className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${ubicacionEditando === hallazgo.id ? 'bg-blue-500 text-white' : 'bg-knar-charcoal text-knar-text-secondary hover:text-knar-text-primary'}`}
+                                      >
+                                        🗺️ {hallazgo.ubicacion ? 'Cambiar ubicación' : 'Ubicar en mapa'}
+                                      </button>
                                       {hallazgo.ubicacion && (<span className="text-xs text-knar-text-muted">({hallazgo.ubicacion.x}, {hallazgo.ubicacion.y})</span>)}
                                     </div>
                                   </div>
