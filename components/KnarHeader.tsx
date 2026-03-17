@@ -97,7 +97,7 @@ export function KnarHeader({
 
       {/* Right — tabs slot or optional project context */}
       {rightContent ? (
-        <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", alignSelf: "stretch" }}>
           {rightContent}
         </div>
       ) : (contextLeft || contextRight) ? (
