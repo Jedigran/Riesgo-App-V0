@@ -25,7 +25,7 @@ import { useHallazgo } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useSesion } from '@/src/controllers/useSesion';
 import { useGrupo } from '@/src/controllers/useGrupo';
-import { SiteHeader } from '@/components';
+import { KnarHeader } from '@/components/KnarHeader';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
@@ -985,27 +985,20 @@ export default function RiesgoApp() {
   return (
     <div className="h-screen flex flex-col bg-knar-dark font-sans overflow-hidden">
       {/* HEADER */}
-      <header style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }} className="px-6 py-3 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <svg style={{ color: 'var(--accent)' }} className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>Risk-Sensus</h1>
-            </div>
-            <span style={{ width: '1px', height: '14px', backgroundColor: 'var(--border)', display: 'inline-block' }} />
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Sesión Activa</span>
-          </div>
+      <KnarHeader
+        title="Risk-Sensus"
+        subtitle="Gestión de Riesgos de Proceso"
+        contextRight="Sesión Activa"
+      />
 
-          {/* Right Tab Switcher — underline pattern */}
-          <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
-            <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
-            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
-            <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
-          </div>
+      {/* RIGHT TAB SWITCHER */}
+      <div style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)', padding: '0 24px', flexShrink: 0 }}>
+        <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
+          <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
+          <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
+          <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
         </div>
-      </header>
+      </div>
 
       {/* MAIN CONTENT - Two Panels */}
       <div className="flex-1 flex overflow-hidden">
