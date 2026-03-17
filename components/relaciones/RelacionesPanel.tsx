@@ -165,7 +165,7 @@ export default function RelacionesPanel() {
           {/* Hallazgo Origen */}
           <div>
             <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-              Hallazgo Origen ({getIconoTipo(opcionesOrigen[0]?.tipo || 'Peligro')}) *
+              Entidad Origen ({getIconoTipo(opcionesOrigen[0]?.tipo || 'Peligro')}) *
             </label>
             <select
               value={origenId}
@@ -183,7 +183,7 @@ export default function RelacionesPanel() {
             </select>
             {opcionesOrigen.length === 0 && (
               <p className="mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                No hay {opcionesOrigen[0]?.tipo || 'hallazgos'} disponibles
+                No hay {opcionesOrigen[0]?.tipo || 'entidades'} disponibles
               </p>
             )}
           </div>
@@ -198,7 +198,7 @@ export default function RelacionesPanel() {
           {/* Hallazgo Destino */}
           <div>
             <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-              Hallazgo Destino ({getIconoTipo(opcionesDestino[0]?.tipo || 'Peligro')}) *
+              Entidad Destino ({getIconoTipo(opcionesDestino[0]?.tipo || 'Peligro')}) *
             </label>
             <select
               value={destinoId}
@@ -216,7 +216,7 @@ export default function RelacionesPanel() {
             </select>
             {opcionesDestino.length === 0 && (
               <p className="mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                No hay {opcionesDestino[0]?.tipo || 'hallazgos'} disponibles
+                No hay {opcionesDestino[0]?.tipo || 'entidades'} disponibles
               </p>
             )}
           </div>
@@ -332,7 +332,7 @@ export default function RelacionesPanel() {
               </svg>
             </div>
             <h3 className="knar-card-title">
-              Hallazgos sin Relaciones ({hallazgosHuerfanos().length})
+              Entidades sin Relaciones ({hallazgosHuerfanos().length})
             </h3>
           </div>
           <div className="knar-card-content">
@@ -347,7 +347,7 @@ export default function RelacionesPanel() {
               ))}
             </div>
             <p className="text-xs text-knar-text-muted mt-2">
-              Estos hallazgos no tienen relaciones. Considera crear relaciones para ellos.
+              Estas entidades no tienen relaciones. Considera crear relaciones para ellas.
             </p>
           </div>
         </div>

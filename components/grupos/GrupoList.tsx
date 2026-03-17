@@ -119,7 +119,7 @@ export default function GrupoList({
               d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="knar-card-title">Grupos de Protección</h3>
+        <h3 className="knar-card-title">Relaciones</h3>
         
         {/* Stats */}
         <div
@@ -137,7 +137,7 @@ export default function GrupoList({
               color: 'var(--text-muted)',
             }}
           >
-            {gruposFiltrados.length} grupo{gruposFiltrados.length !== 1 ? 's' : ''}
+            {gruposFiltrados.length} relación{gruposFiltrados.length !== 1 ? 'es' : ''}
           </span>
           <span
             style={{
@@ -258,7 +258,7 @@ export default function GrupoList({
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar grupos..."
+            placeholder="Buscar relaciones..."
             style={{
               width: '100%',
               paddingLeft: '28px',
@@ -371,8 +371,8 @@ export default function GrupoList({
               }}
             >
               {grupos.length === 0
-                ? 'No hay grupos de protección'
-                : 'No se encontraron grupos'}
+                ? 'No hay relaciones'
+                : 'No se encontraron relaciones'}
             </p>
             <p
               style={{
@@ -382,7 +382,7 @@ export default function GrupoList({
               }}
             >
               {grupos.length === 0
-                ? 'Crea un grupo para organizar tus hallazgos'
+                ? 'Crea una relación para organizar tus entidades'
                 : 'Intenta con otros filtros'}
             </p>
           </div>

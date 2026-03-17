@@ -60,8 +60,8 @@ export default function GruposPanel() {
       if (resultado.exito) {
         agregarNotificacion({
           tipo: 'success',
-          titulo: 'Grupo Creado',
-          mensaje: 'El grupo de protección se creó correctamente',
+          titulo: 'Relación Creada',
+          mensaje: 'La relación se creó correctamente',
           duracion: 3000,
         });
         setMostrarFormulario(false);
@@ -91,8 +91,8 @@ export default function GruposPanel() {
       if (resultado.exito) {
         agregarNotificacion({
           tipo: 'success',
-          titulo: 'Grupo Actualizado',
-          mensaje: 'El grupo se actualizó correctamente',
+          titulo: 'Relación Actualizada',
+          mensaje: 'La relación se actualizó correctamente',
           duracion: 3000,
         });
         setGrupoEditando(null);
@@ -110,15 +110,15 @@ export default function GruposPanel() {
   // Handle eliminar grupo
   const handleEliminarGrupo = useCallback(
     (grupoId: string) => {
-      if (!confirm('¿Está seguro de eliminar este grupo?')) return;
+      if (!confirm('¿Está seguro de eliminar esta relación?')) return;
 
       const resultado = eliminarGrupo(grupoId);
 
       if (resultado.exito) {
         agregarNotificacion({
           tipo: 'success',
-          titulo: 'Grupo Eliminado',
-          mensaje: 'El grupo se eliminó correctamente',
+          titulo: 'Relación Eliminada',
+          mensaje: 'La relación se eliminó correctamente',
           duracion: 3000,
         });
         if (grupoSeleccionadoId === grupoId) {
@@ -182,7 +182,7 @@ export default function GruposPanel() {
               d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="knar-card-title">Grupos de Protección</h3>
+        <h3 className="knar-card-title">Relaciones</h3>
 
         {/* Stats */}
         <div
@@ -194,7 +194,7 @@ export default function GruposPanel() {
           }}
         >
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)' }}>
-            {grupos.length} grupo{grupos.length !== 1 ? 's' : ''}
+            {grupos.length} relación{grupos.length !== 1 ? 'es' : ''}
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-disabled)' }}>
             •
@@ -241,7 +241,7 @@ export default function GruposPanel() {
             <svg style={{ width: '14px', height: '14px', marginRight: '4px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Nuevo Grupo
+            Nueva Relación
           </button>
         </div>
       </div>
@@ -290,8 +290,8 @@ export default function GruposPanel() {
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span style={{ fontSize: '10px', fontWeight: 300, color: '#fbbf24' }}>
-                  {hallazgosSinGrupo().length} hallazgo{hallazgosSinGrupo().length !== 1 ? 's' : ''} sin grupo. 
-                  Considera crear grupos para organizar mejor tus hallazgos.
+                  {hallazgosSinGrupo().length} entidad{hallazgosSinGrupo().length !== 1 ? 'es' : ''} sin relación. 
+                  Considera crear relaciones para organizar mejor tus entidades.
                 </span>
               </div>
             </div>
@@ -353,7 +353,7 @@ export default function GruposPanel() {
                   marginBottom: '8px',
                 }}
               >
-                No hay grupos de protección
+                No hay relaciones
               </p>
               <p
                 style={{
@@ -363,8 +363,8 @@ export default function GruposPanel() {
                   maxWidth: '400px',
                 }}
               >
-                Los grupos te permiten organizar tus hallazgos en sistemas de protección coherentes. 
-                Cada grupo puede contener múltiples peligros y sus respectivos protectores.
+                Las relaciones te permiten organizar tus entidades en sistemas de protección coherentes. 
+                Cada relación puede contener múltiples peligros y sus respectivos protectores.
               </p>
               <button
                 onClick={() => {
@@ -377,7 +377,7 @@ export default function GruposPanel() {
                 <svg style={{ width: '14px', height: '14px', marginRight: '6px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Crear Primer Grupo
+                Crear Primera Relación
               </button>
             </div>
           )}

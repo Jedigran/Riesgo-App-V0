@@ -26,15 +26,15 @@ export interface EsquematicoPanelProps {
 const MARKER_COLORS: Record<TipoHallazgo, string> = {
   Peligro: '#ef4444',
   Barrera: '#3b82f6',
-  POE:     '#10b981',
-  SOL:     '#8b5cf6',
+  POE: '#10b981',
+  SOL: '#8b5cf6',
 };
 
 const MARKER_LABELS: Record<TipoHallazgo, string> = {
   Peligro: 'P',
   Barrera: 'B',
-  POE:     'E',
-  SOL:     'S',
+  POE: 'E',
+  SOL: 'S',
 };
 
 const TIPOS: TipoHallazgo[] = ['Peligro', 'Barrera', 'POE', 'SOL'];
@@ -475,7 +475,7 @@ export default function EsquematicoPanel({
         {grupos.length > 0 && (
           <>
             <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Grupos:
+              Relaciones:
             </span>
             {grupos.map((grupo) => {
               const active = grupoFiltroActivo === grupo.id;
@@ -499,7 +499,7 @@ export default function EsquematicoPanel({
                     transition: 'all 150ms ease',
                     whiteSpace: 'nowrap',
                   }}
-                  title={`Filtrar por grupo: ${grupo.nombre}`}
+                  title={`Filtrar por relación: ${grupo.nombre}`}
                 >
                   {/* Color square */}
                   <span
@@ -569,7 +569,7 @@ export default function EsquematicoPanel({
             }}
           />
           <span style={{ fontSize: '11px', fontWeight: 300, color: '#93c5fd' }}>
-            Modo colocacion activo — haz clic en el diagrama para ubicar el hallazgo
+            Modo colocacion activo — haz clic en el diagrama para ubicar la entidad
           </span>
         </div>
       )}
@@ -594,10 +594,10 @@ export default function EsquematicoPanel({
             }}
           />
           <span style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)' }}>
-            Viendo grupo: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
+            Viendo relación: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
-            ({gruposCount[grupoFiltroActivo] || 0} hallazgos)
+            ({gruposCount[grupoFiltroActivo] || 0} entidades)
           </span>
           <button
             onClick={() => setGrupoFiltroActivo(null)}
@@ -792,7 +792,7 @@ export default function EsquematicoPanel({
               pointerEvents: 'none',
             }}>
               <p style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-disabled)' }}>
-                Sin hallazgos ubicados. Abre un hallazgo en la tabla para colocarlo.
+                Sin entidades ubicadas. Abre una entidad en la tabla para colocarla.
               </p>
             </div>
           )}
@@ -1020,7 +1020,7 @@ function MarkerTooltip({ hallazgo, pos, onClose, grupos }: MarkerTooltipProps) {
             }}
           >
             <p style={{ fontSize: '9px', fontWeight: 400, color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Grupos de Proteccion
+              Relaciones
             </p>
             {grupos.map((grupo) => (
               <div
@@ -1062,7 +1062,7 @@ function MarkerTooltip({ hallazgo, pos, onClose, grupos }: MarkerTooltipProps) {
             }}
           >
             <p style={{ fontSize: '9px', fontWeight: 300, color: 'var(--text-disabled)', fontStyle: 'italic' }}>
-              Sin grupos de proteccion
+              Sin relaciones
             </p>
           </div>
         )}

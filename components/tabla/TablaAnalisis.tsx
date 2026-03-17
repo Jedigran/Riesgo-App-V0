@@ -112,11 +112,11 @@ export default function TablaAnalisis() {
       case 'HAZOP':
         return `${datos.nodo || '—'} - ${datos.parametro || ''} ${datos.palabraGuia || ''}`;
       case 'FMEA':
-        return `${datos.componente || '—'} - ${datos.modoFalla || ''}`;
+        return `${datos.equipo || '—'} - ${datos.modoFalla || ''}`;
       case 'LOPA':
         return `${datos.escenario || '—'}`;
       case 'OCA':
-        return `${datos.eventoIniciador || '—'}`;
+        return `${datos.compuesto || '—'}${datos.cantidad ? ` - ${datos.cantidad} kg` : ''}`;
       case 'Intuicion':
         return `${datos.titulo || '—'}`;
       default:
@@ -356,7 +356,7 @@ export default function TablaAnalisis() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-knar-text-primary">
-            Total: {analisisFiltrados.length} análisis
+            Total: {analisisFiltrados.length} elementos de análisis
           </h3>
           <p className="text-xs text-knar-text-muted">
             De {sesion.analisis.length} totales en sesión
@@ -374,7 +374,7 @@ export default function TablaAnalisis() {
               }`}
             >
               <span>{getIconoPorTipo(tipo)}</span>
-              <span>{tipo}</span>
+              <span>{tipo === 'Intuicion' ? 'Registro directo' : tipo}</span>
               <span className="text-knar-text-muted">({conteoPorTipo[tipo] || 0})</span>
             </button>
           ))}
@@ -400,15 +400,7 @@ export default function TablaAnalisis() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <select
-          value={filtros.estado}
-          onChange={(e) => setFiltros({ ...filtros, estado: e.target.value as EstadoAnalisis | 'todos' })}
-          className="px-3 py-2 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"
-        >
-          <option value="todos">Todos los estados</option>
-          <option value="en_progreso">En progreso</option>
-          <option value="completado">Completado</option>
-        </select>
+
       </div>
 
       {/* Tabla */}
@@ -433,9 +425,9 @@ export default function TablaAnalisis() {
             <thead className="bg-knar-dark border-b border-knar-border">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary"></th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Tipo</th>
+                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Elemento de Análisis</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Datos Principales</th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Hallazgos</th>
+                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Entidades</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Fecha</th>
               </tr>
             </thead>
@@ -478,7 +470,7 @@ export default function TablaAnalisis() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-knar-text-primary font-medium">
-                          {contarHallazgosVinculados(analisis.base.id)} hallazgos
+                          {contarHallazgosVinculados(analisis.base.id)} entidades
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -519,7 +511,7 @@ export default function TablaAnalisis() {
                                   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                   </svg>
-                                  Hallazgos Vinculados ({hallazgosVinculados.length})
+                                  Entidades Vinculadas ({hallazgosVinculados.length})
                                 </h4>
                                 {hallazgosVinculados.length > 0 ? (
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -540,25 +532,14 @@ export default function TablaAnalisis() {
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-knar-text-muted italic">Sin hallazgos vinculados</p>
+                                  <p className="text-xs text-knar-text-muted italic">Sin entidades vinculadas</p>
                                 )}
                               </div>
                             </div>
 
                             {/* Actions */}
                             <div className="mt-4 pt-4 border-t border-knar-border flex items-center gap-3">
-                              <button
-                                className="px-3 py-1.5 bg-blue-500 bg-opacity-20 text-blue-400 rounded text-xs font-light hover:bg-opacity-30 transition-colors flex items-center gap-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // TODO: Open edit modal/form
-                                }}
-                              >
-                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Editar
-                              </button>
+
                               <button
                                 className="px-3 py-1.5 bg-red-500 bg-opacity-20 text-red-400 rounded text-xs font-light hover:bg-opacity-30 transition-colors flex items-center gap-2"
                                 onClick={(e) => {
@@ -570,19 +551,6 @@ export default function TablaAnalisis() {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                                 Eliminar
-                              </button>
-                              <button
-                                className="px-3 py-1.5 bg-green-500 bg-opacity-20 text-green-400 rounded text-xs font-light hover:bg-opacity-30 transition-colors flex items-center gap-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // TODO: View on map
-                                }}
-                              >
-                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Ver en Mapa
                               </button>
                             </div>
                           </div>

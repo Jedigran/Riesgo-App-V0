@@ -147,7 +147,7 @@ export default function GrupoForm({
     const errores: string[] = [];
     
     if (!nombre.trim()) {
-      errores.push('El nombre del grupo es requerido');
+      errores.push('El nombre de la relación es requerido');
     }
     
     if (peligrosSeleccionados.length === 0) {
@@ -163,7 +163,7 @@ export default function GrupoForm({
       protectoresSeleccionados.includes(id)
     );
     if (overlap.length > 0) {
-      errores.push('Un hallazgo no puede ser peligro y protector simultáneamente');
+      errores.push('Una entidad no puede ser peligro y protector simultáneamente');
     }
     
     return errores;
@@ -207,7 +207,7 @@ export default function GrupoForm({
           </svg>
         </div>
         <h3 className="knar-card-title">
-          {grupoExistente ? 'Editar Grupo de Protección' : 'Nuevo Grupo de Protección'}
+          {grupoExistente ? 'Editar Relación' : 'Nueva Relación'}
         </h3>
       </div>
       
@@ -253,7 +253,7 @@ export default function GrupoForm({
               marginBottom: '6px',
             }}
           >
-            Nombre del Grupo *
+            Nombre de la Relación *
           </label>
           <input
             type="text"
@@ -293,7 +293,7 @@ export default function GrupoForm({
           <textarea
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Describa el propósito de este grupo de protección..."
+            placeholder="Describa el propósito de esta relación..."
             rows={2}
             style={{
               width: '100%',
@@ -324,7 +324,7 @@ export default function GrupoForm({
               marginBottom: '6px',
             }}
           >
-            Color del Grupo *
+            Color de la Relación *
           </label>
           <div
             style={{
