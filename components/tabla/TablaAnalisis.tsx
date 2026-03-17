@@ -374,7 +374,7 @@ export default function TablaAnalisis() {
               }`}
             >
               <span>{getIconoPorTipo(tipo)}</span>
-              <span>{tipo}</span>
+              <span>{tipo === 'Intuicion' ? 'Registro directo' : tipo}</span>
               <span className="text-knar-text-muted">({conteoPorTipo[tipo] || 0})</span>
             </button>
           ))}

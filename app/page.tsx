@@ -954,17 +954,17 @@ export default function RiesgoApp() {
         });
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
-          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar Intuición' });
+          agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar Registro directo' });
           return;
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'Intuición Guardada', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'Registro directo Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
-        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar Intuición' });
+        agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar Registro directo' });
       }
     }
     else {
@@ -1079,7 +1079,7 @@ export default function RiesgoApp() {
                       <h3 className="knar-card-title">Elementos de Análisis</h3>
                     </div>
                     <div className="knar-card-content space-y-2">
-                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Intuición</button>
+                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Registro directo</button>
                       <button onClick={() => setMetodologiaSeleccionada('hazop')} className="w-full knar-btn knar-btn-ghost justify-start">HAZOP</button>
                       <button onClick={() => setMetodologiaSeleccionada('fmea')} className="w-full knar-btn knar-btn-ghost justify-start">FMEA</button>
                       <button onClick={() => setMetodologiaSeleccionada('lopa')} className="w-full knar-btn knar-btn-ghost justify-start">LOPA</button>
@@ -1837,7 +1837,7 @@ export default function RiesgoApp() {
                       <div className="knar-card">
                         <div className="knar-card-header">
                           <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></div>
-                          <h3 className="knar-card-title">Intuición - Entidad Directa</h3>
+                          <h3 className="knar-card-title">Registro directo - Entidad Directa</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
                           <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="knar-input" placeholder="Título de la entidad" /></div>
