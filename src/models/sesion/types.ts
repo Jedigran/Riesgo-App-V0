@@ -64,6 +64,8 @@ export interface Sesion {
   responsable?: string;
   /** Validity date (ISO string) */
   validez?: string;
+  /** Additional context text for the analysis */
+  contexto?: string;
 
   /** All analysis forms created in this session */
   analisis: AnalisisOrigen[];

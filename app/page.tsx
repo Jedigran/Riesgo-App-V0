@@ -46,6 +46,7 @@ interface ConfigData {
   empresa: string;
   responsable: string;
   validez: string;
+  contexto: string;
 }
 
 interface HallazgoFormData {
@@ -167,6 +168,7 @@ export default function RiesgoApp() {
     empresa: sesion?.empresa ?? '',
     responsable: sesion?.responsable ?? '',
     validez: sesion?.validez ?? '',
+    contexto: sesion?.contexto ?? '',
   });
 
   // ========================================
@@ -1421,6 +1423,7 @@ export default function RiesgoApp() {
                   <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Empresa *</label><input type="text" name="empresa" value={configData.empresa} onChange={handleConfigChange} className="knar-input" placeholder="Nombre de la empresa" /></div>
                   <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Responsable *</label><input type="text" name="responsable" value={configData.responsable} onChange={handleConfigChange} className="knar-input" placeholder="Nombre del responsable" /></div>
                   <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Validez *</label><input type="date" name="validez" value={configData.validez} onChange={handleConfigChange} className="knar-input" /></div>
+                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Contexto</label><input type="text" name="contexto" value={configData.contexto} onChange={handleConfigChange} className="knar-input" placeholder="Ej. Revisión preliminar, Auditoría 2025" /></div>
                 </div>
               </div>
             )}
@@ -2390,6 +2393,8 @@ export default function RiesgoApp() {
             <span>Responsable: <span className="text-knar-text-secondary">{configData.responsable || '—'}</span></span>
             <span>|</span>
             <span>Validez: <span className="text-knar-text-secondary">{configData.validez || '—'}</span></span>
+            <span>|</span>
+            <span>Contexto: <span className="text-knar-text-secondary">{configData.contexto || '—'}</span></span>
             <span>|</span>
             <button
               onClick={cargarAnalisisEjemplo}
