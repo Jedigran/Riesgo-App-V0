@@ -25,7 +25,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Risk-Sensus",
+  title: "Risk-Census",
   description: "Herramienta de mapeo visual de riesgos industriales. Soporta metodologías HAZOP, FMEA, LOPA y OCA con censo de hallazgos y relaciones.",
   icons: {
     icon: "/favicon.png",
