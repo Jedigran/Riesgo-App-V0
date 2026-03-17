@@ -112,7 +112,7 @@ export default function TablaAnalisis() {
       case 'HAZOP':
         return `${datos.nodo || '—'} - ${datos.parametro || ''} ${datos.palabraGuia || ''}`;
       case 'FMEA':
-        return `${datos.componente || '—'} - ${datos.modoFalla || ''}`;
+        return `${datos.equipo || '—'} - ${datos.modoFalla || ''}`;
       case 'LOPA':
         return `${datos.escenario || '—'}`;
       case 'OCA':
