@@ -206,7 +206,7 @@ export default function TablaHallazgos() {
           <table className="w-full">
             <thead style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }}>
               <tr>
-                {(['Tipo', 'Título', 'Descripción', 'Grupos'] as const).map(col => (
+                {(['Tipo', 'Título', 'Descripción', 'Relaciones'] as const).map(col => (
                   <th key={col} className="px-4 py-2 text-left" style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-light)', color: 'var(--text-muted)' }}>{col}</th>
                 ))}
               </tr>
@@ -284,7 +284,7 @@ export default function TablaHallazgos() {
                         </div>
                       ) : (
                         <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                          Sin grupos
+                          Sin relaciones
                         </span>
                       )}
                     </td>

@@ -77,7 +77,7 @@ export default function GrupoTabla({
             color: 'var(--text-muted)',
           }}
         >
-          No hay grupos de protección creados
+          No hay relaciones de protección creadas
         </p>
       </div>
     );
@@ -92,7 +92,7 @@ export default function GrupoTabla({
               d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="knar-card-title">Tabla de Grupos</h3>
+        <h3 className="knar-card-title">Tabla de Relaciones</h3>
       </div>
       
       <div className="knar-card-content" style={{ padding: 0, overflow: 'hidden' }}>
@@ -120,7 +120,7 @@ export default function GrupoTabla({
                   letterSpacing: '0.02em',
                 }}
               >
-                Grupo
+                Relación
               </th>
               <th
                 style={{

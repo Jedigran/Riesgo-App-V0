@@ -1010,7 +1010,7 @@ export default function RiesgoApp() {
             <button onClick={() => setLeftTabActive('configuracion')} className={`knar-tab-inline${leftTabActive === 'configuracion' ? ' active' : ''}`}>Configuración</button>
             <button onClick={() => setLeftTabActive('censo')} className={`knar-tab-inline${leftTabActive === 'censo' ? ' active' : ''}`}>Censo</button>
             {/* <button onClick={() => setLeftTabActive('relaciones')} className={`knar-tab-inline${leftTabActive === 'relaciones' ? ' active' : ''}`}>Relaciones</button> */}
-            <button onClick={() => setLeftTabActive('grupos')} className={`knar-tab-inline${leftTabActive === 'grupos' ? ' active' : ''}`}>Grupos</button>
+            <button onClick={() => setLeftTabActive('grupos')} className={`knar-tab-inline${leftTabActive === 'grupos' ? ' active' : ''}`}>Relaciones</button>
           </div>
 
           {/* Left Panel Content */}
