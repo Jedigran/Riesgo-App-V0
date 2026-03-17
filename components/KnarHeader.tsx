@@ -13,6 +13,8 @@
  * Import this component into any app in the suite to get a consistent header.
  */
 
+import type React from 'react';
+
 const DIPLOMADO_LOGO =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ciDfPIK45LwNn6mBuWqCGasokejVkN.png"
 
@@ -23,6 +25,8 @@ export interface KnarHeaderProps {
   logoAlt?: string
   contextLeft?: string
   contextRight?: string
+  /** Optional content rendered on the far right — e.g. tab switcher */
+  rightContent?: React.ReactNode
 }
 
 export function KnarHeader({
@@ -32,6 +36,7 @@ export function KnarHeader({
   logoAlt = "Diplomado Gestión de Activos — Cuerpos Técnicos Integrados",
   contextLeft,
   contextRight,
+  rightContent,
 }: KnarHeaderProps) {
   return (
     <header
@@ -90,8 +95,12 @@ export function KnarHeader({
         </div>
       </div>
 
-      {/* Right — optional project context */}
-      {(contextLeft || contextRight) && (
+      {/* Right — tabs slot or optional project context */}
+      {rightContent ? (
+        <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
+          {rightContent}
+        </div>
+      ) : (contextLeft || contextRight) ? (
         <div style={{
           display: "flex",
           gap: "var(--space-5)",
@@ -106,7 +115,7 @@ export function KnarHeader({
           )}
           {contextRight && <span>{contextRight}</span>}
         </div>
-      )}
+      ) : null}
     </header>
   )
 }

@@ -988,17 +988,14 @@ export default function RiesgoApp() {
       <KnarHeader
         title="Risk-Sensus"
         subtitle="Gestión de Riesgos de Proceso"
-        contextRight="Sesión Activa"
+        rightContent={
+          <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0, height: '100%' }}>
+            <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
+            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
+            <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
+          </div>
+        }
       />
-
-      {/* RIGHT TAB SWITCHER */}
-      <div style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)', padding: '0 24px', flexShrink: 0 }}>
-        <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
-          <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
-          <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
-          <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
-        </div>
-      </div>
 
       {/* MAIN CONTENT - Two Panels */}
       <div className="flex-1 flex overflow-hidden">
