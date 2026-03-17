@@ -1075,7 +1075,7 @@ export default function RiesgoApp() {
                       <h3 className="knar-card-title">Elementos de Análisis</h3>
                     </div>
                     <div className="knar-card-content space-y-2">
-                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Registro directo</button>
+                      <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-ghost justify-start">Registro directo</button>
                       <button onClick={() => setMetodologiaSeleccionada('hazop')} className="w-full knar-btn knar-btn-ghost justify-start">HAZOP</button>
                       <button onClick={() => setMetodologiaSeleccionada('fmea')} className="w-full knar-btn knar-btn-ghost justify-start">FMEA</button>
                       <button onClick={() => setMetodologiaSeleccionada('lopa')} className="w-full knar-btn knar-btn-ghost justify-start">LOPA</button>
