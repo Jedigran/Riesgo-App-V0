@@ -570,76 +570,38 @@ export default function EsquematicoPanel({
           <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
         )}
 
-        {/* Analisis filter pills */}
+        {/* Analisis filter dropdown */}
         {sesion.analisis.length > 0 && (
-          <>
-            <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Análisis:
-            </span>
+          <select
+            value={analisisFiltroActivo ?? ''}
+            onChange={(e) => setAnalisisFiltroActivo(e.target.value || null)}
+            style={{
+              fontSize: '11px',
+              fontWeight: 300,
+              color: analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--text-muted)',
+              background: analisisFiltroActivo ? 'rgba(255,140,0,0.10)' : 'var(--surface-2)',
+              border: `0.5px solid ${analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--border-8)'}`,
+              borderRadius: '6px',
+              padding: '3px 8px',
+              outline: 'none',
+              cursor: 'pointer',
+              maxWidth: '200px',
+            }}
+          >
+            <option value="">Análisis: todos</option>
             {sesion.analisis.map((analisis) => {
-              const active = analisisFiltroActivo === analisis.base.id;
-              const count = analisisCount[analisis.base.id] || 0;
               const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
+              const count = analisisCount[analisis.base.id] || 0;
+              const label = analisis.base.nombre
+                ? `${tipo} — ${analisis.base.nombre} (${count})`
+                : `${tipo} (${count})`;
               return (
-                <button
-                  key={analisis.base.id}
-                  onClick={() => setAnalisisFiltroActivo(active ? null : analisis.base.id)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '3px 8px',
-                    borderRadius: '9999px',
-                    border: `0.5px solid ${active ? 'var(--knar-orange)' : 'var(--border-8)'}`,
-                    backgroundColor: active ? 'rgba(255,140,0,0.12)' : 'transparent',
-                    color: active ? 'var(--knar-orange)' : 'var(--text-muted)',
-                    fontSize: '11px',
-                    fontWeight: 300,
-                    cursor: 'pointer',
-                    transition: 'all 150ms ease',
-                    whiteSpace: 'nowrap',
-                  }}
-                  title={`Filtrar por análisis: ${analisis.base.nombre || tipo}`}
-                >
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '1px',
-                      flexShrink: 0,
-                      background: active ? 'var(--knar-orange)' : 'var(--text-disabled)',
-                      boxShadow: active ? '0 0 4px rgba(255,140,0,0.5)' : 'none',
-                    }}
-                  />
-                  {tipo}
-                  {analisis.base.nombre && (
-                    <span style={{ color: active ? 'var(--knar-orange)' : 'var(--text-disabled)', fontWeight: 300 }}>
-                      &nbsp;—&nbsp;{analisis.base.nombre.length > 12 ? analisis.base.nombre.substring(0, 12) + '…' : analisis.base.nombre}
-                    </span>
-                  )}
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: '16px',
-                      height: '14px',
-                      padding: '0 4px',
-                      borderRadius: '9999px',
-                      fontSize: '10px',
-                      fontWeight: 400,
-                      background: active ? 'rgba(255,140,0,0.2)' : 'rgba(255,255,255,0.06)',
-                      color: active ? 'var(--knar-orange)' : 'var(--text-muted)',
-                      border: `0.5px solid ${active ? 'rgba(255,140,0,0.3)' : 'var(--border-6)'}`,
-                    }}
-                  >
-                    {count}
-                  </span>
-                </button>
+                <option key={analisis.base.id} value={analisis.base.id}>
+                  {label}
+                </option>
               );
             })}
-          </>
+          </select>
         )}
 
         {/* Marker count */}

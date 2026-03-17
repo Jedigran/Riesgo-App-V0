@@ -51,6 +51,9 @@ export interface AnalisisBase {
   /** Type of analysis methodology used */
   tipo: TipoAnalisis;
 
+  /** Optional user-defined name to identify this analysis (e.g. "Línea A - Bomba P-201") */
+  nombre?: string;
+
   /** Creation timestamp in ISO 8601 format */
   fechaCreacion: string;
 
@@ -322,9 +325,6 @@ export interface AnalisisOCA {
  * Used for quick assessments or when formal methodology is not required.
  */
 export interface AnalisisIntuicion {
-  /** Short title for the observation */
-  titulo: string;
-
   /** Detailed description of the observation or concern */
   descripcion: string;
 

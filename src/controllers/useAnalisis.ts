@@ -97,19 +97,19 @@ export interface UseAnalisisReturn {
 
   // Crear
   /** Create HAZOP analysis */
-  crearAnalisisHAZOP: (datos: AnalisisHAZOP) => ResultadoOperacion;
+  crearAnalisisHAZOP: (datos: AnalisisHAZOP, nombre?: string) => ResultadoOperacion;
 
   /** Create FMEA analysis */
-  crearAnalisisFMEA: (datos: AnalisisFMEA) => ResultadoOperacion;
+  crearAnalisisFMEA: (datos: AnalisisFMEA, nombre?: string) => ResultadoOperacion;
 
   /** Create LOPA analysis */
-  crearAnalisisLOPA: (datos: AnalisisLOPA) => ResultadoOperacion;
+  crearAnalisisLOPA: (datos: AnalisisLOPA, nombre?: string) => ResultadoOperacion;
 
   /** Create OCA analysis */
-  crearAnalisisOCA: (datos: AnalisisOCA) => ResultadoOperacion;
+  crearAnalisisOCA: (datos: AnalisisOCA, nombre?: string) => ResultadoOperacion;
 
   /** Create Intuicion analysis */
-  crearAnalisisIntuicion: (datos: AnalisisIntuicion) => ResultadoOperacion;
+  crearAnalisisIntuicion: (datos: AnalisisIntuicion, nombre?: string) => ResultadoOperacion;
 
   // Actualizar
   /** Update analysis data */
@@ -231,7 +231,7 @@ export function useAnalisis(): UseAnalisisReturn {
    * @returns Operation result with ID if successful
    */
   const crearAnalisisHAZOP = useCallback(
-    (datos: AnalisisHAZOP): ResultadoOperacion => {
+    (datos: AnalisisHAZOP, nombre?: string): ResultadoOperacion => {
       // 1. Validate data
       const validacion = validarAnalisisHAZOP(datos);
 
@@ -258,6 +258,7 @@ export function useAnalisis(): UseAnalisisReturn {
         base: {
           id,
           tipo: 'HAZOP',
+          nombre: nombre?.trim() || undefined,
           fechaCreacion: fechaISO,
           estado: 'en_progreso',
           analisisRelacionadosIds: [],
@@ -287,7 +288,7 @@ export function useAnalisis(): UseAnalisisReturn {
    * @returns Operation result with ID if successful
    */
   const crearAnalisisFMEA = useCallback(
-    (datos: AnalisisFMEA): ResultadoOperacion => {
+    (datos: AnalisisFMEA, nombre?: string): ResultadoOperacion => {
       // 1. Validate data
       const validacion = validarAnalisisFMEA(datos);
 
@@ -314,6 +315,7 @@ export function useAnalisis(): UseAnalisisReturn {
         base: {
           id,
           tipo: 'FMEA',
+          nombre: nombre?.trim() || undefined,
           fechaCreacion: fechaISO,
           estado: 'en_progreso',
           analisisRelacionadosIds: [],
@@ -343,7 +345,7 @@ export function useAnalisis(): UseAnalisisReturn {
    * @returns Operation result with ID if successful
    */
   const crearAnalisisLOPA = useCallback(
-    (datos: AnalisisLOPA): ResultadoOperacion => {
+    (datos: AnalisisLOPA, nombre?: string): ResultadoOperacion => {
       // 1. Validate data
       const validacion = validarAnalisisLOPA(datos);
 
@@ -370,6 +372,7 @@ export function useAnalisis(): UseAnalisisReturn {
         base: {
           id,
           tipo: 'LOPA',
+          nombre: nombre?.trim() || undefined,
           fechaCreacion: fechaISO,
           estado: 'en_progreso',
           analisisRelacionadosIds: [],
@@ -399,7 +402,7 @@ export function useAnalisis(): UseAnalisisReturn {
    * @returns Operation result with ID if successful
    */
   const crearAnalisisOCA = useCallback(
-    (datos: AnalisisOCA): ResultadoOperacion => {
+    (datos: AnalisisOCA, nombre?: string): ResultadoOperacion => {
       // 1. Validate data
       const validacion = validarAnalisisOCA(datos);
 
@@ -426,6 +429,7 @@ export function useAnalisis(): UseAnalisisReturn {
         base: {
           id,
           tipo: 'OCA',
+          nombre: nombre?.trim() || undefined,
           fechaCreacion: fechaISO,
           estado: 'en_progreso',
           analisisRelacionadosIds: [],
@@ -455,7 +459,7 @@ export function useAnalisis(): UseAnalisisReturn {
    * @returns Operation result with ID if successful
    */
   const crearAnalisisIntuicion = useCallback(
-    (datos: AnalisisIntuicion): ResultadoOperacion => {
+    (datos: AnalisisIntuicion, nombre?: string): ResultadoOperacion => {
       // 1. Validate data
       const validacion = validarAnalisisIntuicion(datos);
 
@@ -482,6 +486,7 @@ export function useAnalisis(): UseAnalisisReturn {
         base: {
           id,
           tipo: 'Intuicion',
+          nombre: nombre?.trim() || undefined,
           fechaCreacion: fechaISO,
           estado: 'en_progreso',
           analisisRelacionadosIds: [],
