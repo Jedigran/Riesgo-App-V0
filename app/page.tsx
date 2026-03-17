@@ -996,7 +996,7 @@ export default function RiesgoApp() {
           <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
             <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
             <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
-            <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Análisis</button>
+            <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
           </div>
         </div>
       </header>
@@ -1076,7 +1076,7 @@ export default function RiesgoApp() {
                       <div className="knar-icon-box">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                       </div>
-                      <h3 className="knar-card-title">Metodologías de Análisis</h3>
+                      <h3 className="knar-card-title">Elementos de Análisis</h3>
                     </div>
                     <div className="knar-card-content space-y-2">
                       <button onClick={() => setMetodologiaSeleccionada('intuicion')} className="w-full knar-btn knar-btn-primary justify-start">Intuición</button>
@@ -1091,7 +1091,7 @@ export default function RiesgoApp() {
                   <div className="space-y-4">
                     <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-                      Volver a metodologías
+                      Volver a elementos de análisis
                     </button>
 
                     {/* ========== HAZOP FORM ========== */}
@@ -2001,7 +2001,7 @@ export default function RiesgoApp() {
               <div className="knar-card">
                 <div className="knar-card-header">
                   <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-                  <h3 className="knar-card-title">Tabla de Análisis</h3>
+                  <h3 className="knar-card-title">Tabla de Elementos de Análisis</h3>
                 </div>
                 <div className="knar-card-content">
                   <TablaAnalisis />

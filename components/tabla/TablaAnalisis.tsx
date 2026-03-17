@@ -356,7 +356,7 @@ export default function TablaAnalisis() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-knar-text-primary">
-            Total: {analisisFiltrados.length} análisis
+            Total: {analisisFiltrados.length} elementos de análisis
           </h3>
           <p className="text-xs text-knar-text-muted">
             De {sesion.analisis.length} totales en sesión
@@ -433,7 +433,7 @@ export default function TablaAnalisis() {
             <thead className="bg-knar-dark border-b border-knar-border">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary"></th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Tipo</th>
+                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Elemento de Análisis</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Datos Principales</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Entidades</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Fecha</th>
