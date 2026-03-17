@@ -4,6 +4,7 @@ import { useCallback, useRef, useState, useMemo } from 'react';
 import { useMapa } from '@/src/controllers/useMapa';
 import { useFiltrosHallazgos } from '@/src/controllers/useFiltrosHallazgos';
 import { useGrupo } from '@/src/controllers/useGrupo';
+import { useSesion } from '@/src/controllers/useSesion';
 import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
 
 // ============================================================================
@@ -73,6 +74,7 @@ export default function EsquematicoPanel({
   } = useFiltrosHallazgos();
 
   const { grupos, obtenerGruposPorHallazgo } = useGrupo();
+  const { sesion } = useSesion();
 
   // Tooltip state
   const [tooltipHallazgo, setTooltipHallazgo] = useState<Hallazgo | null>(null);
@@ -81,6 +83,9 @@ export default function EsquematicoPanel({
 
   // Group filter state
   const [grupoFiltroActivo, setGrupoFiltroActivo] = useState<string | null>(null);
+
+  // Analisis filter state
+  const [analisisFiltroActivo, setAnalisisFiltroActivo] = useState<string | null>(null);
 
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
@@ -280,13 +285,23 @@ export default function EsquematicoPanel({
   }, [allMarkers, obtenerGruposPorHallazgo]);
 
   // Apply group filter
-  const markersFiltrados = useMemo(() => {
+  const markersConGrupoFiltro = useMemo(() => {
     if (!grupoFiltroActivo) return allMarkers;
     return allMarkers.filter((h) => {
       const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
       return gruposDelHallazgo.some((g) => g.id === grupoFiltroActivo);
     });
   }, [allMarkers, grupoFiltroActivo, markersConGrupos]);
+
+  // Apply analisis filter on top of group filter
+  const markersFiltrados = useMemo(() => {
+    if (!analisisFiltroActivo) return markersConGrupoFiltro;
+    const hallazgos = sesion?.hallazgos ?? [];
+    return markersConGrupoFiltro.filter((h) => {
+      const hallazgo = hallazgos.find((s) => s.id === h.id);
+      return hallazgo?.analisisOrigenIds?.includes(analisisFiltroActivo) ?? false;
+    });
+  }, [markersConGrupoFiltro, analisisFiltroActivo, sesion?.hallazgos]);
 
   // Count hallazgos por grupo
   const gruposCount = useMemo(() => {
@@ -299,6 +314,19 @@ export default function EsquematicoPanel({
     });
     return counts;
   }, [allMarkers, grupos, markersConGrupos]);
+
+  // Count hallazgos por analisis
+  const analisisCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    const hallazgos = sesion?.hallazgos ?? [];
+    (sesion?.analisis ?? []).forEach((a) => {
+      counts[a.base.id] = allMarkers.filter((h) => {
+        const hallazgo = hallazgos.find((s) => s.id === h.id);
+        return hallazgo?.analisisOrigenIds?.includes(a.base.id) ?? false;
+      }).length;
+    });
+    return counts;
+  }, [allMarkers, sesion?.analisis, sesion?.hallazgos]);
 
   const isEditMode = ubicacionEditando !== null;
   const zoomPct = Math.round(zoom * 100);
@@ -537,6 +565,45 @@ export default function EsquematicoPanel({
               );
             })}
           </>
+        )}
+
+        {/* Analisis filter divider */}
+        {(sesion?.analisis?.length ?? 0) > 0 && (
+          <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
+        )}
+
+        {/* Analisis filter dropdown */}
+        {(sesion?.analisis?.length ?? 0) > 0 && (
+          <select
+            value={analisisFiltroActivo ?? ''}
+            onChange={(e) => setAnalisisFiltroActivo(e.target.value || null)}
+            style={{
+              fontSize: '11px',
+              fontWeight: 300,
+              color: analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--text-muted)',
+              background: analisisFiltroActivo ? 'rgba(255,140,0,0.10)' : 'var(--surface-2)',
+              border: `0.5px solid ${analisisFiltroActivo ? 'var(--knar-orange)' : 'var(--border-8)'}`,
+              borderRadius: '6px',
+              padding: '3px 8px',
+              outline: 'none',
+              cursor: 'pointer',
+              maxWidth: '200px',
+            }}
+          >
+            <option value="">Análisis: todos</option>
+            {(sesion?.analisis ?? []).map((analisis) => {
+              const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
+              const count = analisisCount[analisis.base.id] || 0;
+              const label = analisis.base.nombre
+                ? `${tipo} — ${analisis.base.nombre} (${count})`
+                : `${tipo} (${count})`;
+              return (
+                <option key={analisis.base.id} value={analisis.base.id}>
+                  {label}
+                </option>
+              );
+            })}
+          </select>
         )}
 
         {/* Marker count */}

@@ -432,7 +432,7 @@ export function analisisIntuiciontoHallazgos(analisis: AnalisisIntuicion): Trans
       id: generarIdHallazgo('Peligro'),
       tipo: 'Peligro',
       tipoPeligro: 'Inherente',
-      titulo: `${analisis.titulo} - Observación`,
+      titulo: `${analisis.descripcion.substring(0, 40)} - Observación`,
       descripcion: `${analisis.descripcion}\n\nObservación: ${observacion}`,
       ubicacion: generarCoordenadaAleatoria(),
       fechaCreacion: fechaISO,

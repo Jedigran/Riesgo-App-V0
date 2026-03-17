@@ -25,7 +25,7 @@ import { useHallazgo } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useSesion } from '@/src/controllers/useSesion';
 import { useGrupo } from '@/src/controllers/useGrupo';
-import { SiteHeader } from '@/components';
+import { KnarHeader } from '@/components/KnarHeader';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
@@ -181,10 +181,12 @@ export default function RiesgoApp() {
 
   // Intuicion
   const [intuicionData, setIntuicionData] = useState({
-    titulo: '',
     descripcion: '',
     observaciones: [''],
   });
+
+  // Nombre compartido para todos los análisis
+  const [nombreAnalisis, setNombreAnalisis] = useState('');
 
   // ========================================
   // ESTADOS PARA SECTION 2: HALLAZGOS
@@ -725,7 +727,7 @@ export default function RiesgoApp() {
           receptorImpacto: hazopData.receptorImpacto,
           salvaguardasExistentes: hazopData.salvaguardasExistentes.filter(s => s.trim()).length > 0 ? hazopData.salvaguardasExistentes.filter(s => s.trim()) : [''],
           recomendaciones: hazopData.recomendaciones.filter(r => r.trim()).length > 0 ? hazopData.recomendaciones.filter(r => r.trim()) : [''],
-        });
+        }, nombreAnalisis);
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
           agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar HAZOP' });
@@ -745,6 +747,7 @@ export default function RiesgoApp() {
           salvaguardasExistentes: [''],
           recomendaciones: [''],
         });
+        setNombreAnalisis('');
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -772,7 +775,7 @@ export default function RiesgoApp() {
           D: fmeaData.D,
           RPN: fmeaData.S * fmeaData.O * fmeaData.D,
           accionesRecomendadas: fmeaData.accionesRecomendadas.filter(a => a.trim()).length > 0 ? fmeaData.accionesRecomendadas.filter(a => a.trim()) : [''],
-        });
+        }, nombreAnalisis);
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
           agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar FMEA' });
@@ -795,6 +798,7 @@ export default function RiesgoApp() {
           barrerasExistentes: [''],
           accionesRecomendadas: [''],
         });
+        setNombreAnalisis('');
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -829,7 +833,7 @@ export default function RiesgoApp() {
           rrf: cumpleCriterio ? 0 : 1 / (lopaData.riesgoTolerable / lopaData.frecuenciaInicial),
           silRequerido: 0,
           recomendaciones: lopaData.recomendaciones.filter(r => r.trim()).length > 0 ? lopaData.recomendaciones.filter(r => r.trim()) : [''],
-        });
+        }, nombreAnalisis);
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
           agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar LOPA' });
@@ -855,6 +859,7 @@ export default function RiesgoApp() {
           silRequerido: 0,
           recomendaciones: [''],
         });
+        setNombreAnalisis('');
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -902,7 +907,7 @@ export default function RiesgoApp() {
           barrerasExistentes: ocaData.barrerasExistentes.filter(b => b.trim()).length > 0 ? ocaData.barrerasExistentes.filter(b => b.trim()) : [''],
           gaps: ocaData.gaps.filter(g => g.trim()).length > 0 ? ocaData.gaps.filter(g => g.trim()) : [''],
           recomendaciones: ocaData.recomendaciones.filter(r => r.trim()).length > 0 ? ocaData.recomendaciones.filter(r => r.trim()) : [''],
-        });
+        }, nombreAnalisis);
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
           agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar OCA' });
@@ -933,6 +938,7 @@ export default function RiesgoApp() {
           gaps: [''],
           recomendaciones: [''],
         });
+        setNombreAnalisis('');
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -941,17 +947,16 @@ export default function RiesgoApp() {
     }
     // ========== INTUICION ==========
     else if (metodologiaSeleccionada === 'intuicion') {
-      if (!intuicionData.titulo.trim() || !intuicionData.descripcion.trim()) {
-        agregarError({ severidad: 'error', mensaje: 'Complete título y descripción' });
+      if (!intuicionData.descripcion.trim()) {
+        agregarError({ severidad: 'error', mensaje: 'Complete la descripción' });
         return;
       }
 
       try {
         const resultadoAnalisis = crearAnalisisIntuicion({
-          titulo: intuicionData.titulo,
           descripcion: intuicionData.descripcion,
           observaciones: intuicionData.observaciones.filter(o => o.trim()).length > 0 ? intuicionData.observaciones.filter(o => o.trim()) : [''],
-        });
+        }, nombreAnalisis);
 
         if (!resultadoAnalisis.exito || !resultadoAnalisis.id) {
           agregarError({ severidad: 'error', mensaje: resultadoAnalisis.errores[0] || 'Error al guardar Registro directo' });
@@ -960,7 +965,8 @@ export default function RiesgoApp() {
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'Registro directo Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
-        setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
+        setIntuicionData({ descripcion: '', observaciones: [''] });
+        setNombreAnalisis('');
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -979,27 +985,17 @@ export default function RiesgoApp() {
   return (
     <div className="h-screen flex flex-col bg-knar-dark font-sans overflow-hidden">
       {/* HEADER */}
-      <header style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }} className="px-6 py-3 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <svg style={{ color: 'var(--accent)' }} className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>Risk-Sensus</h1>
-            </div>
-            <span style={{ width: '1px', height: '14px', backgroundColor: 'var(--border)', display: 'inline-block' }} />
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Sesión Activa</span>
-          </div>
-
-          {/* Right Tab Switcher — underline pattern */}
-          <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
+      <KnarHeader
+        title="Risk-Sensus"
+        subtitle="Gestión de Riesgos de Proceso"
+        rightContent={
+          <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0, height: '100%' }}>
             <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
             <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
             <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Elementos de Análisis</button>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* MAIN CONTENT - Two Panels */}
       <div className="flex-1 flex overflow-hidden">
@@ -1093,6 +1089,29 @@ export default function RiesgoApp() {
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
                       Volver a elementos de análisis
                     </button>
+
+                    {/* ========== NOMBRE DEL ANÁLISIS (COMPARTIDO) ========== */}
+                    <div className="knar-card">
+                      <div className="knar-card-content">
+                        <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+                          Nombre del análisis
+                          <span style={{ color: 'var(--text-disabled)', marginLeft: '6px', fontWeight: 300 }}>(opcional — ayuda a identificarlo en filtros)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={nombreAnalisis}
+                          onChange={(e) => setNombreAnalisis(e.target.value)}
+                          className="knar-input"
+                          placeholder={
+                            metodologiaSeleccionada === 'hazop' ? 'Ej: Línea A — Bomba P-201' :
+                            metodologiaSeleccionada === 'fmea' ? 'Ej: Bomba centrífuga P-201' :
+                            metodologiaSeleccionada === 'lopa' ? 'Ej: Pérdida de bombeo — escenario crítico' :
+                            metodologiaSeleccionada === 'oca' ? 'Ej: Derrame H2S — zona norte' :
+                            'Ej: Inspección visual — 15 mar 2026'
+                          }
+                        />
+                      </div>
+                    </div>
 
                     {/* ========== HAZOP FORM ========== */}
                     {metodologiaSeleccionada === 'hazop' && (
@@ -1839,7 +1858,6 @@ export default function RiesgoApp() {
                           <h3 className="knar-card-title">Registro directo - Entidad Directa</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="knar-input" placeholder="Título de la entidad" /></div>
                           <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
                         </div>
                       </div>

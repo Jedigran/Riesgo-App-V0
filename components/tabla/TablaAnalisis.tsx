@@ -56,14 +56,14 @@ export default function TablaAnalisis() {
         
         // Buscar en campos comunes
         const datos = a.datos as any;
+        const coincideNombre = a.base.nombre?.toLowerCase().includes(busqueda);
         const coincideNodo = datos.nodo?.toLowerCase().includes(busqueda);
         const coincideComponente = datos.componente?.toLowerCase().includes(busqueda);
         const coincideEscenario = datos.escenario?.toLowerCase().includes(busqueda);
         const coincideEvento = datos.eventoIniciador?.toLowerCase().includes(busqueda);
-        const coincideTitulo = datos.titulo?.toLowerCase().includes(busqueda);
         
-        if (!coincideNodo && !coincideComponente && !coincideEscenario && 
-            !coincideEvento && !coincideTitulo) {
+        if (!coincideNombre && !coincideNodo && !coincideComponente && !coincideEscenario && 
+            !coincideEvento) {
           return false;
         }
       }
@@ -106,8 +106,9 @@ export default function TablaAnalisis() {
     }
   };
 
-  // Obtener datos específicos por tipo
+  // Obtener datos específicos por tipo — if nombre is set, show it; otherwise fall back to type-derived fields
   const getDatosPrincipales = (analisis: AnalisisOrigen) => {
+    if (analisis.base.nombre) return analisis.base.nombre;
     const datos = analisis.datos as any;
     
     switch (analisis.base.tipo) {
@@ -120,7 +121,7 @@ export default function TablaAnalisis() {
       case 'OCA':
         return `${datos.compuesto || '—'}${datos.cantidad ? ` - ${datos.cantidad} kg` : ''}`;
       case 'Intuicion':
-        return `${datos.titulo || '—'}`;
+        return datos.descripcion ? datos.descripcion.substring(0, 60) + (datos.descripcion.length > 60 ? '…' : '') : '—';
       default:
         return '—';
     }
@@ -312,7 +313,6 @@ export default function TablaAnalisis() {
       case 'Intuicion':
         return (
           <div className="space-y-3">
-            <DetailRow label="Título" value={datos.titulo} fullWidth />
             <DetailRow label="Descripción" value={datos.descripcion} fullWidth />
           </div>
         );
@@ -466,9 +466,16 @@ export default function TablaAnalisis() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs text-knar-text-secondary truncate" style={{ display: 'block' }}>
-                          {getDatosPrincipales(analisis)}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          {analisis.base.nombre && (
+                            <span className="text-xs font-medium text-knar-text-primary truncate">
+                              {analisis.base.nombre}
+                            </span>
+                          )}
+                          <span className={`truncate ${analisis.base.nombre ? 'text-[11px] text-knar-text-muted' : 'text-xs text-knar-text-secondary'}`} style={{ display: 'block' }}>
+                            {getDatosPrincipales(analisis)}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-knar-text-primary font-medium">

@@ -522,9 +522,6 @@ export function validarAnalisisIntuicion(data: AnalisisIntuicion): ValidationRes
   const advertencias: string[] = [];
 
   // Validate required string fields
-  const tituloError = validarStringRequerido(data.titulo, 'titulo');
-  if (tituloError) errores.push(tituloError);
-
   const descripcionError = validarStringRequerido(data.descripcion, 'descripcion');
   if (descripcionError) errores.push(descripcionError);
 
