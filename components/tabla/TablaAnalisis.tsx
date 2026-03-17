@@ -116,7 +116,7 @@ export default function TablaAnalisis() {
       case 'LOPA':
         return `${datos.escenario || '—'}`;
       case 'OCA':
-        return `${datos.eventoIniciador || '—'}`;
+        return `${datos.compuesto || '—'}${datos.cantidad ? ` - ${datos.cantidad} kg` : ''}`;
       case 'Intuicion':
         return `${datos.titulo || '—'}`;
       default:
