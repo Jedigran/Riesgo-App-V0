@@ -163,7 +163,7 @@ export default function GrupoForm({
       protectoresSeleccionados.includes(id)
     );
     if (overlap.length > 0) {
-      errores.push('Un hallazgo no puede ser peligro y protector simultáneamente');
+      errores.push('Una entidad no puede ser peligro y protector simultáneamente');
     }
     
     return errores;

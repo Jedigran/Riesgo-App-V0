@@ -569,7 +569,7 @@ export default function EsquematicoPanel({
             }}
           />
           <span style={{ fontSize: '11px', fontWeight: 300, color: '#93c5fd' }}>
-            Modo colocacion activo — haz clic en el diagrama para ubicar el hallazgo
+            Modo colocacion activo — haz clic en el diagrama para ubicar la entidad
           </span>
         </div>
       )}
@@ -597,7 +597,7 @@ export default function EsquematicoPanel({
               Viendo relación: <strong>{grupos.find(g => g.id === grupoFiltroActivo)?.nombre}</strong>
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: 'var(--text-muted)', marginLeft: '8px' }}>
-            ({gruposCount[grupoFiltroActivo] || 0} hallazgos)
+            ({gruposCount[grupoFiltroActivo] || 0} entidades)
           </span>
           <button
             onClick={() => setGrupoFiltroActivo(null)}
@@ -792,7 +792,7 @@ export default function EsquematicoPanel({
               pointerEvents: 'none',
             }}>
               <p style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-disabled)' }}>
-                Sin hallazgos ubicados. Abre un hallazgo en la tabla para colocarlo.
+                Sin entidades ubicadas. Abre una entidad en la tabla para colocarla.
               </p>
             </div>
           )}

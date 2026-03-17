@@ -382,7 +382,7 @@ export default function GrupoList({
               }}
             >
               {grupos.length === 0
-                ? 'Crea una relación para organizar tus hallazgos'
+                ? 'Crea una relación para organizar tus entidades'
                 : 'Intenta con otros filtros'}
             </p>
           </div>

@@ -435,7 +435,7 @@ export default function TablaAnalisis() {
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary"></th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Tipo</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Datos Principales</th>
-                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Hallazgos</th>
+                <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Entidades</th>
                 <th className="px-4 py-3 text-left text-xs font-light text-knar-text-secondary">Fecha</th>
               </tr>
             </thead>
@@ -478,7 +478,7 @@ export default function TablaAnalisis() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs text-knar-text-primary font-medium">
-                          {contarHallazgosVinculados(analisis.base.id)} hallazgos
+                          {contarHallazgosVinculados(analisis.base.id)} entidades
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -519,7 +519,7 @@ export default function TablaAnalisis() {
                                   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                   </svg>
-                                  Hallazgos Vinculados ({hallazgosVinculados.length})
+                                  Entidades Vinculadas ({hallazgosVinculados.length})
                                 </h4>
                                 {hallazgosVinculados.length > 0 ? (
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -540,7 +540,7 @@ export default function TablaAnalisis() {
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-knar-text-muted italic">Sin hallazgos vinculados</p>
+                                  <p className="text-xs text-knar-text-muted italic">Sin entidades vinculadas</p>
                                 )}
                               </div>
                             </div>

@@ -290,8 +290,8 @@ export default function GruposPanel() {
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span style={{ fontSize: '10px', fontWeight: 300, color: '#fbbf24' }}>
-                  {hallazgosSinGrupo().length} hallazgo{hallazgosSinGrupo().length !== 1 ? 's' : ''} sin relación. 
-                  Considera crear relaciones para organizar mejor tus hallazgos.
+                  {hallazgosSinGrupo().length} entidad{hallazgosSinGrupo().length !== 1 ? 'es' : ''} sin relación. 
+                  Considera crear relaciones para organizar mejor tus entidades.
                 </span>
               </div>
             </div>
@@ -363,7 +363,7 @@ export default function GruposPanel() {
                   maxWidth: '400px',
                 }}
               >
-                Las relaciones te permiten organizar tus hallazgos en sistemas de protección coherentes. 
+                Las relaciones te permiten organizar tus entidades en sistemas de protección coherentes. 
                 Cada relación puede contener múltiples peligros y sus respectivos protectores.
               </p>
               <button

@@ -710,7 +710,7 @@ export default function RiesgoApp() {
         return;
       }
       if (hallazgosForm.length === 0) {
-        agregarError({ severidad: 'warning', mensaje: 'Agregue al menos un hallazgo' });
+        agregarError({ severidad: 'warning', mensaje: 'Agregue al menos una entidad' });
         return;
       }
 
@@ -733,7 +733,7 @@ export default function RiesgoApp() {
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setHazopData({
         nodo: '',
         subnodo: '',
@@ -780,7 +780,7 @@ export default function RiesgoApp() {
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'FMEA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setFmeaData({
           equipo: '',
           funcion: '',
@@ -837,7 +837,7 @@ export default function RiesgoApp() {
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'LOPA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setLopaData({
           escenario: '',
           consecuencia: '',
@@ -910,7 +910,7 @@ export default function RiesgoApp() {
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'OCA Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setOcaData({
           compuesto: 'H2S',
           cantidad: 1000,
@@ -959,7 +959,7 @@ export default function RiesgoApp() {
         }
 
         crearHallazgosDeFormulario(resultadoAnalisis.id);
-        agregarNotificacion({ tipo: 'success', titulo: 'Intuición Guardada', mensaje: 'Análisis y hallazgos guardados', duracion: 3000 });
+        agregarNotificacion({ tipo: 'success', titulo: 'Intuición Guardada', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
@@ -995,7 +995,7 @@ export default function RiesgoApp() {
           {/* Right Tab Switcher — underline pattern */}
           <div className="knar-tabs-inline" style={{ borderBottom: 'none', padding: 0 }}>
             <button onClick={() => setRightTabActive('esquematico')} className={`knar-tab-inline${rightTabActive === 'esquematico' ? ' active' : ''}`}>Esquemático</button>
-            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Hallazgo</button>
+            <button onClick={() => setRightTabActive('tabla-hallazgo')} className={`knar-tab-inline${rightTabActive === 'tabla-hallazgo' ? ' active' : ''}`}>Tabla Entidades</button>
             <button onClick={() => setRightTabActive('tabla-analisis')} className={`knar-tab-inline${rightTabActive === 'tabla-analisis' ? ' active' : ''}`}>Tabla Análisis</button>
           </div>
         </div>
@@ -1837,10 +1837,10 @@ export default function RiesgoApp() {
                       <div className="knar-card">
                         <div className="knar-card-header">
                           <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></div>
-                          <h3 className="knar-card-title">Intuición - Hallazgo Directo</h3>
+                          <h3 className="knar-card-title">Intuición - Entidad Directa</h3>
                         </div>
                         <div className="knar-card-content space-y-3">
-                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="knar-input" placeholder="Título del hallazgo" /></div>
+                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="knar-input" placeholder="Título de la entidad" /></div>
                           <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
                         </div>
                       </div>
@@ -1850,7 +1850,7 @@ export default function RiesgoApp() {
                     <div className="knar-card">
                       <div className="knar-card-header">
                         <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" /></svg></div>
-                        <h3 className="knar-card-title">Crear Hallazgos</h3>
+                        <h3 className="knar-card-title">Crear Entidades</h3>
                       </div>
                       <div className="knar-card-content space-y-4">
                         <div className="flex items-center space-x-2">
@@ -1864,16 +1864,16 @@ export default function RiesgoApp() {
                         </div>
 
                         {hallazgosForm.length === 0 ? (
-                          <p className="text-xs text-knar-text-muted text-center py-4">No hay hallazgos agregados. Seleccione un tipo y haga clic en "+ Agregar"</p>
+                          <p className="text-xs text-knar-text-muted text-center py-4">No hay entidades agregadas. Seleccione un tipo y haga clic en "+ Agregar"</p>
                         ) : (
                           <div className="space-y-3">
                             {hallazgosForm.map((hallazgo, index) => (
                               <div key={hallazgo.id} className="bg-knar-dark rounded border border-knar-border p-3 space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-medium text-knar-text-primary">Hallazgo {index + 1}: {hallazgo.tipo}</span>
+                                  <span className="text-xs font-medium text-knar-text-primary">Entidad {index + 1}: {hallazgo.tipo}</span>
                                   <button onClick={() => eliminarHallazgo(hallazgo.id)} className="text-xs text-knar-text-muted hover:text-red-400">× Eliminar</button>
                                 </div>
-                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del hallazgo" /></div>
+                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título de la entidad" /></div>
                                 <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
                                 {hallazgo.tipo === 'Peligro' && (<>
                                   <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>

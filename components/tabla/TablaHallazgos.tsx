@@ -108,7 +108,7 @@ export default function TablaHallazgos() {
   if (!sesionCargada || !sesion) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Cargando hallazgos...</p>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>Cargando entidades...</p>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export default function TablaHallazgos() {
       <div className="flex items-center justify-between">
         <div>
           <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', color: 'var(--text-primary)' }}>
-            Total: {hallazgosFiltrados.length} hallazgos
+            Total: {hallazgosFiltrados.length} entidades
           </h3>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>
             De {sesion.hallazgos.length} totales en sesión
@@ -178,7 +178,7 @@ export default function TablaHallazgos() {
           type="text"
           value={filtros.busqueda}
           onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value })}
-          placeholder="Buscar hallazgos..."
+          placeholder="Buscar entidades..."
           className="knar-input"
           style={{ paddingRight: 32 }}
         />
@@ -197,8 +197,8 @@ export default function TablaHallazgos() {
         <div style={{ backgroundColor: 'var(--knar-charcoal)', border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-8)', textAlign: 'center' }}>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)' }}>
             {sesion.hallazgos.length === 0
-              ? 'No hay hallazgos en la sesión. Cree un análisis para comenzar.'
-              : 'No hay hallazgos que coincidan con los filtros.'}
+              ? 'No hay entidades en la sesión. Cree un análisis para comenzar.'
+              : 'No hay entidades que coincidan con los filtros.'}
           </p>
         </div>
       ) : (
