@@ -79,6 +79,72 @@ interface HallazgoFormData {
 }
 
 // ============================================================================
+// COLLAPSIBLE CARD COMPONENT
+// ============================================================================
+
+interface CollapsibleCardProps {
+  title: string;
+  icon: React.ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onDelete?: () => void;
+  children: React.ReactNode;
+  rightAddon?: React.ReactNode;
+}
+
+function CollapsibleCard({
+  title,
+  icon,
+  isExpanded,
+  onToggle,
+  onDelete,
+  rightAddon,
+  children,
+}: CollapsibleCardProps) {
+  return (
+    <div className="knar-card">
+      <div
+        className="knar-card-header cursor-pointer select-none"
+        onClick={onToggle}
+        style={{ transition: 'background-color 0.15s ease' }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        <div className="knar-icon-box">{icon}</div>
+        <h3 className="knar-card-title flex-1">{title}</h3>
+        {rightAddon && <div className="mr-2">{rightAddon}</div>}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="text-xs text-knar-text-muted hover:text-red-400 px-2 py-1 transition-colors"
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+          >
+            × Eliminar
+          </button>
+        )}
+        <span
+          className="text-knar-text-muted ml-2 transition-transform duration-200"
+          style={{
+            display: 'inline-block',
+            transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+          }}
+        >
+          ▼
+        </span>
+      </div>
+      {isExpanded && <div className="knar-card-content">{children}</div>}
+    </div>
+  );
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -102,6 +168,16 @@ export default function RiesgoApp() {
     responsable: sesion?.responsable ?? '',
     validez: sesion?.validez ?? '',
   });
+
+  // ========================================
+  // ESTADOS PARA COLAPSAR SECCIONES
+  // ========================================
+
+  // Controla si el formulario de análisis está colapsado
+  const [analisisFormCollapsed, setAnalisisFormCollapsed] = useState(false);
+
+  // Controla qué entidad está expandida (null = ninguna)
+  const [expandedEntityId, setExpandedEntityId] = useState<string | null>(null);
 
   // ========================================
   // ESTADOS PARA CADA FORMULARIO (SECTION 1)
@@ -302,6 +378,8 @@ export default function RiesgoApp() {
       descripcion: '',
     };
     setHallazgosForm((prev) => [...prev, nuevoHallazgo]);
+    // Auto-expand the new entity
+    setExpandedEntityId(nuevoHallazgo.id);
   };
 
   const actualizarHallazgo = (id: string, campo: keyof HallazgoFormData, valor: any) => {
@@ -312,6 +390,17 @@ export default function RiesgoApp() {
 
   const eliminarHallazgo = (id: string) => {
     setHallazgosForm((prev) => prev.filter((h) => h.id !== id));
+  };
+
+  // ========================================
+  // HELPER: RESET FORM STATE
+  // ========================================
+  const resetFormState = () => {
+    setMetodologiaSeleccionada(null);
+    setHallazgosForm([]);
+    setNombreAnalisis('');
+    setAnalisisFormCollapsed(false);
+    setExpandedEntityId(null);
   };
 
   // ========================================
@@ -747,9 +836,7 @@ export default function RiesgoApp() {
           salvaguardasExistentes: [''],
           recomendaciones: [''],
         });
-        setNombreAnalisis('');
-        setHallazgosForm([]);
-        setMetodologiaSeleccionada(null);
+        resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar HAZOP' });
       }
@@ -798,9 +885,7 @@ export default function RiesgoApp() {
           barrerasExistentes: [''],
           accionesRecomendadas: [''],
         });
-        setNombreAnalisis('');
-        setHallazgosForm([]);
-        setMetodologiaSeleccionada(null);
+        resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar FMEA' });
       }
@@ -859,9 +944,7 @@ export default function RiesgoApp() {
           silRequerido: 0,
           recomendaciones: [''],
         });
-        setNombreAnalisis('');
-        setHallazgosForm([]);
-        setMetodologiaSeleccionada(null);
+        resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar LOPA' });
       }
@@ -938,9 +1021,7 @@ export default function RiesgoApp() {
           gaps: [''],
           recomendaciones: [''],
         });
-        setNombreAnalisis('');
-        setHallazgosForm([]);
-        setMetodologiaSeleccionada(null);
+        resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar OCA' });
       }
@@ -966,9 +1047,7 @@ export default function RiesgoApp() {
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'Registro directo Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setIntuicionData({ descripcion: '', observaciones: [''] });
-        setNombreAnalisis('');
-        setHallazgosForm([]);
-        setMetodologiaSeleccionada(null);
+        resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar Registro directo' });
       }
@@ -1085,7 +1164,7 @@ export default function RiesgoApp() {
                 ) : (
                   /* Formulario de metodología */
                   <div className="space-y-4">
-                    <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">
+                    <button onClick={resetFormState} className="knar-btn knar-btn-ghost">
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
                       Volver a elementos de análisis
                     </button>
@@ -1116,14 +1195,16 @@ export default function RiesgoApp() {
                     {/* ========== HAZOP FORM ========== */}
                     {metodologiaSeleccionada === 'hazop' && (
                       <>
-                        <div className="knar-card">
-                          <div className="knar-card-header">
-                            <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-                            <h3 className="knar-card-title">HAZOP - Nodo de Análisis</h3>
-                          </div>
-                          <div className="knar-card-content space-y-3">
-                            {/* Nodo */}
-                            <div>
+                        <CollapsibleCard
+                          title="HAZOP - Nodo de Análisis"
+                          icon={
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                          }
+                          isExpanded={!analisisFormCollapsed}
+                          onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
+                        >
+                          {/* Nodo */}
+                          <div>
                               <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Nodo *</label>
                               <input
                                 type="text"
@@ -1245,21 +1326,22 @@ export default function RiesgoApp() {
                                 placeholder="Ej: Personal/Operación/Medio Ambiente"
                               />
                             </div>
-                          </div>
-                        </div>
+                        </CollapsibleCard>
                       </>
                     )}
 
                     {/* ========== FMEA FORM ========== */}
                     {metodologiaSeleccionada === 'fmea' && (
-                      <div className="knar-card">
-                        <div className="knar-card-header">
-                          <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v10m0-10V4m0 4a2 2 0 110 4 2 2 0 010-4z" /></svg></div>
-                          <h3 className="knar-card-title">FMEA - Análisis de Fallas</h3>
-                        </div>
-                        <div className="knar-card-content space-y-3">
-                          {/* Equipo */}
-                          <div>
+                      <CollapsibleCard
+                        title="FMEA - Análisis de Fallas"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v10m0-10V4m0 4a2 2 0 110 4 2 2 0 010-4z" /></svg>
+                        }
+                        isExpanded={!analisisFormCollapsed}
+                        onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
+                      >
+                        {/* Equipo */}
+                        <div>
                             <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Equipo *</label>
                             <input
                               type="text"
@@ -1407,20 +1489,21 @@ export default function RiesgoApp() {
                               placeholder="Ej: Sensor de nivel, Alarma de alto nivel"
                             />
                           </div>
-                        </div>
-                      </div>
+                        </CollapsibleCard>
                     )}
 
                     {/* ========== LOPA FORM ========== */}
                     {metodologiaSeleccionada === 'lopa' && (
-                      <div className="knar-card">
-                        <div className="knar-card-header">
-                          <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
-                          <h3 className="knar-card-title">LOPA - Capas de Protección</h3>
-                        </div>
-                        <div className="knar-card-content space-y-3">
-                          {/* Escenario */}
-                          <div>
+                      <CollapsibleCard
+                        title="LOPA - Capas de Protección"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        }
+                        isExpanded={!analisisFormCollapsed}
+                        onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
+                      >
+                        {/* Escenario */}
+                        <div>
                             <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Escenario de Riesgo *</label>
                             <input
                               type="text"
@@ -1570,20 +1653,21 @@ export default function RiesgoApp() {
                               </span>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        </CollapsibleCard>
                     )}
 
                     {/* ========== OCA FORM ========== */}
                     {metodologiaSeleccionada === 'oca' && (
-                      <div className="knar-card">
-                        <div className="knar-card-header">
-                          <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
-                          <h3 className="knar-card-title">OCA - Consecuencias</h3>
-                        </div>
-                        <div className="knar-card-content space-y-3">
-                          {/* Compuesto */}
-                          <div>
+                      <CollapsibleCard
+                        title="OCA - Consecuencias"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        }
+                        isExpanded={!analisisFormCollapsed}
+                        onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
+                      >
+                        {/* Compuesto */}
+                        <div>
                             <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Compuesto Químico *</label>
                             <select
                               value={ocaData.compuesto}
@@ -1846,21 +1930,21 @@ export default function RiesgoApp() {
                               </span>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        </CollapsibleCard>
                     )}
 
                     {/* ========== INTUICION FORM ========== */}
                     {metodologiaSeleccionada === 'intuicion' && (
-                      <div className="knar-card">
-                        <div className="knar-card-header">
-                          <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></div>
-                          <h3 className="knar-card-title">Registro directo - Entidad Directa</h3>
-                        </div>
-                        <div className="knar-card-content space-y-3">
-                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
-                        </div>
-                      </div>
+                      <CollapsibleCard
+                        title="Registro directo - Entidad Directa"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        }
+                        isExpanded={!analisisFormCollapsed}
+                        onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
+                      >
+                        <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
+                      </CollapsibleCard>
                     )}
 
                     {/* ========== SECTION 2: HALLAZGOS (COMÚN PARA TODOS) ========== */}
@@ -1885,46 +1969,53 @@ export default function RiesgoApp() {
                         ) : (
                           <div className="space-y-3">
                             {hallazgosForm.map((hallazgo, index) => (
-                              <div key={hallazgo.id} className="bg-knar-dark rounded border border-knar-border p-3 space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-medium text-knar-text-primary">Entidad {index + 1}: {hallazgo.tipo}</span>
-                                  <button onClick={() => eliminarHallazgo(hallazgo.id)} className="text-xs text-knar-text-muted hover:text-red-400">× Eliminar</button>
-                                </div>
-                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título de la entidad" /></div>
-                                <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
-                                {hallazgo.tipo === 'Peligro' && (<>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Consecuencia</label><input type="text" value={hallazgo.consecuencia || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'consecuencia', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Severidad (1-5)</label><select value={hallazgo.severidad || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'severidad', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Insignificante</option><option value="2">2 - Menor</option><option value="3">3 - Moderado</option><option value="4">4 - Mayor</option><option value="5">5 - Catastrófico</option></select></div>
-                                </>)}
-                                {hallazgo.tipo === 'Barrera' && (<>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Barrera</label><select value={hallazgo.tipoBarrera || 'Fisica'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarrera', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Fisica">Física</option><option value="Administrativa">Administrativa</option><option value="Humana">Humana</option></select></div>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Función de Barrera *</label><select value={hallazgo.tipoBarreraFuncion || 'Preventiva'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarreraFuncion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Preventiva">Preventiva (evita que ocurra el evento)</option><option value="Detectiva">Detectiva (detecta el evento)</option><option value="Mitigativa">Mitigativa (mitiga consecuencias)</option></select></div>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Efectividad (1-5)</label><select value={hallazgo.efectividadEstimada || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'efectividadEstimada', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Muy Baja</option><option value="2">2 - Baja</option><option value="3">3 - Media</option><option value="4">4 - Alta</option><option value="5">5 - Muy Alta</option></select></div>
-                                </>)}
-                                {hallazgo.tipo === 'SOL' && (<>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Parámetro *</label><select value={hallazgo.parametro || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'parametro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Flujo">Flujo</option><option value="Nivel">Nivel</option><option value="pH">pH</option><option value="Velocidad">Velocidad</option><option value="Vibración">Vibración</option><option value="Concentración">Concentración</option><option value="dBA">dBA (Sonido/Ruido)</option></select></div>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Mínimo</label><input type="number" value={hallazgo.valorMinimo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMinimo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="0" /></div>
-                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Máximo</label><input type="number" value={hallazgo.valorMaximo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMaximo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="100" /></div>
+                              <CollapsibleCard
+                                key={hallazgo.id}
+                                title={`Entidad ${index + 1}: ${hallazgo.tipo}`}
+                                icon={
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 13h.01M7 19h.01M8.001 3h7.999a2 2 0 012 2v14a2 2 0 01-2 2H8.001a2 2 0 01-2-2V5a2 2 0 012-2z" /></svg>
+                                }
+                                isExpanded={expandedEntityId === hallazgo.id}
+                                onToggle={() => setExpandedEntityId(expandedEntityId === hallazgo.id ? null : hallazgo.id)}
+                                onDelete={() => eliminarHallazgo(hallazgo.id)}
+                              >
+                                <div className="space-y-2">
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título *</label><input type="text" value={hallazgo.titulo} onChange={(e) => actualizarHallazgo(hallazgo.id, 'titulo', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título de la entidad" /></div>
+                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={hallazgo.descripcion} onChange={(e) => actualizarHallazgo(hallazgo.id, 'descripcion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={2} placeholder="Descripción detallada" /></div>
+                                  {hallazgo.tipo === 'Peligro' && (<>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Peligro *</label><select value={hallazgo.tipoPeligro || 'Inherente'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoPeligro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Inherente">Inherente (peligro propio de la sustancia)</option><option value="Diseño">Diseño (peligro por condiciones de operación)</option></select></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Consecuencia</label><input type="text" value={hallazgo.consecuencia || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'consecuencia', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" /></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Severidad (1-5)</label><select value={hallazgo.severidad || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'severidad', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Insignificante</option><option value="2">2 - Menor</option><option value="3">3 - Moderado</option><option value="4">4 - Mayor</option><option value="5">5 - Catastrófico</option></select></div>
+                                  </>)}
+                                  {hallazgo.tipo === 'Barrera' && (<>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Tipo de Barrera</label><select value={hallazgo.tipoBarrera || 'Fisica'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarrera', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Fisica">Física</option><option value="Administrativa">Administrativa</option><option value="Humana">Humana</option></select></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Función de Barrera *</label><select value={hallazgo.tipoBarreraFuncion || 'Preventiva'} onChange={(e) => actualizarHallazgo(hallazgo.id, 'tipoBarreraFuncion', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="Preventiva">Preventiva (evita que ocurra el evento)</option><option value="Detectiva">Detectiva (detecta el evento)</option><option value="Mitigativa">Mitigativa (mitiga consecuencias)</option></select></div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Efectividad (1-5)</label><select value={hallazgo.efectividadEstimada || 3} onChange={(e) => actualizarHallazgo(hallazgo.id, 'efectividadEstimada', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="1">1 - Muy Baja</option><option value="2">2 - Baja</option><option value="3">3 - Media</option><option value="4">4 - Alta</option><option value="5">5 - Muy Alta</option></select></div>
+                                  </>)}
+                                  {hallazgo.tipo === 'SOL' && (<>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Parámetro *</label><select value={hallazgo.parametro || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'parametro', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="Presión">Presión</option><option value="Temperatura">Temperatura</option><option value="Flujo">Flujo</option><option value="Nivel">Nivel</option><option value="pH">pH</option><option value="Velocidad">Velocidad</option><option value="Vibración">Vibración</option><option value="Concentración">Concentración</option><option value="dBA">dBA (Sonido/Ruido)</option></select></div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Mínimo</label><input type="number" value={hallazgo.valorMinimo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMinimo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="0" /></div>
+                                      <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Valor Máximo</label><input type="number" value={hallazgo.valorMaximo || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'valorMaximo', Number(e.target.value))} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="100" /></div>
+                                    </div>
+                                    <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Unidad</label><select value={hallazgo.unidad || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'unidad', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="psi">psi</option><option value="bar">bar</option><option value="kPa">kPa</option><option value="atm">atm</option><option value="°C">°C</option><option value="°F">°F</option><option value="K">K</option><option value="m³/h">m³/h</option><option value="L/min">L/min</option><option value="gal/min">gal/min</option><option value="%">%</option><option value="m">m</option><option value="ft">ft</option><option value="pH">pH (0-14)</option><option value="mm/s">mm/s</option><option value="g">g</option><option value="ppm">ppm</option><option value="mg/L">mg/L</option><option value="dBA">dBA</option></select></div>
+                                  </>)}
+                                  <div>
+                                    <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Ubicación</label>
+                                    <div className="flex items-center space-x-2">
+                                      <button onClick={() => setUbicacionEditando(hallazgo.id)} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${ubicacionEditando === hallazgo.id ? 'bg-blue-500 text-white' : 'bg-knar-charcoal text-knar-text-secondary hover:text-knar-text-primary'}`}>🗺️ {hallazgo.ubicacion ? 'Cambiar ubicación' : 'Ubicar en mapa'}</button>
+                                      {hallazgo.ubicacion && (<span className="text-xs text-knar-text-muted">({hallazgo.ubicacion.x}, {hallazgo.ubicacion.y})</span>)}
+                                    </div>
                                   </div>
-                                  <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Unidad</label><select value={hallazgo.unidad || ''} onChange={(e) => actualizarHallazgo(hallazgo.id, 'unidad', e.target.value)} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none"><option value="">Seleccionar</option><option value="psi">psi</option><option value="bar">bar</option><option value="kPa">kPa</option><option value="atm">atm</option><option value="°C">°C</option><option value="°F">°F</option><option value="K">K</option><option value="m³/h">m³/h</option><option value="L/min">L/min</option><option value="gal/min">gal/min</option><option value="%">%</option><option value="m">m</option><option value="ft">ft</option><option value="pH">pH (0-14)</option><option value="mm/s">mm/s</option><option value="g">g</option><option value="ppm">ppm</option><option value="mg/L">mg/L</option><option value="dBA">dBA</option></select></div>
-                                </>)}
-                                <div>
-                                  <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Ubicación</label>
-                                  <div className="flex items-center space-x-2">
-                                    <button onClick={() => setUbicacionEditando(hallazgo.id)} className={`px-3 py-1.5 rounded text-xs font-light transition-colors ${ubicacionEditando === hallazgo.id ? 'bg-blue-500 text-white' : 'bg-knar-charcoal text-knar-text-secondary hover:text-knar-text-primary'}`}>🗺️ {hallazgo.ubicacion ? 'Cambiar ubicación' : 'Ubicar en mapa'}</button>
-                                    {hallazgo.ubicacion && (<span className="text-xs text-knar-text-muted">({hallazgo.ubicacion.x}, {hallazgo.ubicacion.y})</span>)}
-                                  </div>
                                 </div>
-                              </div>
+                              </CollapsibleCard>
                             ))}
                           </div>
                         )}
 
                         <div className="flex items-center space-x-3 pt-4 border-t border-knar-border">
                           <button onClick={handleGuardar} className="knar-btn knar-btn-primary">Guardar</button>
-                          <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">Cancelar</button>
+                          <button onClick={resetFormState} className="knar-btn knar-btn-ghost">Cancelar</button>
                         </div>
                       </div>
                     </div>
