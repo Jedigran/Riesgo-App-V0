@@ -633,8 +633,75 @@ export default function RiesgoApp() {
   // TEST DATA LOADER FOR ANALYSIS (HAZOP, FMEA, LOPA, OCA)
   // ========================================
   const cargarAnalisisEjemplo = () => {
-    // HAZOP-01
-    const resultadoHAZOP = crearAnalisisHAZOP({
+    // Helper to create hallazgos directly for an analysis
+    // Each entity gets a unique position spread across the map
+    const crearHallazgosParaAnalisis = (analisisId: string, hallazgosData: any[], startIndex: number) => {
+      // Positions spread across the map in a grid pattern
+      const posiciones = [
+        { x: 20, y: 20 }, { x: 40, y: 20 }, { x: 60, y: 20 }, { x: 80, y: 20 },
+        { x: 20, y: 40 }, { x: 40, y: 40 }, { x: 60, y: 40 }, { x: 80, y: 40 },
+        { x: 20, y: 60 }, { x: 40, y: 60 }, { x: 60, y: 60 }, { x: 80, y: 60 },
+        { x: 20, y: 80 }, { x: 40, y: 80 }, { x: 60, y: 80 }, { x: 80, y: 80 },
+      ];
+
+      for (let i = 0; i < hallazgosData.length; i++) {
+        const h = hallazgosData[i];
+        const ubicacion = posiciones[startIndex + i] || { x: 50, y: 50 };
+        
+        if (h.tipo === 'Peligro') {
+          crearPeligro({
+            titulo: h.titulo,
+            descripcion: h.descripcion,
+            tipoPeligro: h.tipoPeligro,
+            consecuencia: h.consecuencia,
+            severidad: h.severidad,
+            causaRaiz: h.causaRaiz,
+            analisisOrigenIds: [analisisId],
+          }, ubicacion);
+        } else if (h.tipo === 'Barrera') {
+          crearBarrera({
+            titulo: h.titulo,
+            descripcion: h.descripcion,
+            tipoBarrera: h.tipoBarrera,
+            tipoBarreraFuncion: h.tipoBarreraFuncion,
+            efectividadEstimada: h.efectividadEstimada,
+            elementoProtegido: h.elementoProtegido,
+            analisisOrigenIds: [analisisId],
+          }, ubicacion);
+        } else if (h.tipo === 'POE') {
+          crearPOE({
+            titulo: h.titulo,
+            descripcion: h.descripcion,
+            procedimientoReferencia: h.procedimientoReferencia,
+            frecuenciaAplicacion: h.frecuenciaAplicacion,
+            responsable: h.responsable,
+            analisisOrigenIds: [analisisId],
+          }, ubicacion);
+        } else if (h.tipo === 'SOL') {
+          crearSOL({
+            titulo: h.titulo,
+            descripcion: h.descripcion,
+            capaNumero: h.capaNumero,
+            independiente: h.independiente,
+            tipoTecnologia: h.tipoTecnologia,
+            parametro: h.parametro,
+            valorMinimo: h.valorMinimo,
+            valorMaximo: h.valorMaximo,
+            unidad: h.unidad,
+            analisisOrigenIds: [analisisId],
+          }, ubicacion);
+        }
+      }
+      
+      return startIndex + hallazgosData.length; // Return next index
+    };
+
+    let entityIndex = 0; // Track entity position index
+
+    // ========================================
+    // HAZOP #1 - Sistema de Achique
+    // ========================================
+    const hazop1 = crearAnalisisHAZOP({
       nodo: 'Sistema de Achique',
       subnodo: 'Bomba principal',
       parametro: 'Flujo',
@@ -645,61 +712,246 @@ export default function RiesgoApp() {
       salvaguardasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
       recomendaciones: ['Instalar bomba redundante'],
     });
-
-    if (resultadoHAZOP.exito && resultadoHAZOP.id) {
-      crearHallazgosDeFormulario(resultadoHAZOP.id);
-    }
-
-    // FMEA-01
-    const resultadoFMEA = crearAnalisisFMEA({
-      equipo: 'Bomba principal del Sistema de Achique',
-      funcion: 'Evacuar agua acumulada del sistema de drenaje',
-      modoFalla: 'Motor no opera',
-      receptorImpacto: 'Personal / Operación',
-      efecto: 'Pérdida de bombeo',
-      causa: 'Falla eléctrica del motor',
-      S: 9,
-      O: 5,
-      D: 3,
-      RPN: 135,
-      barrerasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
-      accionesRecomendadas: ['Instalar bomba redundante'],
-    });
-
-    if (resultadoFMEA.exito && resultadoFMEA.id) {
-      crearHallazgosDeFormulario(resultadoFMEA.id);
-    }
-
-    // LOPA-01
-    const resultadoLOPA = crearAnalisisLOPA({
-      escenario: 'Pérdida de bombeo de achique',
-      consecuencia: 'Acumulación de agua',
-      receptorImpacto: 'Personal / Operación',
-      S: 7,
-      riesgoTolerable: 0.00001,
-      causa: 'Falla eléctrica del motor',
-      frecuenciaInicial: 0.0707,
-      capasIPL: [
+    if (hazop1.exito && hazop1.id) {
+      entityIndex = crearHallazgosParaAnalisis(hazop1.id, [
         {
-          nombre: 'Alarma de alto nivel',
-          pfd: 0.0001,
+          tipo: 'Peligro',
+          titulo: 'Pérdida de flujo de achique',
+          descripcion: 'Riesgo por falla en bomba principal',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Acumulación de agua',
+          severidad: 4,
+          causaRaiz: 'Falla eléctrica',
         },
-      ],
-      pfdTotal: 0.0001,
-      riesgoEscenario: 0.00000707,
-      cumpleCriterio: true,
-      pfdObjetivo: 0,
-      rrf: 0,
-      silRequerido: 0,
-      recomendaciones: ['N/A'],
-    });
-
-    if (resultadoLOPA.exito && resultadoLOPA.id) {
-      crearHallazgosDeFormulario(resultadoLOPA.id);
+        {
+          tipo: 'Barrera',
+          titulo: 'Sensor de nivel alto',
+          descripcion: 'Detector de nivel para activar alarma',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Detectiva',
+          efectividadEstimada: 4,
+          elementoProtegido: 'Sistema de achique',
+        },
+      ], entityIndex);
     }
 
-    // OCA-01
-    const resultadoOCA = crearAnalisisOCA({
+    // ========================================
+    // HAZOP #2 - Reactor R-101
+    // ========================================
+    const hazop2 = crearAnalisisHAZOP({
+      nodo: 'Reactor R-101',
+      subnodo: 'Sistema de agitación',
+      parametro: 'Presión',
+      palabraGuia: 'Más de',
+      causa: 'Reacción exotérmica descontrolada',
+      consecuencia: 'Sobrepresión y posible ruptura del reactor',
+      receptorImpacto: 'Personal/Planta',
+      salvaguardasExistentes: ['PSV-101', 'Sistema de enfriamiento'],
+      recomendaciones: ['Instalar disco de ruptura'],
+    });
+    if (hazop2.exito && hazop2.id) {
+      entityIndex = crearHallazgosParaAnalisis(hazop2.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Sobrepresión en reactor',
+          descripcion: 'Riesgo por reacción exotérmica',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Ruptura del reactor',
+          severidad: 5,
+          causaRaiz: 'Falla en control de temperatura',
+        },
+        {
+          tipo: 'SOL',
+          titulo: 'PSV-101',
+          descripcion: 'Válvula de alivio de presión',
+          capaNumero: 1,
+          independiente: true,
+          tipoTecnologia: 'Válvula de seguridad',
+          parametro: 'Presión',
+          valorMinimo: 0,
+          valorMaximo: 150,
+          unidad: 'psig',
+        },
+      ], entityIndex);
+    }
+
+    // ========================================
+    // FMEA #1 - Bomba P-201
+    // ========================================
+    const fmea1 = crearAnalisisFMEA({
+      equipo: 'Bomba centrífuga P-201',
+      funcion: 'Transferir producto del tanque T-101 a T-102',
+      modoFalla: 'Falla en sello mecánico',
+      receptorImpacto: 'Operadores de planta',
+      efecto: 'Fuga de producto químico',
+      causa: 'Desgaste por operación continua',
+      S: 7,
+      O: 4,
+      D: 5,
+      RPN: 140,
+      barrerasExistentes: ['Dique de contención', 'Sensor de fugas'],
+      accionesRecomendadas: ['Programar mantenimiento preventivo'],
+    });
+    if (fmea1.exito && fmea1.id) {
+      entityIndex = crearHallazgosParaAnalisis(fmea1.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Fuga por falla de sello',
+          descripcion: 'Fuga de producto químico por sello dañado',
+          tipoPeligro: 'Diseño',
+          consecuencia: 'Exposición química',
+          severidad: 4,
+          causaRaiz: 'Desgaste del sello',
+        },
+        {
+          tipo: 'POE',
+          titulo: 'POE-INS-001: Inspección de bombas',
+          descripcion: 'Procedimiento de inspección semanal',
+          procedimientoReferencia: 'PRO-INS-001',
+          frecuenciaAplicacion: 'Semanal',
+          responsable: 'Jefe de Mantenimiento',
+        },
+      ], entityIndex);
+    }
+
+    // ========================================
+    // FMEA #2 - Compresor C-101
+    // ========================================
+    const fmea2 = crearAnalisisFMEA({
+      equipo: 'Compresor de aire C-101',
+      funcion: 'Suministrar aire de instrumento',
+      modoFalla: 'Vibración excesiva',
+      receptorImpacto: 'Equipos de proceso',
+      efecto: 'Daño en rodamientos',
+      causa: 'Desbalanceo del rotor',
+      S: 6,
+      O: 3,
+      D: 4,
+      RPN: 72,
+      barrerasExistentes: ['Monitor de vibración'],
+      accionesRecomendadas: ['Balanceo dinámico'],
+    });
+    if (fmea2.exito && fmea2.id) {
+      entityIndex = crearHallazgosParaAnalisis(fmea2.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Vibración excesiva',
+          descripcion: 'Riesgo de falla catastrófica',
+          tipoPeligro: 'Diseño',
+          consecuencia: 'Falla del compresor',
+          severidad: 4,
+          causaRaiz: 'Desbalanceo',
+        },
+        {
+          tipo: 'Barrera',
+          titulo: 'Monitor de vibración VM-101',
+          descripcion: 'Sistema de monitoreo continuo',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Detectiva',
+          efectividadEstimada: 4,
+          elementoProtegido: 'Compresor C-101',
+        },
+      ], entityIndex);
+    }
+
+    // ========================================
+    // LOPA #1 - Escenario Crítico
+    // ========================================
+    const lopa1 = crearAnalisisLOPA({
+      escenario: 'Fuga en tubería de proceso',
+      consecuencia: 'Incendio de vapor',
+      receptorImpacto: 'Personal/Planta',
+      S: 8,
+      riesgoTolerable: 0.00001,
+      causa: 'Corrosión de tubería',
+      frecuenciaInicial: 0.01,
+      capasIPL: [
+        { nombre: 'Alarma de gas', pfd: 0.1 },
+        { nombre: 'Sistema de rociadores', pfd: 0.05 },
+      ],
+      pfdTotal: 0.005,
+      riesgoEscenario: 0.00005,
+      cumpleCriterio: false,
+      pfdObjetivo: 0.001,
+      rrf: 10,
+      silRequerido: 2,
+      recomendaciones: ['Instalar SIS'],
+    });
+    if (lopa1.exito && lopa1.id) {
+      entityIndex = crearHallazgosParaAnalisis(lopa1.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Fuga por corrosión',
+          descripcion: 'Fuga de material inflamable',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Incendio',
+          severidad: 5,
+          causaRaiz: 'Corrosión',
+        },
+        {
+          tipo: 'SOL',
+          titulo: 'SIS-101: Parada de emergencia',
+          descripcion: 'Sistema instrumentado de seguridad',
+          capaNumero: 2,
+          independiente: true,
+          tipoTecnologia: 'Sensor + Válvula',
+          parametro: 'Flujo',
+          valorMinimo: 0,
+          valorMaximo: 100,
+          unidad: '%',
+        },
+      ], entityIndex);
+    }
+
+    // ========================================
+    // LOPA #2 - Escenario Alternativo
+    // ========================================
+    const lopa2 = crearAnalisisLOPA({
+      escenario: 'Bloqueo de salida de tanque',
+      consecuencia: 'Ruptura por sobrepresión',
+      receptorImpacto: 'Planta/Medio Ambiente',
+      S: 7,
+      riesgoTolerable: 0.0001,
+      causa: 'Válvula bloqueada',
+      frecuenciaInicial: 0.05,
+      capasIPL: [
+        { nombre: 'PSV', pfd: 0.01 },
+      ],
+      pfdTotal: 0.01,
+      riesgoEscenario: 0.0005,
+      cumpleCriterio: false,
+      pfdObjetivo: 0.002,
+      rrf: 5,
+      silRequerido: 1,
+      recomendaciones: ['Mejorar inspección'],
+    });
+    if (lopa2.exito && lopa2.id) {
+      entityIndex = crearHallazgosParaAnalisis(lopa2.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Ruptura por sobrepresión',
+          descripcion: 'Falla estructural del tanque',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Derrame masivo',
+          severidad: 5,
+          causaRaiz: 'Obstrucción',
+        },
+        {
+          tipo: 'Barrera',
+          titulo: 'PSV-201',
+          descripcion: 'Válvula de alivio de seguridad',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Mitigativa',
+          efectividadEstimada: 5,
+          elementoProtegido: 'Tanque T-201',
+        },
+      ], entityIndex);
+    }
+
+    // ========================================
+    // OCA #1 - H2S Release
+    // ========================================
+    const oca1 = crearAnalisisOCA({
       compuesto: 'H2S',
       cantidad: 1000,
       viento: 1.5,
@@ -721,15 +973,80 @@ export default function RiesgoApp() {
       gaps: [''],
       recomendaciones: [''],
     });
+    if (oca1.exito && oca1.id) {
+      entityIndex = crearHallazgosParaAnalisis(oca1.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Nube tóxica de H2S',
+          descripcion: 'Dispersión de gas sulfhídrico',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Intoxicación del personal',
+          severidad: 5,
+          causaRaiz: 'Fuga en tubería',
+        },
+        {
+          tipo: 'POE',
+          titulo: 'POE-EMER-001: Evacuación',
+          descripcion: 'Procedimiento de evacuación por gas',
+          procedimientoReferencia: 'PRO-EMER-001',
+          frecuenciaAplicacion: 'Emergencia',
+          responsable: 'Supervisor de Seguridad',
+        },
+      ], entityIndex);
+    }
 
-    if (resultadoOCA.exito && resultadoOCA.id) {
-      crearHallazgosDeFormulario(resultadoOCA.id);
+    // ========================================
+    // OCA #2 - Cl2 Release
+    // ========================================
+    const oca2 = crearAnalisisOCA({
+      compuesto: 'Cl2',
+      cantidad: 500,
+      viento: 2.0,
+      factorViento: 0.75,
+      estabilidad: 'D',
+      factorEscalabilidad: 1.0,
+      topografia: 'Rural',
+      factorTopografia: 1.0,
+      tipoEscenario: 'Worst-Case',
+      endpoint: 0.0035,
+      tasaLiberacion: 50,
+      distanciaEndpointMillas: 1.5,
+      distanciaEndpointKm: 2.4,
+      areaAfectadaMillas2: 7.07,
+      areaAfectadaKm2: 18.3,
+      programaRMP: 'Programa 2',
+      evaluacion: '🟡 MODERADA',
+      barrerasExistentes: [''],
+      gaps: [''],
+      recomendaciones: [''],
+    });
+    if (oca2.exito && oca2.id) {
+      entityIndex = crearHallazgosParaAnalisis(oca2.id, [
+        {
+          tipo: 'Peligro',
+          titulo: 'Nube tóxica de Cl2',
+          descripcion: 'Dispersión de gas cloro',
+          tipoPeligro: 'Inherente',
+          consecuencia: 'Daño respiratorio',
+          severidad: 5,
+          causaRaiz: 'Falla en válvula',
+        },
+        {
+          tipo: 'Barrera',
+          titulo: 'Detector de Cl2',
+          descripcion: 'Sistema de detección de cloro',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Detectiva',
+          efectividadEstimada: 4,
+          elementoProtegido: 'Área de almacenamiento',
+        },
+      ], entityIndex);
     }
 
     agregarNotificacion({
       tipo: 'success',
-      titulo: 'Análisis de Ejemplo Cargados',
-      mensaje: 'Se crearon HAZOP-01, FMEA-01, LOPA-01 y OCA-01',
+      titulo: 'Datos de Ejemplo Cargados',
+      mensaje: 'Se crearon 8 análisis (2 de cada tipo) con 16 entidades',
       duracion: 4000,
     });
   };
@@ -1111,39 +1428,6 @@ export default function RiesgoApp() {
             {/* Censo Tab */}
             {leftTabActive === 'censo' && (
               <div className="space-y-4">
-                {/* TEST BUTTON FOR ANALYSIS - REMOVE LATER */}
-                <button
-                  onClick={cargarAnalisisEjemplo}
-                  style={{
-                    padding: '8px 16px',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: 400,
-                    color: 'white',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-                    marginBottom: '8px',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.filter = 'brightness(1.1)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.filter = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Cargar Análisis de Ejemplo (HAZOP, FMEA, LOPA, OCA) - TESTING ONLY
-                </button>
-
                 {metodologiaSeleccionada === null ? (
                   /* Lista de metodologías */
                   <div className="knar-card">
@@ -2039,41 +2323,7 @@ export default function RiesgoApp() {
 
             {/* Grupos Tab */}
             {leftTabActive === 'grupos' && (
-              <div>
-                {/* TEST BUTTON - REMOVE LATER */}
-                <button
-                  onClick={cargarDatosEjemplo}
-                  style={{
-                    marginBottom: '12px',
-                    padding: '8px 16px',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: 400,
-                    color: 'white',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.filter = 'brightness(1.1)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.filter = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <svg style={{ width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                  </svg>
-                  Cargar Datos de Ejemplo (5 de cada tipo) - TESTING ONLY
-                </button>
-                <GruposPanel />
-              </div>
+              <GruposPanel />
             )}
           </div>
         </aside>
@@ -2140,6 +2390,31 @@ export default function RiesgoApp() {
             <span>Responsable: <span className="text-knar-text-secondary">{configData.responsable || '—'}</span></span>
             <span>|</span>
             <span>Validez: <span className="text-knar-text-secondary">{configData.validez || '—'}</span></span>
+            <span>|</span>
+            <button
+              onClick={cargarAnalisisEjemplo}
+              style={{
+                padding: '4px 10px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '10px',
+                fontWeight: 400,
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'all 150ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.filter = 'brightness(1.1)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.filter = 'none';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              🧪 Cargar Ejemplo
+            </button>
           </div>
         </div>
       </footer>
