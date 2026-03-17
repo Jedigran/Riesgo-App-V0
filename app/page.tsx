@@ -205,7 +205,7 @@ export default function RiesgoApp() {
   // ========================================
   // OCA HELPER FUNCTIONS
   // ========================================
-  
+
   // Chemical compound endpoint lookup (mg/L)
   const getEndpointPorCompuesto = (compuesto: string): number => {
     const endpoints: Record<string, number> = {
@@ -735,16 +735,16 @@ export default function RiesgoApp() {
         crearHallazgosDeFormulario(resultadoAnalisis.id);
         agregarNotificacion({ tipo: 'success', titulo: 'HAZOP Guardado', mensaje: 'Análisis y entidades guardadas', duracion: 3000 });
         setHazopData({
-        nodo: '',
-        subnodo: '',
-        parametro: '',
-        palabraGuia: '',
-        causa: '',
-        consecuencia: '',
-        receptorImpacto: '',
-        salvaguardasExistentes: [''],
-        recomendaciones: [''],
-      });
+          nodo: '',
+          subnodo: '',
+          parametro: '',
+          palabraGuia: '',
+          causa: '',
+          consecuencia: '',
+          receptorImpacto: '',
+          salvaguardasExistentes: [''],
+          recomendaciones: [''],
+        });
         setHallazgosForm([]);
         setMetodologiaSeleccionada(null);
       } catch (error) {
@@ -1090,7 +1090,7 @@ export default function RiesgoApp() {
                   /* Formulario de metodología */
                   <div className="space-y-4">
                     <button onClick={() => { setMetodologiaSeleccionada(null); setHallazgosForm([]); }} className="knar-btn knar-btn-ghost">
-                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
                       Volver a elementos de análisis
                     </button>
 
@@ -1353,9 +1353,9 @@ export default function RiesgoApp() {
                             const npr = fmeaData.S * fmeaData.O * fmeaData.D;
                             const [bg, border, textColor, label] =
                               npr >= 201 ? ['rgba(220,38,38,0.12)', 'rgba(220,38,38,0.35)', '#f87171', 'Crítico'] :
-                              npr >= 101 ? ['rgba(234,88,12,0.12)', 'rgba(234,88,12,0.35)', 'var(--accent)', 'Alto'] :
-                              npr >= 51  ? ['rgba(202,138,4,0.12)', 'rgba(202,138,4,0.35)', '#facc15', 'Moderado'] :
-                                           ['rgba(22,163,74,0.12)', 'rgba(22,163,74,0.35)', '#4ade80', 'Bajo'];
+                                npr >= 101 ? ['rgba(234,88,12,0.12)', 'rgba(234,88,12,0.35)', 'var(--accent)', 'Alto'] :
+                                  npr >= 51 ? ['rgba(202,138,4,0.12)', 'rgba(202,138,4,0.35)', '#facc15', 'Moderado'] :
+                                    ['rgba(22,163,74,0.12)', 'rgba(22,163,74,0.35)', '#4ade80', 'Bajo'];
                             return (
                               <div style={{ backgroundColor: bg, border: `0.5px solid ${border}`, borderRadius: 'var(--radius-md)', padding: 'var(--space-2)', textAlign: 'center' }}>
                                 <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>{'NPR = S × O × D = '}</span>
@@ -1523,7 +1523,7 @@ export default function RiesgoApp() {
                           {/* Cálculos automáticos */}
                           <div className="bg-knar-charcoal rounded p-3 space-y-2 border border-knar-border">
                             <h4 className="text-xs font-medium text-knar-text-primary">Cálculos de Riesgo</h4>
-                            
+
                             {/* PfD Total */}
                             <div className="flex justify-between text-xs">
                               <span className="text-knar-text-muted">PfD Total:</span>
@@ -1543,11 +1543,10 @@ export default function RiesgoApp() {
                             {/* ¿Cumple Criterio? */}
                             <div className="flex justify-between text-xs">
                               <span className="text-knar-text-muted">¿Cumple Criterio?</span>
-                              <span className={`font-bold ${
-                                (lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)) <= lopaData.riesgoTolerable
+                              <span className={`font-bold ${(lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)) <= lopaData.riesgoTolerable
                                   ? 'text-green-500'
                                   : 'text-red-500'
-                              }`}>
+                                }`}>
                                 {(lopaData.frecuenciaInicial * lopaData.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1)) <= lopaData.riesgoTolerable ? '✅ SÍ' : '❌ NO'}
                               </span>
                             </div>
@@ -1742,7 +1741,7 @@ export default function RiesgoApp() {
                           {/* Cálculos de Distancia y Área */}
                           <div className="bg-knar-charcoal rounded p-3 space-y-2 border border-knar-border">
                             <h4 className="text-xs font-medium text-knar-text-primary">Cálculos de Dispersión</h4>
-                            
+
                             {/* Distancia en millas */}
                             <div className="flex justify-between text-xs">
                               <span className="text-knar-text-muted">Distancia al Endpoint:</span>
@@ -1988,7 +1987,7 @@ export default function RiesgoApp() {
               <div className="knar-card">
                 <div className="knar-card-header">
                   <div className="knar-icon-box"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
-                  <h3 className="knar-card-title">Tabla de Hallazgos</h3>
+                  <h3 className="knar-card-title">Tabla de entidades</h3>
                 </div>
                 <div className="knar-card-content">
                   <TablaHallazgos />

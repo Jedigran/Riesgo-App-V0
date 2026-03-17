@@ -13,6 +13,7 @@
 
 import { useState, useMemo, Fragment } from 'react';
 import { useSesion } from '@/src/controllers/useSesion';
+import { useAnalisis } from '@/src/controllers/useAnalisis';
 import type { AnalisisOrigen, TipoAnalisis, EstadoAnalisis } from '@/src/models/analisis/types';
 
 interface FiltrosTabla {
@@ -23,6 +24,7 @@ interface FiltrosTabla {
 
 export default function TablaAnalisis() {
   const { sesion, sesionCargada } = useSesion();
+  const { eliminarAnalisis } = useAnalisis();
 
   const [filtros, setFiltros] = useState<FiltrosTabla>({
     tipo: 'todos',
@@ -544,7 +546,9 @@ export default function TablaAnalisis() {
                                 className="px-3 py-1.5 bg-red-500 bg-opacity-20 text-red-400 rounded text-xs font-light hover:bg-opacity-30 transition-colors flex items-center gap-2"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // TODO: Delete analysis
+                                  if (!confirm('¿Está seguro de eliminar este elemento de análisis?')) return;
+                                  eliminarAnalisis(analisis.base.id);
+                                  setExpandedRowId(null);
                                 }}
                               >
                                 <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">

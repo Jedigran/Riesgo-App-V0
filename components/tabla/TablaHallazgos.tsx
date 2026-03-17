@@ -11,24 +11,102 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useSesion } from '@/src/controllers/useSesion';
 import { useGrupo } from '@/src/controllers/useGrupo';
-import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
+import { useHallazgo } from '@/src/controllers/useHallazgo';
+import type { Hallazgo, TipoHallazgo, Peligro, Barrera, POE, SOL } from '@/src/models/hallazgo/types';
 
 interface FiltrosTabla {
   tipo: TipoHallazgo | 'todos';
   busqueda: string;
 }
 
+// ============================================================================
+// DETAIL FIELDS RENDERER
+// ============================================================================
+
+function CamposEspecificos({ hallazgo }: { hallazgo: Hallazgo }) {
+  const fields: { label: string; value: string | number | boolean | undefined }[] = [];
+
+  if (hallazgo.tipo === 'Peligro') {
+    const h = hallazgo as Peligro;
+    fields.push(
+      { label: 'Tipo de Peligro', value: h.tipoPeligro },
+      { label: 'Consecuencia', value: h.consecuencia },
+      { label: 'Severidad', value: `${h.severidad} / 5` },
+      { label: 'Causa Raíz', value: h.causaRaiz },
+    );
+  } else if (hallazgo.tipo === 'Barrera') {
+    const h = hallazgo as Barrera;
+    fields.push(
+      { label: 'Tipo de Barrera', value: h.tipoBarrera },
+      { label: 'Función', value: h.tipoBarreraFuncion },
+      { label: 'Efectividad Estimada', value: `${h.efectividadEstimada} / 5` },
+      { label: 'Elemento Protegido', value: h.elementoProtegido },
+    );
+  } else if (hallazgo.tipo === 'POE') {
+    const h = hallazgo as POE;
+    fields.push(
+      { label: 'Procedimiento Referencia', value: h.procedimientoReferencia },
+      { label: 'Frecuencia de Aplicación', value: h.frecuenciaAplicacion },
+      { label: 'Responsable', value: h.responsable },
+    );
+  } else if (hallazgo.tipo === 'SOL') {
+    const h = hallazgo as SOL;
+    fields.push(
+      { label: 'Capa N°', value: h.capaNumero },
+      { label: 'Independiente', value: h.independiente ? 'Sí' : 'No' },
+      { label: 'Tipo de Tecnología', value: h.tipoTecnologia },
+      { label: 'Parámetro', value: h.parametro },
+      { label: 'Valor Mínimo', value: h.valorMinimo !== undefined ? `${h.valorMinimo} ${h.unidad}` : '—' },
+      { label: 'Valor Máximo', value: h.valorMaximo !== undefined ? `${h.valorMaximo} ${h.unidad}` : '—' },
+      { label: 'Unidad', value: h.unidad },
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {/* Common fields */}
+      <div className="flex flex-col gap-1">
+        <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>Título</span>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 400 }}>{hallazgo.titulo}</span>
+      </div>
+      <div className="flex flex-col gap-1 col-span-2">
+        <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>Descripción</span>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 300 }}>{hallazgo.descripcion}</span>
+      </div>
+      {/* Type-specific fields */}
+      {fields.map(({ label, value }) => (
+        <div key={label} className="flex flex-col gap-1">
+          <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>{label}</span>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 400 }}>{value ?? '—'}</span>
+        </div>
+      ))}
+      <div className="flex flex-col gap-1">
+        <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300 }}>Creado</span>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+          {new Date(hallazgo.fechaCreacion).toLocaleDateString('es-ES')}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function TablaHallazgos() {
   const { sesion, sesionCargada } = useSesion();
   const { grupos, obtenerGruposPorHallazgo } = useGrupo();
-  
+  const { eliminarHallazgo } = useHallazgo();
+
   const [filtros, setFiltros] = useState<FiltrosTabla>({
     tipo: 'todos',
     busqueda: '',
   });
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
   // Filtrar hallazgos
   const hallazgosFiltrados = useMemo(() => {
@@ -206,6 +284,7 @@ export default function TablaHallazgos() {
           <table className="w-full">
             <thead style={{ backgroundColor: 'var(--knar-dark)', borderBottom: '0.5px solid var(--border)' }}>
               <tr>
+                <th className="px-4 py-2 text-left" style={{ width: 28 }} />
                 {(['Tipo', 'Título', 'Descripción', 'Relaciones'] as const).map(col => (
                   <th key={col} className="px-4 py-2 text-left" style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-light)', color: 'var(--text-muted)' }}>{col}</th>
                 ))}
@@ -215,80 +294,169 @@ export default function TablaHallazgos() {
               {hallazgosFiltrados.map((hallazgo, i) => {
                 const gruposDelHallazgo = getGruposParaHallazgo(hallazgo.id);
                 const tieneGrupos = gruposDelHallazgo.length > 0;
+                const isExpanded = expandedRowId === hallazgo.id;
 
                 return (
-                  <tr
-                    key={hallazgo.id}
-                    style={{
-                      borderTop: i > 0 ? '0.5px solid var(--border)' : undefined,
-                      transition: 'background-color 150ms ease',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--knar-dark)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
-                  >
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
-                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }}>{hallazgo.tipo}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2">
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-normal)' }}>{hallazgo.titulo}</span>
-                    </td>
-                    <td className="px-4 py-2">
-                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)', display: 'block', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {hallazgo.descripcion}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">
-                      {tieneGrupos ? (
+                  <Fragment key={hallazgo.id}>
+                    <tr
+                      style={{
+                        borderTop: i > 0 ? '0.5px solid var(--border)' : undefined,
+                        transition: 'background-color 150ms ease',
+                        cursor: 'pointer',
+                        backgroundColor: isExpanded ? 'var(--knar-dark)' : undefined,
+                      }}
+                      onClick={() => setExpandedRowId(isExpanded ? null : hallazgo.id)}
+                      onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.backgroundColor = 'var(--knar-dark)'; }}
+                      onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.backgroundColor = ''; }}
+                    >
+                      {/* Expand chevron */}
+                      <td className="px-4 py-2">
+                        <svg
+                          width="12" height="12"
+                          fill="none" stroke="currentColor" strokeWidth="1.5"
+                          viewBox="0 0 24 24"
+                          style={{ color: 'var(--text-muted)', transition: 'transform 200ms ease', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </td>
+                      <td className="px-4 py-2">
                         <div className="flex items-center gap-2">
-                          {/* Show first 2 groups as badges */}
-                          {gruposDelHallazgo.slice(0, 2).map((grupo) => (
-                            <span
-                              key={grupo.id}
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 300,
-                                color: grupo.color,
-                                background: `${grupo.color}15`,
-                                border: `0.5px solid ${grupo.color}30`,
-                                borderRadius: '3px',
-                                padding: '2px 6px',
-                                cursor: 'default',
-                              }}
-                              title={grupo.nombre}
-                            >
-                              {grupo.nombre.length > 15 ? grupo.nombre.substring(0, 15) + '...' : grupo.nombre}
-                            </span>
-                          ))}
-                          {/* Show count badge if more groups */}
-                          {gruposDelHallazgo.length > 2 && (
-                            <span
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: 400,
-                                color: 'var(--text-muted)',
-                                background: 'var(--knar-charcoal)',
-                                border: '0.5px solid var(--border)',
-                                borderRadius: '9999px',
-                                padding: '2px 6px',
-                                minWidth: '24px',
-                                textAlign: 'center',
-                              }}
-                              title={gruposDelHallazgo.slice(2).map(g => g.nombre).join(', ')}
-                            >
-                              +{gruposDelHallazgo.length - 2}
-                            </span>
-                          )}
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
+                          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-light)' }}>{hallazgo.tipo}</span>
                         </div>
-                      ) : (
-                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                          Sin relaciones
+                      </td>
+                      <td className="px-4 py-2">
+                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-primary)', fontWeight: 'var(--weight-normal)' }}>{hallazgo.titulo}</span>
+                      </td>
+                      <td className="px-4 py-2">
+                        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 'var(--weight-light)', display: 'block', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {hallazgo.descripcion}
                         </span>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-4 py-2">
+                        {tieneGrupos ? (
+                          <div className="flex items-center gap-2">
+                            {gruposDelHallazgo.slice(0, 2).map((grupo) => (
+                              <span
+                                key={grupo.id}
+                                style={{
+                                  fontSize: '10px',
+                                  fontWeight: 300,
+                                  color: grupo.color,
+                                  background: `${grupo.color}15`,
+                                  border: `0.5px solid ${grupo.color}30`,
+                                  borderRadius: '3px',
+                                  padding: '2px 6px',
+                                  cursor: 'default',
+                                }}
+                                title={grupo.nombre}
+                              >
+                                {grupo.nombre.length > 15 ? grupo.nombre.substring(0, 15) + '...' : grupo.nombre}
+                              </span>
+                            ))}
+                            {gruposDelHallazgo.length > 2 && (
+                              <span
+                                style={{
+                                  fontSize: '10px',
+                                  fontWeight: 400,
+                                  color: 'var(--text-muted)',
+                                  background: 'var(--knar-charcoal)',
+                                  border: '0.5px solid var(--border)',
+                                  borderRadius: '9999px',
+                                  padding: '2px 6px',
+                                  minWidth: '24px',
+                                  textAlign: 'center',
+                                }}
+                                title={gruposDelHallazgo.slice(2).map(g => g.nombre).join(', ')}
+                              >
+                                +{gruposDelHallazgo.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                            Sin relaciones
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+
+                    {/* Expanded detail row */}
+                    {isExpanded && (
+                      <tr>
+                        <td colSpan={5} className="px-0 py-0">
+                          <div
+                            style={{
+                              backgroundColor: 'var(--knar-charcoal)',
+                              borderBottom: '0.5px solid var(--border)',
+                              padding: '16px 20px',
+                              animation: 'slideDown 0.2s ease-out',
+                            }}
+                          >
+                            <div className="max-w-5xl mx-auto space-y-4">
+                              {/* Type badge + title */}
+                              <div className="flex items-center gap-3 pb-3" style={{ borderBottom: '0.5px solid var(--border)' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: getColorPorTipo(hallazgo.tipo), flexShrink: 0 }} />
+                                <h4 style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--text-primary)' }}>
+                                  {hallazgo.tipo} — {hallazgo.titulo}
+                                </h4>
+                              </div>
+
+                              {/* All fields */}
+                              <CamposEspecificos hallazgo={hallazgo} />
+
+                              {/* Relaciones badges */}
+                              {tieneGrupos && (
+                                <div>
+                                  <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 300, marginBottom: 6 }}>Relaciones</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {gruposDelHallazgo.map((grupo) => (
+                                      <span
+                                        key={grupo.id}
+                                        style={{
+                                          fontSize: '10px',
+                                          fontWeight: 300,
+                                          color: grupo.color,
+                                          background: `${grupo.color}15`,
+                                          border: `0.5px solid ${grupo.color}30`,
+                                          borderRadius: '3px',
+                                          padding: '2px 8px',
+                                        }}
+                                      >
+                                        {grupo.nombre}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="mt-4 pt-4 flex items-center gap-3" style={{ borderTop: '0.5px solid var(--border)' }}>
+                              <button
+                                className="px-3 py-1.5 rounded text-xs font-light flex items-center gap-2 transition-colors"
+                                style={{ backgroundColor: 'rgba(239,68,68,0.15)', color: '#f87171' }}
+                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.25)')}
+                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)')}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!confirm('¿Está seguro de eliminar esta entidad?')) return;
+                                  eliminarHallazgo(hallazgo.id);
+                                  setExpandedRowId(null);
+                                }}
+                              >
+                                <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Eliminar
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
