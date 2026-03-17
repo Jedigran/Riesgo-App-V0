@@ -317,7 +317,7 @@ export default function GrupoCard({
           )}
         </div>
 
-        {/* Protectores section - classified by type */}
+        {/* Controles section - classified by type */}
         <div>
           <div
             style={{
@@ -336,7 +336,7 @@ export default function GrupoCard({
                 letterSpacing: '0.02em',
               }}
             >
-              Protectores ({protectores.length})
+              Controles ({protectores.length})
             </span>
             <div
               style={{

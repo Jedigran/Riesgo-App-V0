@@ -84,19 +84,8 @@ export default function GrupoTabla({
   }
   
   return (
-    <div className="knar-card">
-      <div className="knar-card-header">
-        <div className="knar-icon-box">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <h3 className="knar-card-title">Tabla de Relaciones</h3>
-      </div>
-      
-      <div className="knar-card-content" style={{ padding: 0, overflow: 'hidden' }}>
-        <table
+    <div style={{ paddingTop: '8px' }}>
+      <table
           style={{
             width: '100%',
             borderCollapse: 'collapse',
@@ -120,7 +109,7 @@ export default function GrupoTabla({
                   letterSpacing: '0.02em',
                 }}
               >
-                Relación
+                Detalle de relaciones
               </th>
               <th
                 style={{
@@ -146,7 +135,7 @@ export default function GrupoTabla({
                   letterSpacing: '0.02em',
                 }}
               >
-                Protectores
+                Controles
               </th>
               <th
                 style={{
@@ -314,7 +303,7 @@ export default function GrupoTabla({
                     )}
                   </td>
                   
-                  {/* Protectores - classified by type */}
+                  {/* Controles - classified by type */}
                   <td
                     style={{
                       padding: '10px 12px',
@@ -545,7 +534,7 @@ export default function GrupoTabla({
                           fontStyle: 'italic',
                         }}
                       >
-                        Sin protectores
+                        Sin controles
                       </span>
                     )}
                   </td>
@@ -588,7 +577,6 @@ export default function GrupoTabla({
             })}
           </tbody>
         </table>
-      </div>
     </div>
   );
 }

@@ -110,16 +110,25 @@ export default function GrupoList({
   );
   
   return (
-    <div className="knar-card flex flex-col" style={{ minHeight: '400px' }}>
+    <div className="flex flex-col" style={{ minHeight: '400px' }}>
       {/* Header */}
-      <div className="knar-card-header flex-shrink-0">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          paddingBottom: '12px',
+          marginBottom: '12px',
+          borderBottom: '0.5px solid var(--border-8)',
+        }}
+      >
         <div className="knar-icon-box">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="knar-card-title">Relaciones</h3>
+        <h3 className="knar-card-title">Detalle de relaciones</h3>
         
         {/* Stats */}
         <div
@@ -173,7 +182,7 @@ export default function GrupoList({
               color: '#10b981',
             }}
           >
-            {totalProtectores} protector{totalProtectores !== 1 ? 'es' : ''}
+            {totalProtectores} control{totalProtectores !== 1 ? 'es' : ''}
           </span>
         </div>
         
@@ -540,7 +549,7 @@ export default function GrupoList({
                         color: 'var(--text-disabled)',
                       }}
                     >
-                      Protectores
+                      Controles
                     </div>
                   </div>
                 </div>

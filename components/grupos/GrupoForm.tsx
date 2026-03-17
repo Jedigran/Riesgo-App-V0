@@ -519,7 +519,7 @@ export default function GrupoForm({
                 color: 'var(--text-secondary)',
               }}
             >
-              Protectores ({protectoresSeleccionados.length}) *
+              Controles ({protectoresSeleccionados.length}) *
             </label>
           </div>
           
@@ -528,7 +528,7 @@ export default function GrupoForm({
             type="text"
             value={filtroProtectores}
             onChange={(e) => setFiltroProtectores(e.target.value)}
-            placeholder="Buscar protectores (Barreras/POEs/SOLs)..."
+            placeholder="Buscar controles (Barreras/POEs/SOLs)..."
             style={{
               width: '100%',
               padding: '6px 10px',
@@ -563,7 +563,7 @@ export default function GrupoForm({
                   textAlign: 'center',
                 }}
               >
-                No hay protectores disponibles
+                No hay controles disponibles
               </p>
             ) : (
               protectoresFiltrados.map((p) => {

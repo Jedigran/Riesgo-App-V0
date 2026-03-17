@@ -206,7 +206,7 @@ export default function GruposPanel() {
             •
           </span>
           <span style={{ fontSize: '10px', fontWeight: 300, color: '#10b981' }}>
-            {totalProtectoresEnGrupos} protectores
+            {totalProtectoresEnGrupos} controles
           </span>
         </div>
 
@@ -363,8 +363,8 @@ export default function GruposPanel() {
                   maxWidth: '400px',
                 }}
               >
-                Las relaciones te permiten organizar tus entidades en sistemas de protección coherentes. 
-                Cada relación puede contener múltiples peligros y sus respectivos protectores.
+                Las relaciones te permiten organizar tus entidades en sistemas de protección coherentes.
+                Cada relación puede contener múltiples peligros y sus respectivos controles.
               </p>
               <button
                 onClick={() => {
