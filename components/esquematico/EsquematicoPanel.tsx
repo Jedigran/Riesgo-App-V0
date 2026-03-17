@@ -4,6 +4,7 @@ import { useCallback, useRef, useState, useMemo } from 'react';
 import { useMapa } from '@/src/controllers/useMapa';
 import { useFiltrosHallazgos } from '@/src/controllers/useFiltrosHallazgos';
 import { useGrupo } from '@/src/controllers/useGrupo';
+import { useSesion } from '@/src/controllers/useSesion';
 import type { Hallazgo, TipoHallazgo } from '@/src/models/hallazgo/types';
 
 // ============================================================================
@@ -73,6 +74,7 @@ export default function EsquematicoPanel({
   } = useFiltrosHallazgos();
 
   const { grupos, obtenerGruposPorHallazgo } = useGrupo();
+  const { sesion } = useSesion();
 
   // Tooltip state
   const [tooltipHallazgo, setTooltipHallazgo] = useState<Hallazgo | null>(null);
@@ -81,6 +83,9 @@ export default function EsquematicoPanel({
 
   // Group filter state
   const [grupoFiltroActivo, setGrupoFiltroActivo] = useState<string | null>(null);
+
+  // Analisis filter state
+  const [analisisFiltroActivo, setAnalisisFiltroActivo] = useState<string | null>(null);
 
   // Image name for header display
   const [imagenNombre, setImagenNombre] = useState<string>('');
@@ -280,13 +285,22 @@ export default function EsquematicoPanel({
   }, [allMarkers, obtenerGruposPorHallazgo]);
 
   // Apply group filter
-  const markersFiltrados = useMemo(() => {
+  const markersConGrupoFiltro = useMemo(() => {
     if (!grupoFiltroActivo) return allMarkers;
     return allMarkers.filter((h) => {
       const gruposDelHallazgo = markersConGrupos.get(h.id) || [];
       return gruposDelHallazgo.some((g) => g.id === grupoFiltroActivo);
     });
   }, [allMarkers, grupoFiltroActivo, markersConGrupos]);
+
+  // Apply analisis filter on top of group filter
+  const markersFiltrados = useMemo(() => {
+    if (!analisisFiltroActivo) return markersConGrupoFiltro;
+    return markersConGrupoFiltro.filter((h) => {
+      const hallazgo = sesion.hallazgos.find((s) => s.id === h.id);
+      return hallazgo?.analisisOrigenIds?.includes(analisisFiltroActivo) ?? false;
+    });
+  }, [markersConGrupoFiltro, analisisFiltroActivo, sesion.hallazgos]);
 
   // Count hallazgos por grupo
   const gruposCount = useMemo(() => {
@@ -299,6 +313,18 @@ export default function EsquematicoPanel({
     });
     return counts;
   }, [allMarkers, grupos, markersConGrupos]);
+
+  // Count hallazgos por analisis
+  const analisisCount = useMemo(() => {
+    const counts: Record<string, number> = {};
+    sesion.analisis.forEach((a) => {
+      counts[a.base.id] = allMarkers.filter((h) => {
+        const hallazgo = sesion.hallazgos.find((s) => s.id === h.id);
+        return hallazgo?.analisisOrigenIds?.includes(a.base.id) ?? false;
+      }).length;
+    });
+    return counts;
+  }, [allMarkers, sesion.analisis, sesion.hallazgos]);
 
   const isEditMode = ubicacionEditando !== null;
   const zoomPct = Math.round(zoom * 100);
@@ -529,6 +555,83 @@ export default function EsquematicoPanel({
                       background: active ? `${grupo.color}30` : 'rgba(255,255,255,0.06)',
                       color: active ? grupo.color : 'var(--text-muted)',
                       border: `0.5px solid ${active ? `${grupo.color}40` : 'var(--border-6)'}`,
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </>
+        )}
+
+        {/* Analisis filter divider */}
+        {sesion.analisis.length > 0 && (
+          <div style={{ width: '0.5px', height: '16px', background: 'var(--border-6)' }} />
+        )}
+
+        {/* Analisis filter pills */}
+        {sesion.analisis.length > 0 && (
+          <>
+            <span style={{ fontSize: '10px', fontWeight: 400, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              Análisis:
+            </span>
+            {sesion.analisis.map((analisis) => {
+              const active = analisisFiltroActivo === analisis.base.id;
+              const count = analisisCount[analisis.base.id] || 0;
+              const tipo = analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo;
+              return (
+                <button
+                  key={analisis.base.id}
+                  onClick={() => setAnalisisFiltroActivo(active ? null : analisis.base.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    border: `0.5px solid ${active ? 'var(--knar-orange)' : 'var(--border-8)'}`,
+                    backgroundColor: active ? 'rgba(255,140,0,0.12)' : 'transparent',
+                    color: active ? 'var(--knar-orange)' : 'var(--text-muted)',
+                    fontSize: '11px',
+                    fontWeight: 300,
+                    cursor: 'pointer',
+                    transition: 'all 150ms ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={`Filtrar por análisis: ${analisis.base.nombre || tipo}`}
+                >
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '1px',
+                      flexShrink: 0,
+                      background: active ? 'var(--knar-orange)' : 'var(--text-disabled)',
+                      boxShadow: active ? '0 0 4px rgba(255,140,0,0.5)' : 'none',
+                    }}
+                  />
+                  {tipo}
+                  {analisis.base.nombre && (
+                    <span style={{ color: active ? 'var(--knar-orange)' : 'var(--text-disabled)', fontWeight: 300 }}>
+                      &nbsp;—&nbsp;{analisis.base.nombre.length > 12 ? analisis.base.nombre.substring(0, 12) + '…' : analisis.base.nombre}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '16px',
+                      height: '14px',
+                      padding: '0 4px',
+                      borderRadius: '9999px',
+                      fontSize: '10px',
+                      fontWeight: 400,
+                      background: active ? 'rgba(255,140,0,0.2)' : 'rgba(255,255,255,0.06)',
+                      color: active ? 'var(--knar-orange)' : 'var(--text-muted)',
+                      border: `0.5px solid ${active ? 'rgba(255,140,0,0.3)' : 'var(--border-6)'}`,
                     }}
                   >
                     {count}
