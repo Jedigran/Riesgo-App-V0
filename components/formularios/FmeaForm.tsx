@@ -150,12 +150,42 @@ export default function FmeaForm({
         />
       </div>
 
-      {/* S, O, D */}
+      {/* Barreras Existentes */}
+      <div className="mb-3">
+        <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+          Barreras Existentes
+        </label>
+        <input
+          type="text"
+          value={data.barrerasExistentes[0]}
+          onChange={(e) => onChange({ ...data, barrerasExistentes: [e.target.value] })}
+          className="knar-input"
+          placeholder="Ej: Sensor de nivel, Alarma de alto nivel"
+        />
+      </div>
+
+      {/* S, O, D with Help Icons */}
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div>
-          <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-            S (1-10) *
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="block" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+              S (1-10) *
+            </label>
+            <div className="relative group">
+              <div 
+                className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-knar-border-6 text-knar-text-muted cursor-help transition-all hover:border-knar-orange hover:text-knar-orange"
+                style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+              >
+                ?
+              </div>
+              <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block min-w-[180px] p-2 rounded-md border border-knar-border-6 bg-knar-charcoal shadow-lg" style={{ fontSize: 'var(--text-3xs)', color: 'var(--text-muted)', lineHeight: '1.5', zIndex: 'var(--z-tooltip)' }}>
+                <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Severidad</div>
+                <div>1 = Insignificante</div>
+                <div>5 = Moderado</div>
+                <div>10 = Catastrófico</div>
+              </div>
+            </div>
+          </div>
           <input
             type="number"
             min="1"
@@ -166,9 +196,25 @@ export default function FmeaForm({
           />
         </div>
         <div>
-          <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-            O (1-10) *
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="block" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+              O (1-10) *
+            </label>
+            <div className="relative group">
+              <div 
+                className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-knar-border-6 text-knar-text-muted cursor-help transition-all hover:border-knar-orange hover:text-knar-orange"
+                style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+              >
+                ?
+              </div>
+              <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block min-w-[180px] p-2 rounded-md border border-knar-border-6 bg-knar-charcoal shadow-lg" style={{ fontSize: 'var(--text-3xs)', color: 'var(--text-muted)', lineHeight: '1.5', zIndex: 'var(--z-tooltip)' }}>
+                <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Ocurrencia</div>
+                <div>1 = Muy rara</div>
+                <div>5 = Ocasional</div>
+                <div>10 = Muy frecuente</div>
+              </div>
+            </div>
+          </div>
           <input
             type="number"
             min="1"
@@ -179,9 +225,25 @@ export default function FmeaForm({
           />
         </div>
         <div>
-          <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-            D (1-10) *
-          </label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <label className="block" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+              D (1-10) *
+            </label>
+            <div className="relative group">
+              <div 
+                className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-knar-border-6 text-knar-text-muted cursor-help transition-all hover:border-knar-orange hover:text-knar-orange"
+                style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+              >
+                ?
+              </div>
+              <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block min-w-[180px] p-2 rounded-md border border-knar-border-6 bg-knar-charcoal shadow-lg" style={{ fontSize: 'var(--text-3xs)', color: 'var(--text-muted)', lineHeight: '1.5', zIndex: 'var(--z-tooltip)' }}>
+                <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Detección</div>
+                <div>1 = Fácil de detectar</div>
+                <div>5 = Detección moderada</div>
+                <div>10 = Imposible de detectar</div>
+              </div>
+            </div>
+          </div>
           <input
             type="number"
             min="1"
@@ -194,25 +256,48 @@ export default function FmeaForm({
       </div>
 
       {/* NPR (RPN) with color coding */}
-      <div
-        className="mb-3"
-        style={{
-          backgroundColor: bg,
-          border: `0.5px solid ${border}`,
-          borderRadius: 'var(--radius-md)',
-          padding: 'var(--space-2)',
-          textAlign: 'center',
-        }}
-      >
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>
-          {'NPR = S × O × D = '}
-        </span>
-        <span style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', color: textColor }}>
-          {npr}
-        </span>
-        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)', marginLeft: 'var(--space-2)' }}>
-          ({label})
-        </span>
+      <div className="mb-3">
+        <div className="flex items-center gap-1.5 mb-2">
+          <label className="block" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
+            NPR
+          </label>
+          <div className="relative group">
+            <div 
+              className="flex items-center justify-center w-3.5 h-3.5 rounded-full border border-knar-border-6 text-knar-text-muted cursor-help transition-all hover:border-knar-orange hover:text-knar-orange"
+              style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+            >
+              ?
+            </div>
+            <div className="absolute left-0 top-full mt-1.5 hidden group-hover:block min-w-[200px] p-2 rounded-md border border-knar-border-6 bg-knar-charcoal shadow-lg" style={{ fontSize: 'var(--text-3xs)', color: 'var(--text-muted)', lineHeight: '1.5', zIndex: 'var(--z-tooltip)' }}>
+              <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Número Prioritario de Riesgo</div>
+              <div className="mb-1">NPR = S × O × D</div>
+              <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Rangos:</div>
+              <div>🔴 Crítico: ≥201</div>
+              <div>🟠 Alto: 101-200</div>
+              <div>🟡 Moderado: 51-100</div>
+              <div>🟢 Bajo: ≤50</div>
+            </div>
+          </div>
+        </div>
+        <div
+          style={{
+            backgroundColor: bg,
+            border: `0.5px solid ${border}`,
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-2)',
+            textAlign: 'center',
+          }}
+        >
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)' }}>
+            {'NPR = S × O × D = '}
+          </span>
+          <span style={{ fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', color: textColor }}>
+            {npr}
+          </span>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 'var(--weight-light)', marginLeft: 'var(--space-2)' }}>
+            ({label})
+          </span>
+        </div>
       </div>
 
       {/* Barreras Existentes */}
