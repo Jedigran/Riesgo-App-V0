@@ -129,7 +129,7 @@ export interface UseGrupoReturn {
 
   // Crear
   /** Create a new protection group */
-  crearGrupo: (datos: CrearGrupoDTO) => ResultadoOperacion;
+  crearGrupo: (datos: CrearGrupoDTO, skipValidation?: boolean) => ResultadoOperacion;
 
   // Actualizar
   /** Update group data */
@@ -306,7 +306,7 @@ export function useGrupo(): UseGrupoReturn {
    * });
    */
   const crearGrupo = useCallback(
-    (datos: CrearGrupoDTO): ResultadoOperacion => {
+    (datos: CrearGrupoDTO, skipValidation = false): ResultadoOperacion => {
       // 1. Check session exists
       if (!sesion) {
         return {
@@ -325,9 +325,20 @@ export function useGrupo(): UseGrupoReturn {
         creadoPor: datos.creadoPor,
       });
 
-      // 3. Skip validation - trust the caller to provide valid IDs
-      // Validation against session causes issues with async state updates
-      // The group will be created and displayed correctly regardless
+      // 3. Validate against existing hallazgos (unless skipped)
+      // Skip validation only for programmatic/automated creation
+      // Manual user creation should always be validated
+      if (!skipValidation) {
+        const hallazgos = sesion.hallazgos;
+        const errores = validarGrupoProteccion(grupo, hallazgos);
+
+        if (errores.length > 0) {
+          return {
+            exito: false,
+            errores,
+          };
+        }
+      }
 
       // 4. Dispatch create action
       dispatch({

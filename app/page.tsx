@@ -463,13 +463,15 @@ export default function RiesgoApp() {
       console.log(`  Grupo "${grupoData.nombre}": ${peligrosIds.length} peligros, ${protectoresIds.length} protectores`);
 
       if (peligrosIds.length > 0 && protectoresIds.length > 0) {
+        // Skip validation for programmatic group creation (async state update issue)
+        // Manual group creation through UI will have validation enabled
         const resultadoGrupo = crearGrupo({
           nombre: grupoData.nombre,
           descripcion: grupoData.descripcion,
           color: grupoData.color,
           peligrosIds,
           protectoresIds,
-        });
+        }, true); // skipValidation = true for example loading
 
         if (resultadoGrupo.exito) {
           console.log(`✅ Grupo creado: ${grupoData.nombre}`);
