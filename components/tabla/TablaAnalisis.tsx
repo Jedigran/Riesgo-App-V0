@@ -462,7 +462,7 @@ export default function TablaAnalisis() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${getColorPorTipo(analisis.base.tipo)}`} />
-                          <span className="text-xs text-knar-text-primary font-medium">{analisis.base.tipo}</span>
+                          <span className="text-xs text-knar-text-primary font-medium">{analisis.base.tipo === 'Intuicion' ? 'Registro directo' : analisis.base.tipo}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
