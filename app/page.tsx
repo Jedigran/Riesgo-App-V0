@@ -26,7 +26,7 @@ import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useSesion } from '@/src/controllers/useSesion';
 import { useGrupo } from '@/src/controllers/useGrupo';
 import { KnarHeader } from '@/components/KnarHeader';
-import { ejemplosBasicos, ejemplosAnalisis, posicionesHallazgos } from '@/src/data/ejemplos';
+import { ejemplosBasicos, ejemplosAnalisis, posicionesHallazgos, ejemplosGrupos } from '@/src/data/ejemplos';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
@@ -410,100 +410,97 @@ export default function RiesgoApp() {
   };
 
   // ========================================
-  // TEST DATA LOADER - EXAMPLES WITH GROUPS
+  // TEST DATA LOADER - COMPLETE EXAMPLE (Hallazgos + Grupos + Análisis)
   // ========================================
   const cargarDatosEjemplo = () => {
-    // Map to store created hallazgo IDs by title for group creation
-    const hallazgoIdsByTitle = new Map<string, string>();
     const erroresEncontrados: string[] = [];
+    const hallazgoIdsByTitle = new Map<string, string>();
 
-    // Create all hallazgos from example data
+    console.log('🔵 Cargando ejemplos de hallazgos...');
+
+    // Step 1: Create all hallazgos from hallazgos.ts
     ejemplosBasicos.forEach((ejemplo) => {
       let resultado;
-      const ubicacion = ejemplo.ubicacion;
 
       switch (ejemplo.tipo) {
         case 'Peligro':
-          resultado = crearPeligro(ejemplo.datos as CrearPeligroDTO, ubicacion);
+          resultado = crearPeligro(ejemplo.datos as CrearPeligroDTO, ejemplo.ubicacion);
           break;
         case 'Barrera':
-          resultado = crearBarrera(ejemplo.datos as CrearBarreraDTO, ubicacion);
+          resultado = crearBarrera(ejemplo.datos as CrearBarreraDTO, ejemplo.ubicacion);
           break;
         case 'POE':
-          resultado = crearPOE(ejemplo.datos as CrearPOEDTO, ubicacion);
+          resultado = crearPOE(ejemplo.datos as CrearPOEDTO, ejemplo.ubicacion);
           break;
         case 'SOL':
-          resultado = crearSOL(ejemplo.datos as CrearSOLDTO, ubicacion);
+          resultado = crearSOL(ejemplo.datos as CrearSOLDTO, ejemplo.ubicacion);
           break;
       }
 
-      // Store the ID for group creation
-      if (resultado?.exito && resultado.id && ejemplo.datos.titulo) {
+      if (resultado?.exito && resultado.id) {
         hallazgoIdsByTitle.set(ejemplo.datos.titulo, resultado.id);
+        console.log(`✅ Creado: ${ejemplo.tipo} - ${ejemplo.datos.titulo}`);
       } else if (resultado && !resultado.exito) {
-        erroresEncontrados.push(`Error creando ${ejemplo.tipo}: ${resultado.errores.join(', ')}`);
+        const error = `Error creando ${ejemplo.tipo} ${ejemplo.datos.titulo}: ${resultado.errores.join(', ')}`;
+        erroresEncontrados.push(error);
+        console.error(`❌ ${error}`);
       }
     });
 
-    // Create groups (protection systems)
-    // ── GROUP 1: Simple (1 Peligro + 1 Barrera) ────────────────────────────
-    const peligroSimpleId = hallazgoIdsByTitle.get('Sobrepresión en Reactor R-101');
-    const barreraSimpleId = hallazgoIdsByTitle.get('Válvula de Alivio PSV-101');
+    console.log(`📦 Hallazgos creados: ${hallazgoIdsByTitle.size}`);
+    console.log('🔵 Creando grupos de protección...');
 
-    if (peligroSimpleId && barreraSimpleId) {
-      const resultadoGrupo = crearGrupo({
-        nombre: 'Grupo Protección Reactor R-101',
-        descripcion: 'Protección básica contra sobrepresión - Válvula de alivio PSV-101',
-        color: '#ef4444',  // Red
-        peligrosIds: [peligroSimpleId],
-        protectoresIds: [barreraSimpleId],
-      });
-      
-      if (!resultadoGrupo.exito) {
-        erroresEncontrados.push(`Error creando Grupo 1: ${resultadoGrupo.errores.join(', ')}`);
+    // Step 2: Create groups from grupos.ts
+    ejemplosGrupos.forEach((grupoData) => {
+      const peligrosIds = grupoData.peligrosTitulos
+        .map((titulo) => hallazgoIdsByTitle.get(titulo))
+        .filter((id): id is string => id !== undefined);
+
+      const protectoresIds = grupoData.protectoresTitulos
+        .map((titulo) => hallazgoIdsByTitle.get(titulo))
+        .filter((id): id is string => id !== undefined);
+
+      console.log(`  Grupo "${grupoData.nombre}": ${peligrosIds.length} peligros, ${protectoresIds.length} protectores`);
+
+      if (peligrosIds.length > 0 && protectoresIds.length > 0) {
+        const resultadoGrupo = crearGrupo({
+          nombre: grupoData.nombre,
+          descripcion: grupoData.descripcion,
+          color: grupoData.color,
+          peligrosIds,
+          protectoresIds,
+        });
+
+        if (resultadoGrupo.exito) {
+          console.log(`✅ Grupo creado: ${grupoData.nombre}`);
+        } else {
+          erroresEncontrados.push(`Error creando ${grupoData.nombre}: ${resultadoGrupo.errores.join(', ')}`);
+        }
+      } else {
+        erroresEncontrados.push(`No se encontraron IDs para ${grupoData.nombre}`);
       }
-    } else {
-      erroresEncontrados.push('No se encontraron IDs para Grupo 1');
-    }
+    });
 
-    // ── GROUP 2: Complete (1 Peligro + 1 Barrera + 1 POE + 1 SOL) ──────────
-    const peligroCompletoId = hallazgoIdsByTitle.get('Fuga de Gas H2S en Línea L-205');
-    const barreraCompletoId = hallazgoIdsByTitle.get('Detector de Gas H2S GD-205');
-    const poeCompletoId = hallazgoIdsByTitle.get('POE-002 Monitoreo de Gases Tóxicos');
-    const solCompletoId = hallazgoIdsByTitle.get('SIS-205 Ventilación de Emergencia');
-
-    if (peligroCompletoId && barreraCompletoId && poeCompletoId && solCompletoId) {
-      const resultadoGrupo = crearGrupo({
-        nombre: 'Grupo Protección Línea H2S',
-        descripcion: 'Sistema completo de protección para línea con H2S - Detección, monitoreo y ventilación',
-        color: '#f59e0b',  // Amber/Orange
-        peligrosIds: [peligroCompletoId],
-        protectoresIds: [barreraCompletoId, poeCompletoId, solCompletoId],
-      });
-      
-      if (!resultadoGrupo.exito) {
-        erroresEncontrados.push(`Error creando Grupo 2: ${resultadoGrupo.errores.join(', ')}`);
-      }
-    } else {
-      erroresEncontrados.push('No se encontraron IDs para Grupo 2');
-    }
-
-    // Show notification
+    // Show result notification
     if (erroresEncontrados.length > 0) {
+      console.error('❌ Errores:', erroresEncontrados);
       agregarNotificacion({
         tipo: 'error',
         titulo: 'Error al cargar ejemplos',
         mensaje: erroresEncontrados.join(' | '),
-        duracion: 8000,
+        duracion: 10000,
       });
     } else {
+      console.log('✅ Todos los ejemplos cargados correctamente');
       agregarNotificacion({
         tipo: 'success',
-        titulo: 'Datos de Ejemplo Cargados',
-        mensaje: 'Se crearon 8 entidades y 2 grupos de protección - Ve a la pestaña "Relaciones" para verlos',
-        duracion: 6000,
+        titulo: '✅ Ejemplos Cargados',
+        mensaje: '8 hallazgos + 2 grupos + 6 análisis creados - Revisa la pestaña "Relaciones"',
+        duracion: 8000,
       });
     }
+
+    return hallazgoIdsByTitle;
   };
 
   // ========================================
@@ -1281,7 +1278,10 @@ export default function RiesgoApp() {
             <span>Contexto: <span className="text-knar-text-secondary">{configData.contexto || '—'}</span></span>
             <span>|</span>
             <button
-              onClick={cargarAnalisisEjemplo}
+              onClick={() => {
+                cargarDatosEjemplo();
+                cargarAnalisisEjemplo();
+              }}
               style={{
                 padding: '4px 10px',
                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',

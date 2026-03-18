@@ -10,3 +10,4 @@
 
 export { ejemplosBasicos, type EjemploHallazgo } from './hallazgos';
 export { ejemplosAnalisis, posicionesHallazgos, type EjemploAnalisis, type EjemploHallazgoAnalisis } from './analisis';
+export { ejemplosGrupos, type EjemploGrupo } from './grupos';
