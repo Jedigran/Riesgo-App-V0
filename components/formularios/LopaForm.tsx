@@ -44,6 +44,36 @@ export interface LopaFormProps {
 }
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function calcularPfdTotal(capasIPL: CapaIPL[]): number {
+  if (capasIPL.length === 0) return 1;
+  return capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1);
+}
+
+function calcularRiesgo(frecuenciaInicial: number, pfdTotal: number): number {
+  return frecuenciaInicial * pfdTotal;
+}
+
+function cumpleCriterio(riesgo: number, riesgoTolerable: number): boolean {
+  return riesgo <= riesgoTolerable;
+}
+
+function calcularRRF(riesgo: number, riesgoTolerable: number): number {
+  if (riesgo <= riesgoTolerable) return 1;
+  return riesgo / riesgoTolerable;
+}
+
+function calcularSILRequerido(rrf: number): number {
+  if (rrf <= 1) return 0;
+  if (rrf <= 100) return 1;
+  if (rrf <= 1000) return 2;
+  if (rrf <= 10000) return 3;
+  return 4;
+}
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
@@ -53,14 +83,25 @@ export default function LopaForm({
   analisisFormCollapsed,
   onToggleCollapse,
 }: LopaFormProps) {
-  // Calculate PfD Total
-  const pfdTotal = data.capasIPL.reduce((acc, capa) => acc * (capa.pfd || 1), 1);
+  // Calculate derived values
+  const pfdTotal = calcularPfdTotal(data.capasIPL);
+  const riesgoEscenario = calcularRiesgo(data.frecuenciaInicial, pfdTotal);
+  const cumple = cumpleCriterio(riesgoEscenario, data.riesgoTolerable);
+  const rrf = calcularRRF(riesgoEscenario, data.riesgoTolerable);
+  const silRequerido = calcularSILRequerido(rrf);
 
-  // Calculate Scenario Risk
-  const riesgoEscenario = data.frecuenciaInicial * pfdTotal;
+  // Handler functions for IPL management
+  const handleAgregarIPL = () => {
+    if (data.capasIPL.length >= 8) return;
+    const nuevasCapas = [...data.capasIPL, { nombre: '', pfd: 0.1 }];
+    onChange({ ...data, capasIPL: nuevasCapas });
+  };
 
-  // Check if meets criteria
-  const cumpleCriterio = riesgoEscenario <= data.riesgoTolerable;
+  const handleEliminarIPL = (index: number) => {
+    if (data.capasIPL.length <= 1) return;
+    const nuevasCapas = data.capasIPL.filter((_, i) => i !== index);
+    onChange({ ...data, capasIPL: nuevasCapas });
+  };
 
   const handleIPLNombreChange = (index: number, value: string) => {
     const nuevasCapas = [...data.capasIPL];
@@ -72,7 +113,7 @@ export default function LopaForm({
   const handleIPLPfdChange = (index: number, value: number) => {
     const nuevasCapas = [...data.capasIPL];
     if (!nuevasCapas[index]) nuevasCapas[index] = { nombre: '', pfd: 0.1 };
-    nuevasCapas[index].pfd = value;
+    nuevasCapas[index].pfd = Math.max(0, Math.min(1, value));
     onChange({ ...data, capasIPL: nuevasCapas });
   };
 
@@ -188,55 +229,148 @@ export default function LopaForm({
         />
       </div>
 
-      {/* Capas IPL - Layer 1 */}
+      {/* Capas IPL Section */}
       <div className="mb-3">
-        <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-          Capa IPL 1 - Nombre
-        </label>
-        <input
-          type="text"
-          value={data.capasIPL[0]?.nombre || ''}
-          onChange={(e) => handleIPLNombreChange(0, e.target.value)}
-          className="knar-input"
-          placeholder="Ej: BPCS - Alarma"
-        />
-      </div>
-      <div className="mb-3">
-        <label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
-          Capa IPL 1 - PFD
-        </label>
-        <input
-          type="number"
-          step="0.0001"
-          value={data.capasIPL[0]?.pfd || 0.1}
-          onChange={(e) => handleIPLPfdChange(0, Number(e.target.value))}
-          className="knar-input"
-          placeholder="Ej: 0.1"
-        />
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Capas de Protección Independientes (IPL)
+          </h4>
+          <div className="relative group">
+            <div
+              className="flex items-center justify-center w-4 h-4 rounded-full border border-knar-border-6 text-knar-text-muted cursor-help transition-all hover:border-knar-orange hover:text-knar-orange"
+              style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+            >
+              ?
+            </div>
+            <div className="absolute right-0 top-full mt-1.5 hidden group-hover:block min-w-[220px] p-2 rounded-md border border-knar-border-6 bg-knar-charcoal shadow-lg" style={{ fontSize: 'var(--text-3xs)', color: 'var(--text-muted)', lineHeight: '1.5', zIndex: 'var(--z-tooltip)' }}>
+              <div className="font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>PfD Total</div>
+              <div>PfD = PfD₁ × PfD₂ × ... × PfDₙ</div>
+            </div>
+          </div>
+        </div>
+
+        {/* IPL Layers */}
+        <div className="space-y-2 mb-3">
+          {data.capasIPL.map((capa, index) => (
+            <div key={index} className="flex items-center gap-2">
+              {/* IPL Badge with rounded styling */}
+              <div
+                className="flex items-center justify-center px-2 py-0.5 rounded-full bg-knar-dark border border-knar-border-6"
+                style={{ fontSize: '9px', fontWeight: 'var(--weight-medium)', color: 'var(--text-secondary)', minWidth: '42px' }}
+              >
+                IPL {index + 1}
+              </div>
+              <input
+                type="text"
+                value={capa.nombre}
+                onChange={(e) => handleIPLNombreChange(index, e.target.value)}
+                className="knar-input flex-1"
+                placeholder="Nombre"
+                style={{ fontSize: 'var(--text-xs)' }}
+              />
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                max="1"
+                value={capa.pfd}
+                onChange={(e) => handleIPLPfdChange(index, Number(e.target.value))}
+                className="knar-input w-20"
+                placeholder="PfD"
+                style={{ fontSize: 'var(--text-xs)' }}
+              />
+              <button
+                onClick={() => handleEliminarIPL(index)}
+                disabled={data.capasIPL.length <= 1}
+                className="flex items-center justify-center w-5 h-5 rounded border border-knar-border-6 text-knar-text-muted hover:border-red-400 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                style={{ fontSize: '12px' }}
+                title="Eliminar IPL"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add Button */}
+        <button
+          onClick={handleAgregarIPL}
+          disabled={data.capasIPL.length >= 8}
+          className="w-full flex items-center justify-center gap-1 px-2 py-1.5 rounded border border-knar-border-6 text-knar-text-muted hover:border-knar-orange hover:text-knar-orange disabled:opacity-30 disabled:cursor-not-allowed transition-all mb-3"
+          style={{ fontSize: 'var(--text-3xs)' }}
+        >
+          <span style={{ fontSize: '12px' }}>+</span> Agregar IPL (max 8)
+        </button>
+
+        {/* PfD Total Calculation */}
+        <div className="rounded-md bg-knar-dark p-2 border border-knar-border-6">
+          <div className="text-[10px] text-knar-text-muted mb-1">
+            PfD Total = {data.capasIPL.map((_, i) => `PfD${i + 1}`).join(' × ')}
+          </div>
+          <div className="text-[10px] text-knar-text-muted mb-1">
+            PfD Total = {data.capasIPL.map(c => c.pfd.toFixed(4)).join(' × ')}
+          </div>
+          <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            PfD Total = {pfdTotal.toExponential(4)}
+          </div>
+        </div>
       </div>
 
       {/* Risk Calculations Display */}
-      <div className="bg-knar-charcoal rounded p-3 space-y-2 border border-knar-border mb-3">
-        <h4 className="text-xs font-medium text-knar-text-primary">Cálculos de Riesgo</h4>
+      <div className="rounded-md border border-knar-border-6 p-3 space-y-2">
+        <h4 className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Cálculos de Riesgo</h4>
 
-        {/* PfD Total */}
-        <div className="flex justify-between text-xs">
-          <span className="text-knar-text-muted">PfD Total:</span>
-          <span className="text-knar-text-primary font-mono">{pfdTotal.toExponential(2)}</span>
-        </div>
+        {/* Divider */}
+        <div className="border-t border-knar-border-6" style={{ borderWidth: '0.5px' }}></div>
 
         {/* Riesgo del Escenario */}
-        <div className="flex justify-between text-xs">
+        <div className="flex justify-between items-center text-xs">
           <span className="text-knar-text-muted">Riesgo Escenario:</span>
-          <span className="text-knar-text-primary font-mono">{riesgoEscenario.toExponential(2)}</span>
+          <span className="text-knar-text-primary font-mono" style={{ fontSize: 'var(--text-xs)' }}>{riesgoEscenario.toExponential(2)} eventos/año</span>
         </div>
 
+        {/* Divider */}
+        <div className="border-t border-knar-border-6" style={{ borderWidth: '0.5px' }}></div>
+
         {/* ¿Cumple Criterio? */}
-        <div className="flex justify-between text-xs">
+        <div className="flex justify-between items-center text-xs">
           <span className="text-knar-text-muted">¿Cumple Criterio?</span>
-          <span className={`font-bold ${cumpleCriterio ? 'text-green-500' : 'text-red-500'}`}>
-            {cumpleCriterio ? '✅ SÍ' : '❌ NO'}
+          <span
+            className={`px-2 py-0.5 rounded-full border text-[10px] font-medium ${
+              cumple
+                ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                : 'bg-red-500/10 border-red-500/30 text-red-400'
+            }`}
+          >
+            {cumple ? 'SÍ' : 'NO'}
           </span>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-knar-border-6" style={{ borderWidth: '0.5px' }}></div>
+
+        {/* RRF */}
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-knar-text-muted">RRF:</span>
+          <span className="text-knar-text-primary font-mono" style={{ fontSize: 'var(--text-xs)' }}>{rrf.toFixed(2)}</span>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-knar-border-6" style={{ borderWidth: '0.5px' }}></div>
+
+        {/* SIL Requerido */}
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-knar-text-muted">SIL Requerido:</span>
+          {silRequerido > 0 ? (
+            <span
+              className="px-2 py-0.5 rounded-full border bg-knar-orange-10 border-knar-orange-30 text-knar-orange-70"
+              style={{ fontSize: '10px', fontWeight: 'var(--weight-medium)' }}
+            >
+              SIL {silRequerido}
+            </span>
+          ) : (
+            <span className="text-knar-text-muted" style={{ fontSize: 'var(--text-xs)' }}>No requerido</span>
+          )}
         </div>
       </div>
     </CollapsibleCard>
@@ -244,7 +378,7 @@ export default function LopaForm({
 }
 
 // ============================================================================
-// COLLAPSIBLE CARD (Local copy for now - can be extracted to shared component)
+// COLLAPSIBLE CARD
 // ============================================================================
 
 interface CollapsibleCardProps {
