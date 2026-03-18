@@ -21,11 +21,12 @@
 
 import { useState, FormEvent, useCallback } from 'react';
 import { useAnalisis } from '@/src/controllers/useAnalisis';
-import { useHallazgo } from '@/src/controllers/useHallazgo';
+import { useHallazgo, type CrearPeligroDTO, type CrearBarreraDTO, type CrearPOEDTO, type CrearSOLDTO } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
 import { useSesion } from '@/src/controllers/useSesion';
 import { useGrupo } from '@/src/controllers/useGrupo';
 import { KnarHeader } from '@/components/KnarHeader';
+import { ejemplosBasicos } from '@/src/data/ejemplos';
 import TablaHallazgos from '@/components/tabla/TablaHallazgos';
 import TablaAnalisis from '@/components/tabla/TablaAnalisis';
 import RelacionesPanel from '@/components/relaciones/RelacionesPanel';
@@ -259,6 +260,7 @@ export default function RiesgoApp() {
 
   // Intuicion
   const [intuicionData, setIntuicionData] = useState({
+    titulo: '',
     descripcion: '',
     observaciones: [''],
   });
@@ -280,6 +282,7 @@ export default function RiesgoApp() {
 
   const { crearAnalisisHAZOP, crearAnalisisFMEA, crearAnalisisLOPA, crearAnalisisOCA, crearAnalisisIntuicion } = useAnalisis();
   const { crearPeligro, crearBarrera, crearPOE, crearSOL } = useHallazgo();
+  const { crearGrupo } = useGrupo();
   const { agregarError, agregarNotificacion } = useUIEstado();
 
   // ========================================
@@ -406,229 +409,100 @@ export default function RiesgoApp() {
   };
 
   // ========================================
-  // TEST DATA LOADER (FOR TESTING GRUPOS TAB)
+  // TEST DATA LOADER - EXAMPLES WITH GROUPS
   // ========================================
   const cargarDatosEjemplo = () => {
-    // Create 5 Peligros
-    crearPeligro({
-      titulo: 'Sobrepresión en Reactor',
-      descripcion: 'Riesgo de sobrepresión durante operación normal',
-      tipoPeligro: 'Inherente',
-      consecuencia: 'Ruptura del reactor con liberación de material tóxico',
-      severidad: 5,
-      causaRaiz: 'Falla en válvula de control PIC-101',
-      analisisOrigenIds: [],
-    }, { x: 45, y: 30 });
+    // Map to store created hallazgo IDs by title for group creation
+    const hallazgoIdsByTitle = new Map<string, string>();
+    const erroresEncontrados: string[] = [];
 
-    crearPeligro({
-      titulo: 'Fuga de Gas H2S',
-      descripcion: 'Liberación de gas sulfhídrico por corrosión en tubería',
-      tipoPeligro: 'Diseño',
-      consecuencia: 'Intoxicación del personal y contaminación ambiental',
-      severidad: 5,
-      causaRaiz: 'Corrosión acelerada por ambiente marino',
-      analisisOrigenIds: [],
-    }, { x: 55, y: 25 });
+    // Create all hallazgos from example data
+    ejemplosBasicos.forEach((ejemplo) => {
+      let resultado;
+      const ubicacion = ejemplo.ubicacion;
 
-    crearPeligro({
-      titulo: 'Incendio en Tanque de Diesel',
-      descripcion: 'Riesgo de ignición en tanque de almacenamiento',
-      tipoPeligro: 'Inherente',
-      consecuencia: 'Pérdida total del tanque y propagación a equipos cercanos',
-      severidad: 4,
-      causaRaiz: 'Acumulación de vapores inflamables',
-      analisisOrigenIds: [],
-    }, { x: 30, y: 45 });
+      switch (ejemplo.tipo) {
+        case 'Peligro':
+          resultado = crearPeligro(ejemplo.datos as CrearPeligroDTO, ubicacion);
+          break;
+        case 'Barrera':
+          resultado = crearBarrera(ejemplo.datos as CrearBarreraDTO, ubicacion);
+          break;
+        case 'POE':
+          resultado = crearPOE(ejemplo.datos as CrearPOEDTO, ubicacion);
+          break;
+        case 'SOL':
+          resultado = crearSOL(ejemplo.datos as CrearSOLDTO, ubicacion);
+          break;
+      }
 
-    crearPeligro({
-      titulo: 'Derrame de Producto Químico',
-      descripcion: 'Liberación no controlada de ácido sulfúrico',
-      tipoPeligro: 'Inherente',
-      consecuencia: 'Quemaduras químicas y contaminación de suelos',
-      severidad: 4,
-      causaRaiz: 'Falla en bomba de transferencia',
-      analisisOrigenIds: [],
-    }, { x: 65, y: 55 });
-
-    crearPeligro({
-      titulo: 'Exposición a Ruido Excesivo',
-      descripcion: 'Niveles de ruido superiores a 85 dB en área de compresores',
-      tipoPeligro: 'Diseño',
-      consecuencia: 'Pérdida auditiva permanente del personal',
-      severidad: 3,
-      causaRaiz: 'Equipos sin aislamiento acústico adecuado',
-      analisisOrigenIds: [],
-    }, { x: 20, y: 60 });
-
-    // Create 5 Barreras
-    crearBarrera({
-      titulo: 'Válvula de Alivio PSV-101',
-      descripcion: 'Alivia presión cuando excede el setpoint de diseño',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Mitigativa',
-      efectividadEstimada: 4,
-      elementoProtegido: 'Reactor R-101',
-      analisisOrigenIds: [],
-    }, { x: 47, y: 32 });
-
-    crearBarrera({
-      titulo: 'Detector de Gas H2S',
-      descripcion: 'Sistema de detección continua de gas sulfhídrico',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Detectiva',
-      efectividadEstimada: 4,
-      elementoProtegido: 'Personal en área de proceso',
-      analisisOrigenIds: [],
-    }, { x: 57, y: 27 });
-
-    crearBarrera({
-      titulo: 'Sistema de Espuma',
-      descripcion: 'Sistema fijo de generación de espuma para tanques',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Mitigativa',
-      efectividadEstimada: 5,
-      elementoProtegido: 'Tanque de Diesel T-201',
-      analisisOrigenIds: [],
-    }, { x: 32, y: 47 });
-
-    crearBarrera({
-      titulo: 'Dique de Contención',
-      descripcion: 'Barrera física para contener derrames',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Mitigativa',
-      efectividadEstimada: 4,
-      elementoProtegido: 'Área de almacenamiento de químicos',
-      analisisOrigenIds: [],
-    }, { x: 67, y: 57 });
-
-    crearBarrera({
-      titulo: 'Cabinas Insonorizadas',
-      descripcion: 'Cabinas con aislamiento acústico para operadores',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Preventiva',
-      efectividadEstimada: 3,
-      elementoProtegido: 'Operadores de sala de control',
-      analisisOrigenIds: [],
-    }, { x: 22, y: 62 });
-
-    // Create 5 POEs
-    crearPOE({
-      titulo: 'POE-001 Inspección de Válvulas',
-      descripcion: 'Procedimiento para inspección periódica de válvulas de seguridad',
-      procedimientoReferencia: 'PRO-INS-001',
-      frecuenciaAplicacion: 'Mensual',
-      responsable: 'Jefe de Mantenimiento',
-      analisisOrigenIds: [],
-    }, { x: 40, y: 35 });
-
-    crearPOE({
-      titulo: 'POE-002 Monitoreo de Gases',
-      descripcion: 'Procedimiento para monitoreo continuo de H2S',
-      procedimientoReferencia: 'PRO-SEG-002',
-      frecuenciaAplicacion: 'Diario',
-      responsable: 'Supervisor de Seguridad',
-      analisisOrigenIds: [],
-    }, { x: 52, y: 30 });
-
-    crearPOE({
-      titulo: 'POE-003 Prevención de Incendios',
-      descripcion: 'Procedimiento para prevención y control de incendios',
-      procedimientoReferencia: 'PRO-SEG-003',
-      frecuenciaAplicacion: 'Permanente',
-      responsable: 'Brigada de Emergencia',
-      analisisOrigenIds: [],
-    }, { x: 35, y: 42 });
-
-    crearPOE({
-      titulo: 'POE-004 Manejo de Químicos',
-      descripcion: 'Procedimiento para manejo seguro de ácidos',
-      procedimientoReferencia: 'PRO-OPR-004',
-      frecuenciaAplicacion: 'Por turno',
-      responsable: 'Operador de Planta',
-      analisisOrigenIds: [],
-    }, { x: 62, y: 52 });
-
-    crearPOE({
-      titulo: 'POE-005 Control de Ruido',
-      descripcion: 'Procedimiento para control de exposición a ruido',
-      procedimientoReferencia: 'PRO-SEG-005',
-      frecuenciaAplicacion: 'Semanal',
-      responsable: 'Higienista Industrial',
-      analisisOrigenIds: [],
-    }, { x: 25, y: 58 });
-
-    // Create 5 SOLs
-    crearSOL({
-      titulo: 'SIS-001 Parada de Emergencia del Reactor',
-      descripcion: 'Sistema instrumentado de seguridad para parada segura',
-      capaNumero: 1,
-      independiente: true,
-      tipoTecnologia: 'Sensor de presión + Válvula de bloqueo',
-      parametro: 'Presión',
-      valorMinimo: 0,
-      valorMaximo: 150,
-      unidad: 'psig',
-      analisisOrigenIds: [],
-    }, { x: 48, y: 33 });
-
-    crearSOL({
-      titulo: 'SIS-002 Parada de Bomba',
-      descripcion: 'Parada automática por nivel bajo',
-      capaNumero: 2,
-      independiente: true,
-      tipoTecnologia: 'Sensor de nivel + Contactador',
-      parametro: 'Nivel',
-      valorMinimo: 10,
-      valorMaximo: 90,
-      unidad: '%',
-      analisisOrigenIds: [],
-    }, { x: 58, y: 28 });
-
-    crearSOL({
-      titulo: 'SIS-003 Alarma de Gas',
-      descripcion: 'Alarma sonora por alta concentración de gas',
-      capaNumero: 1,
-      independiente: true,
-      tipoTecnologia: 'Detector puntual + Sirena',
-      parametro: 'Concentración H2S',
-      valorMinimo: 0,
-      valorMaximo: 10,
-      unidad: 'ppm',
-      analisisOrigenIds: [],
-    }, { x: 53, y: 26 });
-
-    crearSOL({
-      titulo: 'SIS-004 Control de Temperatura',
-      descripcion: 'Parada por alta temperatura en reactor',
-      capaNumero: 1,
-      independiente: true,
-      tipoTecnologia: 'Termopar + Válvula de vapor',
-      parametro: 'Temperatura',
-      valorMinimo: 20,
-      valorMaximo: 180,
-      unidad: '°C',
-      analisisOrigenIds: [],
-    }, { x: 43, y: 38 });
-
-    crearSOL({
-      titulo: 'SIS-005 Protección contra Sobreflujo',
-      descripcion: 'Parada por alto nivel en tanque',
-      capaNumero: 2,
-      independiente: true,
-      tipoTecnologia: 'Switch de nivel + Válvula de entrada',
-      parametro: 'Nivel',
-      valorMinimo: 0,
-      valorMaximo: 95,
-      unidad: '%',
-      analisisOrigenIds: [],
-    }, { x: 38, y: 48 });
-
-    agregarNotificacion({
-      tipo: 'success',
-      titulo: 'Datos de Ejemplo Cargados',
-      mensaje: 'Se crearon 5 Peligros, 5 Barreras, 5 POEs y 5 SOLs',
-      duracion: 4000,
+      // Store the ID for group creation
+      if (resultado?.exito && resultado.id && ejemplo.datos.titulo) {
+        hallazgoIdsByTitle.set(ejemplo.datos.titulo, resultado.id);
+      } else if (resultado && !resultado.exito) {
+        erroresEncontrados.push(`Error creando ${ejemplo.tipo}: ${resultado.errores.join(', ')}`);
+      }
     });
+
+    // Create groups (protection systems)
+    // ── GROUP 1: Simple (1 Peligro + 1 Barrera) ────────────────────────────
+    const peligroSimpleId = hallazgoIdsByTitle.get('Sobrepresión en Reactor R-101');
+    const barreraSimpleId = hallazgoIdsByTitle.get('Válvula de Alivio PSV-101');
+
+    if (peligroSimpleId && barreraSimpleId) {
+      const resultadoGrupo = crearGrupo({
+        nombre: 'Grupo Protección Reactor R-101',
+        descripcion: 'Protección básica contra sobrepresión - Válvula de alivio PSV-101',
+        color: '#ef4444',  // Red
+        peligrosIds: [peligroSimpleId],
+        protectoresIds: [barreraSimpleId],
+      });
+      
+      if (!resultadoGrupo.exito) {
+        erroresEncontrados.push(`Error creando Grupo 1: ${resultadoGrupo.errores.join(', ')}`);
+      }
+    } else {
+      erroresEncontrados.push('No se encontraron IDs para Grupo 1');
+    }
+
+    // ── GROUP 2: Complete (1 Peligro + 1 Barrera + 1 POE + 1 SOL) ──────────
+    const peligroCompletoId = hallazgoIdsByTitle.get('Fuga de Gas H2S en Línea L-205');
+    const barreraCompletoId = hallazgoIdsByTitle.get('Detector de Gas H2S GD-205');
+    const poeCompletoId = hallazgoIdsByTitle.get('POE-002 Monitoreo de Gases Tóxicos');
+    const solCompletoId = hallazgoIdsByTitle.get('SIS-205 Ventilación de Emergencia');
+
+    if (peligroCompletoId && barreraCompletoId && poeCompletoId && solCompletoId) {
+      const resultadoGrupo = crearGrupo({
+        nombre: 'Grupo Protección Línea H2S',
+        descripcion: 'Sistema completo de protección para línea con H2S - Detección, monitoreo y ventilación',
+        color: '#f59e0b',  // Amber/Orange
+        peligrosIds: [peligroCompletoId],
+        protectoresIds: [barreraCompletoId, poeCompletoId, solCompletoId],
+      });
+      
+      if (!resultadoGrupo.exito) {
+        erroresEncontrados.push(`Error creando Grupo 2: ${resultadoGrupo.errores.join(', ')}`);
+      }
+    } else {
+      erroresEncontrados.push('No se encontraron IDs para Grupo 2');
+    }
+
+    // Show notification
+    if (erroresEncontrados.length > 0) {
+      agregarNotificacion({
+        tipo: 'error',
+        titulo: 'Error al cargar ejemplos',
+        mensaje: erroresEncontrados.join(' | '),
+        duracion: 8000,
+      });
+    } else {
+      agregarNotificacion({
+        tipo: 'success',
+        titulo: 'Datos de Ejemplo Cargados',
+        mensaje: 'Se crearon 8 entidades y 2 grupos de protección - Ve a la pestaña "Relaciones" para verlos',
+        duracion: 6000,
+      });
+    }
   };
 
   // ========================================
@@ -1398,6 +1272,7 @@ export default function RiesgoApp() {
 
       try {
         const resultadoAnalisis = crearAnalisisIntuicion({
+          titulo: intuicionData.titulo || 'Registro directo',
           descripcion: intuicionData.descripcion,
           observaciones: intuicionData.observaciones.filter(o => o.trim()).length > 0 ? intuicionData.observaciones.filter(o => o.trim()) : [''],
         }, nombreAnalisis);
@@ -1421,7 +1296,7 @@ export default function RiesgoApp() {
             : 'Análisis guardado (puede agregar entidades después)', 
           duracion: 3000 
         });
-        setIntuicionData({ descripcion: '', observaciones: [''] });
+        setIntuicionData({ titulo: '', descripcion: '', observaciones: [''] });
         resetFormState();
       } catch (error) {
         agregarError({ severidad: 'error', mensaje: 'Error inesperado al guardar Registro directo' });
@@ -2286,7 +2161,10 @@ export default function RiesgoApp() {
                         isExpanded={!analisisFormCollapsed}
                         onToggle={() => setAnalisisFormCollapsed(!analisisFormCollapsed)}
                       >
-                        <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="knar-input" rows={3} placeholder="Descripción detallada de la observación" /></div>
+                        <div className="space-y-3">
+                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Título</label><input type="text" value={intuicionData.titulo} onChange={(e) => setIntuicionData({ ...intuicionData, titulo: e.target.value })} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" placeholder="Título del análisis (opcional)" /></div>
+                          <div><label className="block mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Descripción *</label><textarea value={intuicionData.descripcion} onChange={(e) => setIntuicionData({ ...intuicionData, descripcion: e.target.value })} className="w-full px-2 py-1.5 bg-knar-charcoal border border-knar-border rounded text-xs text-knar-text-primary focus:border-knar-orange focus:outline-none" rows={3} placeholder="Descripción detallada de la observación" /></div>
+                        </div>
                       </CollapsibleCard>
                     )}
 

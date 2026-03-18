@@ -263,7 +263,7 @@ assert(
 );
 
 assert(
-  sesionVacia.imagenActual === '/diagrams/default-plant.png',
+  sesionVacia.imagenActual === '/ReferenceIamge/Sistema Bombas de Achique_V2.png',
   'crearSesionVacia: Imagen por defecto correcta'
 );
 

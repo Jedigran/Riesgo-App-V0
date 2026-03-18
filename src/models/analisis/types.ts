@@ -320,11 +320,14 @@ export interface AnalisisOCA {
 
 /**
  * Intuitive Analysis (Expert Judgment)
- * 
+ *
  * Informal analysis based on expert observation and experience.
  * Used for quick assessments or when formal methodology is not required.
  */
 export interface AnalisisIntuicion {
+  /** Title or short name for the analysis */
+  titulo: string;
+
   /** Detailed description of the observation or concern */
   descripcion: string;
 

@@ -476,13 +476,20 @@ export function useRelacionesHallazgo(): UseRelacionesHallazgoReturn {
         TipoRelacionHallazgo,
         { origen: TipoHallazgo; destino: TipoHallazgo }[]
       > = {
-        mitiga: [{ origen: 'Barrera', destino: 'Peligro' }],
+        mitiga: [
+          { origen: 'Barrera', destino: 'Peligro' },
+          { origen: 'SOL', destino: 'Peligro' },  // SOL (Protection Layer) can mitigate hazards
+        ],
         controla: [{ origen: 'POE', destino: 'Peligro' }],
         protege: [
           { origen: 'Barrera', destino: 'Barrera' },
           { origen: 'Barrera', destino: 'SOL' },
+          { origen: 'SOL', destino: 'SOL' },  // SOL can protect other SOLs
         ],
-        requiere: [{ origen: 'Peligro', destino: 'Barrera' }],
+        requiere: [
+          { origen: 'Peligro', destino: 'Barrera' },
+          { origen: 'Peligro', destino: 'SOL' },  // Hazard may require SOL
+        ],
       };
 
       const combinaciones = combinacionesValidas[tipo];

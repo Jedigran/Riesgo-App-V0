@@ -204,7 +204,6 @@ assert(
 
 // Test 1.5: AnalisisIntuicion
 const intuicionData: AnalisisIntuicion = {
-  titulo: 'Observación de corrosión en tubería',
   descripcion: 'Se observa corrosión externa en tubería de línea de vapor cerca de la válvula V-102',
   observaciones: [
     'La tubería tiene aproximadamente 15 años de servicio',

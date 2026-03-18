@@ -196,17 +196,16 @@ export function validarAnalisisHAZOP(data: AnalisisHAZOP): ValidationResult {
     if (error) errores.push(error);
   }
 
-  // Validate arrays - OPTIONAL for now (can be empty)
-  // Commenting out to allow empty arrays during initial testing
-  // const salvaguardasError = validarArrayNoVacio(data.salvaguardasExistentes, 'salvaguardasExistentes');
-  // if (salvaguardasError) {
-  //   errores.push(salvaguardasError);
-  // }
+  // Validate arrays - must have at least one element
+  const salvaguardasError = validarArrayNoVacio(data.salvaguardasExistentes, 'salvaguardasExistentes');
+  if (salvaguardasError) {
+    errores.push(salvaguardasError);
+  }
 
-  // const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
-  // if (recomendacionesError) {
-  //   errores.push(recomendacionesError);
-  // }
+  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
+  if (recomendacionesError) {
+    errores.push(recomendacionesError);
+  }
 
   // Validate optional but recommended fields
   if (!data.subnodo || data.subnodo.trim() === '') {
@@ -294,16 +293,16 @@ export function validarAnalisisFMEA(data: AnalisisFMEA): ValidationResult {
   if (data.S !== undefined && data.O !== undefined && data.D !== undefined) {
     const rpnCalculado = data.S * data.O * data.D;
     if (data.RPN !== rpnCalculado) {
-      errores.push(`NPR inválido: debe ser ${rpnCalculado} (${data.S} × ${data.O} × ${data.D}), pero se obtuvo ${data.RPN}`);
+      errores.push(`RPN inválido: debe ser ${rpnCalculado} (${data.S} × ${data.O} × ${data.D}), pero se obtuvo ${data.RPN}`);
     }
 
     // Warn about high RPN with color coding
-    if (data.RPN >= 201) {
-      advertencias.push(`NPR Crítico (${data.RPN}): Requiere acción inmediata`);
+    if (data.RPN >= 400) {
+      advertencias.push(`RPN alto (${data.RPN}): Requiere atención prioritaria`);
+    } else if (data.RPN >= 201) {
+      advertencias.push(`RPN medio-alto (${data.RPN}): Considerar acciones de mejora`);
     } else if (data.RPN >= 101) {
-      advertencias.push(`NPR Alto (${data.RPN}): Acción correctiva requerida`);
-    } else if (data.RPN >= 51) {
-      advertencias.push(`NPR Moderado (${data.RPN}): Considerar acciones de mejora`);
+      advertencias.push(`RPN moderado (${data.RPN}): Monitorear`);
     }
   }
 
@@ -435,13 +434,13 @@ export function validarAnalisisLOPA(data: AnalisisLOPA): ValidationResult {
 
 /**
  * Validates an OCA (Consequence Analysis) form.
- * 
+ *
  * Required fields:
- * - eventoIniciador, consecuencia
+ * - compuesto, cantidad, viento, estabilidad, topografia, tipoEscenario, endpoint
  * - barrerasExistentes (at least one)
  * - gaps (at least one)
- * - recomendaciones (at least one, recommended >= gaps.length)
- * 
+ * - recomendaciones (at least one)
+ *
  * @param data - OCA analysis data
  * @returns Validation result with errors
  */
@@ -449,7 +448,7 @@ export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
   const errores: string[] = [];
   const advertencias: string[] = [];
 
-  // Validate required fields
+  // Validate required numeric fields
   if (!data.compuesto || data.compuesto.trim() === '') {
     errores.push('compuesto: Es requerido');
   }
@@ -477,6 +476,16 @@ export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
   if (!data.endpoint || data.endpoint <= 0) {
     errores.push('endpoint: Debe ser mayor a 0');
   }
+
+  // Validate arrays - must have at least one element
+  const barrerasError = validarArrayNoVacio(data.barrerasExistentes, 'barrerasExistentes');
+  if (barrerasError) errores.push(barrerasError);
+
+  const gapsError = validarArrayNoVacio(data.gaps, 'gaps');
+  if (gapsError) errores.push(gapsError);
+
+  const recomendacionesError = validarArrayNoVacio(data.recomendaciones, 'recomendaciones');
+  if (recomendacionesError) errores.push(recomendacionesError);
 
   // Validate calculated fields if present
   if (data.factorViento !== undefined && (data.factorViento <= 0 || data.factorViento > 2)) {
@@ -509,11 +518,11 @@ export function validarAnalisisOCA(data: AnalisisOCA): ValidationResult {
 
 /**
  * Validates an Intuitive Analysis form.
- * 
+ *
  * Required fields:
  * - titulo, descripcion
  * - observaciones (at least one)
- * 
+ *
  * @param data - Intuitive analysis data
  * @returns Validation result with errors
  */
@@ -522,6 +531,9 @@ export function validarAnalisisIntuicion(data: AnalisisIntuicion): ValidationRes
   const advertencias: string[] = [];
 
   // Validate required string fields
+  const tituloError = validarStringRequerido(data.titulo, 'titulo');
+  if (tituloError) errores.push(tituloError);
+
   const descripcionError = validarStringRequerido(data.descripcion, 'descripcion');
   if (descripcionError) errores.push(descripcionError);
 
@@ -530,10 +542,9 @@ export function validarAnalisisIntuicion(data: AnalisisIntuicion): ValidationRes
     advertencias.push('descripcion: Se recomienda una descripción más detallada (mínimo 20 caracteres)');
   }
 
-  // observaciones is optional — warn if empty but do not block
-  if (!data.observaciones || data.observaciones.length === 0) {
-    advertencias.push('observaciones: Se recomienda registrar al menos una observación');
-  }
+  // observaciones must have at least one element
+  const observacionesError = validarArrayNoVacio(data.observaciones, 'observaciones');
+  if (observacionesError) errores.push(observacionesError);
 
   return {
     valido: errores.length === 0,

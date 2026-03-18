@@ -334,8 +334,11 @@ console.log('\n--- validarAnalisisLOPA ---');
 
 const lopaValido = {
   escenario: 'Sobrepresión en separador V-301',
+  causa: 'Falla en válvula de control',
   frecuenciaInicial: 0.1,
   consecuencia: 'Ruptura de recipiente',
+  S: 8,
+  riesgoTolerable: 0.00001,
   capasIPL: [
     { nombre: 'BPCS - Alarma', pfd: 0.1 },
     { nombre: 'SIS - Parada', pfd: 0.01 },
@@ -370,8 +373,13 @@ assert(
 console.log('\n--- validarAnalisisOCA ---');
 
 const ocaValido = {
-  eventoIniciador: 'Pérdida de energía',
-  consecuencia: 'Parada no controlada',
+  compuesto: 'H2S',
+  cantidad: 1000,
+  viento: 1.5,
+  estabilidad: 'F',
+  topografia: 'Urbana',
+  tipoEscenario: 'Alternativo',
+  endpoint: 0.0017,
   barrerasExistentes: ['UPS', 'Generador'],
   gaps: ['UPS capacidad insuficiente'],
   recomendaciones: ['Ampliar UPS'],
@@ -384,8 +392,13 @@ assert(
 );
 
 const ocaInvalido = {
-  eventoIniciador: '', // Missing
-  consecuencia: 'Parada',
+  compuesto: '', // Missing
+  cantidad: 1000,
+  viento: 1.5,
+  estabilidad: 'F',
+  topografia: 'Urbana',
+  tipoEscenario: 'Alternativo',
+  endpoint: 0.0017,
   barrerasExistentes: [], // Empty
   gaps: ['Gap 1'],
   recomendaciones: ['Rec 1'],
@@ -394,7 +407,7 @@ const ocaInvalido = {
 const resultOCAInvalido = validarAnalisisOCA(ocaInvalido as any);
 assert(
   resultOCAInvalido.valido === false &&
-  resultOCAInvalido.errores.some(e => e.includes('eventoIniciador')) &&
+  resultOCAInvalido.errores.some(e => e.includes('compuesto')) &&
   resultOCAInvalido.errores.some(e => e.includes('barrerasExistentes')),
   'OCA inválido: Detecta campos faltantes y arrays vacíos'
 );

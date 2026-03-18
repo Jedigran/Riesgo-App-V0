@@ -1233,8 +1233,8 @@ export default function EsquematicoPanel({
             />
           )}
 
-          {/* Empty state */}
-          {allMarkers.filter((h) => h.ubicacion).length === 0 && !isEditMode && (
+          {/* Empty state - only show when there are no hallazgos at all in session */}
+          {(sesion?.hallazgos ?? []).length === 0 && !isEditMode && (
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -1244,7 +1244,7 @@ export default function EsquematicoPanel({
               pointerEvents: 'none',
             }}>
               <p style={{ fontSize: '11px', fontWeight: 300, color: 'var(--text-disabled)' }}>
-                Sin entidades ubicadas. Abre una entidad en la tabla para colocarla.
+                Sin entidades ubicadas. Adicione una entidad en la tabla para colocarla.
               </p>
             </div>
           )}
