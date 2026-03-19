@@ -222,6 +222,17 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
     },
     hallazgos: [
       {
+        tipo: 'Peligro',
+        datos: {
+          titulo: 'Inundación de galerías por falla de bomba de achique',
+          descripcion: 'Falla eléctrica del motor de la bomba principal provoca acumulación de agua',
+          tipoPeligro: 'Diseño',
+          consecuencia: 'Inundación de galerías, paralización de operaciones, riesgo de atrapamiento del personal',
+          severidad: 5,
+          causaRaiz: 'Falla eléctrica del motor de la bomba principal',
+        },
+      },
+      {
         tipo: 'Barrera',
         datos: {
           titulo: 'Barrera-MIN-001: Alarma de alto nivel automática',

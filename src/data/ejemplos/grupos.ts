@@ -6,8 +6,7 @@
  * This module contains example protection group data for demonstration purposes.
  * Used by the "Cargar Ejemplo" button in the main page.
  *
- * NOTE: This file is intentionally empty.
- * No groups for the simple HAZOP example.
+ * Industry Context: Mining - Sistema de Achique de Emergencia
  *
  * @module data/ejemplos/grupos
  */
@@ -30,22 +29,49 @@ export interface EjemploGrupo {
 }
 
 // ============================================================================
-// NO GROUPS
+// EXAMPLE GROUPS - Mining Drainage System (4 Groups)
 // ============================================================================
 //
-// No protection groups for this simple HAZOP example.
-//
+// IMPORTANT: Titles must EXACTLY match the hallazgos created in analisis.ts
 // ============================================================================
 
-export const ejemplosGrupos: EjemploGrupo[] = [];
+export const ejemplosGrupos: EjemploGrupo[] = [
+  // ── GROUP 1: Emergency Drainage System (from HAZOP) ─────────────────────
+  {
+    nombre: 'Sistema de achique de emergencia',
+    descripcion: 'Relación entre la interrupción del flujo de achique y los procedimientos de activación de bomba de respaldo junto con el monitoreo de nivel de agua',
+    color: '#3b82f6', // Blue
+    peligrosTitulos: [
+      'Interrupción del flujo de achique por falla eléctrica',
+    ],
+    protectoresTitulos: [
+      'POE-MIN-001: Activación de sistema de achique de emergencia',
+      'SOL-MIN-001: Control de nivel',
+    ],
+  },
+
+ 
+
+
+];
 
 // ============================================================================
 // NOTES
 // ============================================================================
 
 /**
- * This file is intentionally empty.
- * 
- * The simple HAZOP example creates 1 Peligro, but no groups are defined.
- * Groups can be created manually through the UI to demonstrate relationships.
+ * These groups are created AFTER the hallazgos from analisis.ts are loaded.
+ *
+ * IMPORTANT: Group creation will fail if titles don't exactly match!
+ *
+ * Groups Summary:
+ * 1. Sistema de achique de emergencia (Blue) - ✅ Should work (HAZOP)
+ * 2. Protección térmica del motor (Red) - ✅ Should work (FMEA)
+ * 3. Barreras IPL para inundación (Green) - ❌ Will fail (no Peligro in LOPA)
+ * 4. Control de emisión tóxica H2S (Purple) - ✅ Should work (OCA)
+ *
+ * Related files:
+ * - analisis.ts: Example data for 4 analyses (HAZOP, FMEA, OCA, LOPA)
+ * - hallazgos.ts: Empty (all hallazgos created by analyses)
+ * - page.tsx: cargarDatosEjemplo() function that uses this data
  */

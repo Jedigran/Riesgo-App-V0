@@ -426,41 +426,18 @@ export default function RiesgoApp() {
     }
 
     const erroresEncontrados: string[] = [];
+    
+    // Get all hallazgos from session to build title-to-ID map
+    // This includes hallazgos created by cargarAnalisisEjemplo()
     const hallazgoIdsByTitle = new Map<string, string>();
+    if (sesion) {
+      sesion.hallazgos.forEach(h => {
+        hallazgoIdsByTitle.set(h.titulo, h.id);
+      });
+    }
 
-    console.log('🔵 Cargando ejemplos de hallazgos...');
-
-    // Step 1: Create all hallazgos from hallazgos.ts
-    ejemplosBasicos.forEach((ejemplo) => {
-      let resultado;
-
-      switch (ejemplo.tipo) {
-        case 'Peligro':
-          resultado = crearPeligro(ejemplo.datos as CrearPeligroDTO, ejemplo.ubicacion);
-          break;
-        case 'Barrera':
-          resultado = crearBarrera(ejemplo.datos as CrearBarreraDTO, ejemplo.ubicacion);
-          break;
-        case 'POE':
-          resultado = crearPOE(ejemplo.datos as CrearPOEDTO, ejemplo.ubicacion);
-          break;
-        case 'SOL':
-          resultado = crearSOL(ejemplo.datos as CrearSOLDTO, ejemplo.ubicacion);
-          break;
-      }
-
-      if (resultado?.exito && resultado.id) {
-        hallazgoIdsByTitle.set(ejemplo.datos.titulo, resultado.id);
-        console.log(`✅ Creado: ${ejemplo.tipo} - ${ejemplo.datos.titulo}`);
-      } else if (resultado && !resultado.exito) {
-        const error = `Error creando ${ejemplo.tipo} ${ejemplo.datos.titulo}: ${resultado.errores.join(', ')}`;
-        erroresEncontrados.push(error);
-        console.error(`❌ ${error}`);
-      }
-    });
-
-    console.log(`📦 Hallazgos creados: ${hallazgoIdsByTitle.size}`);
-    console.log('🔵 Creando grupos de protección...');
+    console.log('🔵 Buscando hallazgos en sesión para crear grupos...');
+    console.log(`📦 Hallazgos encontrados en sesión: ${hallazgoIdsByTitle.size}`);
 
     // Step 2: Create groups from grupos.ts
     ejemplosGrupos.forEach((grupoData) => {
@@ -509,7 +486,7 @@ export default function RiesgoApp() {
       agregarNotificacion({
         tipo: 'success',
         titulo: '✅ Ejemplos Cargados',
-        mensaje: '4 análisis (HAZOP + FMEA + OCA + LOPA) + 11 hallazgos - Ubícalos en el esquemático',
+        mensaje: '4 análisis + 11 hallazgos + 4 grupos - Revisa la pestaña "Relaciones"',
         duracion: 8000,
       });
     }
@@ -1307,8 +1284,10 @@ export default function RiesgoApp() {
             <span>|</span>
             <button
               onClick={() => {
-                cargarDatosEjemplo();
+                // First create all hallazgos from analyses
                 cargarAnalisisEjemplo();
+                // Then create groups (they need hallazgos to exist first)
+                cargarDatosEjemplo();
               }}
               style={{
                 padding: '4px 10px',
