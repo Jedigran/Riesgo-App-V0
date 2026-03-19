@@ -285,6 +285,7 @@ export default function RiesgoApp() {
   const { crearPeligro, crearBarrera, crearPOE, crearSOL } = useHallazgo();
   const { crearGrupo } = useGrupo();
   const { agregarError, agregarNotificacion } = useUIEstado();
+  const { sesionCargada, iniciarSesion } = useSesion();
 
   // ========================================
   // OCA HELPER FUNCTIONS
@@ -413,6 +414,17 @@ export default function RiesgoApp() {
   // TEST DATA LOADER - COMPLETE EXAMPLE (Hallazgos + Grupos + Análisis)
   // ========================================
   const cargarDatosEjemplo = () => {
+    // Ensure session is initialized
+    if (!sesionCargada) {
+      console.log('🔵 Iniciando sesión antes de cargar ejemplos...');
+      iniciarSesion();
+      // Wait a bit for session to initialize
+      setTimeout(() => {
+        cargarDatosEjemplo();
+      }, 100);
+      return;
+    }
+
     const erroresEncontrados: string[] = [];
     const hallazgoIdsByTitle = new Map<string, string>();
 
@@ -497,7 +509,7 @@ export default function RiesgoApp() {
       agregarNotificacion({
         tipo: 'success',
         titulo: '✅ Ejemplos Cargados',
-        mensaje: '8 hallazgos + 2 grupos + 6 análisis creados - Revisa la pestaña "Relaciones"',
+        mensaje: '2 análisis (HAZOP + FMEA) + 5 hallazgos - Ubícalos en el esquemático',
         duracion: 8000,
       });
     }
@@ -509,6 +521,17 @@ export default function RiesgoApp() {
   // TEST DATA LOADER FOR ANALYSIS (HAZOP, FMEA, LOPA, OCA)
   // ========================================
   const cargarAnalisisEjemplo = () => {
+    // Ensure session is initialized
+    if (!sesionCargada) {
+      console.log('🔵 Iniciando sesión antes de cargar análisis de ejemplo...');
+      iniciarSesion();
+      // Wait a bit for session to initialize
+      setTimeout(() => {
+        cargarAnalisisEjemplo();
+      }, 100);
+      return;
+    }
+
     const erroresEncontrados: string[] = [];
     let entityIndex = 0;
 
