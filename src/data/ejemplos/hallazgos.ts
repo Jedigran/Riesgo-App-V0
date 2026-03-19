@@ -6,6 +6,8 @@
  * This module contains example data for demonstration purposes.
  * Used by the "Cargar Ejemplo" button in the main page.
  *
+ * Industry Context: Mining - Sistema de Achique de Emergencia
+ * 
  * @module data/ejemplos/hallazgos
  */
 
@@ -19,116 +21,165 @@ export interface EjemploHallazgo {
 }
 
 // ============================================================================
-// BASIC EXAMPLES - 4 entities for simple relationship demo
+// MINING EXAMPLES - Sistema de Achique de Emergencia
+// ============================================================================
+// 
+// Context: Underground mining drainage system risk assessment
+// 
+// Unique Hallazgos: 10 total
+// - 4 Peligros (Hazards)
+// - 3 POEs (Standard Operating Procedures)
+// - 2 Barreras (Physical Barriers / IPLs)
+// - 1 SOL (Safety Instrumented Layer)
 // ============================================================================
 
 export const ejemplosBasicos: EjemploHallazgo[] = [
-  // ── PELIGROS ──────────────────────────────────────────────────────────────
+  // ── PELIGROS (4) ─────────────────────────────────────────────────────────
+
+  // H1: Main hazard - referenced by Registro Directo, LOPA, Relación 2
   {
     tipo: 'Peligro',
     datos: {
-      titulo: 'Sobrepresión en Reactor R-101',
-      descripcion: 'Riesgo de sobrepresión durante operación normal por falla en control de presión',
-      tipoPeligro: 'Inherente',
-      consecuencia: 'Ruptura del reactor con liberación de material peligroso',
-      severidad: 5,
-      causaRaiz: 'Falla en válvula de control PIC-101',
-    },
-    ubicacion: { x: 35, y: 30 },
-  },
-  {
-    tipo: 'Peligro',
-    datos: {
-      titulo: 'Fuga de Gas H2S en Línea L-205',
-      descripcion: 'Liberación de gas sulfhídrico por corrosión en tubería de proceso',
+      titulo: 'Inundación de galerías por falla de bomba de achique',
+      descripcion: 'Falla eléctrica del motor de la bomba principal provoca acumulación de agua',
       tipoPeligro: 'Diseño',
-      consecuencia: 'Intoxicación del personal y contaminación ambiental',
+      consecuencia: 'Inundación de galerías, paralización de operaciones, riesgo de atrapamiento del personal',
       severidad: 5,
-      causaRaiz: 'Corrosión acelerada por ambiente marino con H2S',
+      causaRaiz: 'Falla eléctrica del motor de la bomba principal',
     },
-    ubicacion: { x: 55, y: 25 },
+    ubicacion: { x: 30, y: 30 },
   },
 
-  // ── BARRERAS ─────────────────────────────────────────────────────────────
+  // H2: HAZOP hazard
   {
-    tipo: 'Barrera',
+    tipo: 'Peligro',
     datos: {
-      titulo: 'Válvula de Alivio PSV-101',
-      descripcion: 'Válvula de seguridad que alivia presión cuando excede el setpoint de 150 psig',
-      tipoBarrera: 'Fisica',
-      tipoBarreraFuncion: 'Mitigativa',
-      efectividadEstimada: 4,
-      elementoProtegido: 'Reactor R-101',
+      titulo: 'Interrupción del flujo de achique por falla eléctrica',
+      descripcion: 'La bomba principal del sistema de achique deja de operar por falla eléctrica, interrumpiendo el flujo de evacuación de agua',
+      tipoPeligro: 'Diseño',
+      consecuencia: 'Acumulación de agua en el área de operación',
+      severidad: 5,
+      causaRaiz: 'Falla eléctrica del motor',
     },
-    ubicacion: { x: 38, y: 33 },
+    ubicacion: { x: 40, y: 30 },
   },
+
+  // H3: FMEA hazard - referenced by Relación 1
+  {
+    tipo: 'Peligro',
+    datos: {
+      titulo: 'Inoperabilidad del motor de bomba por sobrecalentamiento',
+      descripcion: 'El motor de la bomba principal se detiene por activación de protección térmica debido a sobrecarga prolongada',
+      tipoPeligro: 'Diseño',
+      consecuencia: 'Pérdida de bombeo, acumulación de agua en galerías',
+      severidad: 5,
+      causaRaiz: 'Sobrecarga prolongada del motor',
+    },
+    ubicacion: { x: 50, y: 30 },
+  },
+
+  // H4: OCA hazard - referenced by Relación 3
+  {
+    tipo: 'Peligro',
+    datos: {
+      titulo: 'Emisión tóxica de H2S desde sistema de drenaje',
+      descripcion: 'Liberación de sulfuro de hidrógeno (H2S) desde aguas residuales acumuladas en el sistema de drenaje por reacción química con minerales sulfurados',
+      tipoPeligro: 'Diseño',
+      consecuencia: 'Intoxicación del personal subterráneo por exposición a gas H2S',
+      severidad: 5,
+      causaRaiz: 'Reacción química con minerales sulfurados',
+    },
+    ubicacion: { x: 70, y: 30 },
+  },
+
+  // ── POEs (3) ─────────────────────────────────────────────────────────────
+
+  // H5: POE for HAZOP
+  {
+    tipo: 'POE',
+    datos: {
+      titulo: 'POE-MIN-001: Activación de sistema de achique de emergencia',
+      descripcion: 'Procedimiento para activar bomba de respaldo y verificar restablecimiento del flujo en un plazo máximo de 15 minutos',
+      procedimientoReferencia: 'POE-MIN-001',
+      frecuenciaAplicacion: 'Según sea necesario',
+      responsable: 'Operador de turno',
+    },
+    ubicacion: { x: 40, y: 40 },
+  },
+
+  // H7: POE for FMEA
+  {
+    tipo: 'POE',
+    datos: {
+      titulo: 'POE-MIN-001: Respuesta a activación de bomba de emergencia',
+      descripcion: 'Procedimiento de verificación de operación de bomba de respaldo y diagnóstico de falla de bomba principal',
+      procedimientoReferencia: 'POE-MIN-001',
+      frecuenciaAplicacion: 'Según sea necesario',
+      responsable: 'Supervisor de Mantenimiento',
+    },
+    ubicacion: { x: 50, y: 40 },
+  },
+
+  // H10: POE for OCA - referenced by Relación 3
+  {
+    tipo: 'POE',
+    datos: {
+      titulo: 'POE-MIN-002: Respuesta a detección de H2S',
+      descripcion: 'Procedimiento de evacuación inmediata y uso de equipos de respiración autónoma cuando se detecta H2S sobre 10 ppm',
+      procedimientoReferencia: 'POE-MIN-002',
+      frecuenciaAplicacion: 'Según sea necesario',
+      responsable: 'Todo el personal subterráneo',
+    },
+    ubicacion: { x: 70, y: 40 },
+  },
+
+  // ── BARRERAS (2) ─────────────────────────────────────────────────────────
+
+  // H8: Barrera IPL 1 - referenced by Relación 2
   {
     tipo: 'Barrera',
     datos: {
-      titulo: 'Detector de Gas H2S GD-205',
-      descripcion: 'Sistema de detección continua de gas sulfhídrico con alarma en sala de control',
+      titulo: 'Barrera-MIN-001: Alarma de alto nivel automática',
+      descripcion: 'Sistema de alarma que se activa cuando el nivel de agua en la poza alcanza 2.0 m, alertando al operador de turno',
       tipoBarrera: 'Fisica',
       tipoBarreraFuncion: 'Detectiva',
       efectividadEstimada: 4,
-      elementoProtegido: 'Personal en área de proceso',
+      elementoProtegido: 'Sistema de achique',
     },
-    ubicacion: { x: 58, y: 28 },
+    ubicacion: { x: 60, y: 40 },
   },
 
-  // ── POEs ─────────────────────────────────────────────────────────────────
+  // H9: Barrera IPL 2 - referenced by Relación 2
   {
-    tipo: 'POE',
+    tipo: 'Barrera',
     datos: {
-      titulo: 'POE-001 Inspección de Válvulas de Seguridad',
-      descripcion: 'Procedimiento para inspección y calibración periódica de válvulas de alivio',
-      procedimientoReferencia: 'PRO-INS-001',
-      frecuenciaAplicacion: 'Mensual',
-      responsable: 'Jefe de Mantenimiento',
+      titulo: 'Barrera-MIN-002: Bomba de achique automática de respaldo',
+      descripcion: 'Sistema de bombeo secundario que se activa automáticamente por interlock cuando falla la bomba principal',
+      tipoBarrera: 'Fisica',
+      tipoBarreraFuncion: 'Mitigativa',
+      efectividadEstimada: 4,
+      elementoProtegido: 'Sistema de drenaje subterráneo',
     },
-    ubicacion: { x: 32, y: 38 },
-  },
-  {
-    tipo: 'POE',
-    datos: {
-      titulo: 'POE-002 Monitoreo de Gases Tóxicos',
-      descripcion: 'Procedimiento para monitoreo continuo y respuesta a alarmas de H2S',
-      procedimientoReferencia: 'PRO-SEG-002',
-      frecuenciaAplicacion: 'Continuo',
-      responsable: 'Supervisor de Seguridad Industrial',
-    },
-    ubicacion: { x: 52, y: 32 },
+    ubicacion: { x: 65, y: 35 },
   },
 
-  // ── SOLs ─────────────────────────────────────────────────────────────────
+  // ── SOLs (1) ─────────────────────────────────────────────────────────────
+
+  // H6: SOL for HAZOP - referenced by Relación 1
   {
     tipo: 'SOL',
     datos: {
-      titulo: 'SIS-101 Parada de Emergencia del Reactor',
-      descripcion: 'Sistema instrumentado de seguridad para parada segura ante alta presión',
+      titulo: 'SOL-MIN-002: Sensor de temperatura de motor',
+      descripcion: 'Termopares en devanados del motor que alertan antes de alcanzar temperatura crítica',
       capaNumero: 1,
       independiente: true,
-      tipoTecnologia: 'Sensor de presión PT-101 + Válvula de bloqueo XV-101',
-      parametro: 'Presión',
-      valorMinimo: 0,
-      valorMaximo: 150,
-      unidad: 'psig',
+      tipoTecnologia: 'Termopares en devanados del motor',
+      parametro: 'Temperatura del motor',
+      valorMinimo: 20,
+      valorMaximo: 90,
+      unidad: 'Grados Celsius (°C)',
     },
-    ubicacion: { x: 40, y: 35 },
-  },
-  {
-    tipo: 'SOL',
-    datos: {
-      titulo: 'SIS-205 Ventilación de Emergencia',
-      descripcion: 'Sistema de ventilación forzada para dispersar gas en caso de fuga',
-      capaNumero: 2,
-      independiente: true,
-      tipoTecnologia: 'Detector de gas GD-205 + Ventiladores EV-205',
-      parametro: 'Concentración H2S',
-      valorMinimo: 0,
-      valorMaximo: 10,
-      unidad: 'ppm',
-    },
-    ubicacion: { x: 60, y: 30 },
+    ubicacion: { x: 45, y: 35 },
   },
 ];
 
@@ -137,20 +188,29 @@ export const ejemplosBasicos: EjemploHallazgo[] = [
 // ============================================================================
 
 /**
- * When loading example data, two protection groups (GruposProteccion) are created:
- * 
- * GROUP 1: "Grupo Protección Reactor R-101" (Red #ef4444)
- * - Peligro: Sobrepresión en Reactor R-101
- * - Barrera: Válvula de Alivio PSV-101
- * 
- * GROUP 2: "Grupo Protección Línea H2S" (Amber #f59e0b)
- * - Peligro: Fuga de Gas H2S en Línea L-205
- * - Barrera: Detector de Gas H2S GD-205
- * - POE: POE-002 Monitoreo de Gases Tóxicos
- * - SOL: SIS-205 Ventilación de Emergencia
- * 
+ * When loading example data, three protection groups (GruposProteccion) are created:
+ *
+ * GROUP 1: "Protección térmica del motor de bomba principal" (Blue #3b82f6)
+ * - Peligro: Inoperabilidad del motor de bomba por sobrecalentamiento (H3)
+ * - Control: SOL-MIN-002: Sensor de temperatura de motor (H6)
+ *
+ * GROUP 2: "Barreras IPL para prevención de inundación" (Green #22c55e)
+ * - Peligro: Inundación de galerías por falla de bomba de achique (H1)
+ * - Controls: 
+ *   - Barrera-MIN-001: Alarma de alto nivel automática (H8)
+ *   - Barrera-MIN-002: Bomba de achique automática de respaldo (H9)
+ *
+ * GROUP 3: "Control de emisión tóxica H2S en drenaje" (Purple #a855f7)
+ * - Peligro: Emisión tóxica de H2S desde sistema de drenaje (H4)
+ * - Control: POE-MIN-002: Respuesta a detección de H2S (H10)
+ *
  * Group Structure:
  * - Each group has ONE or MORE peligros (hazards)
  * - Each group has ONE or MORE protectores (Barrera, POE, SOL)
  * - Groups are visualized with color-coded connections on the schematic
+ *
+ * Industry Context:
+ * - Underground mining drainage system (Sistema de Achique de Mina Subterránea)
+ * - Multiple risk assessment methodologies applied to the same system
+ * - Demonstrates relationships between hazards and their protective layers
  */

@@ -514,10 +514,13 @@ export default function RiesgoApp() {
 
     // Process each example analysis
     ejemplosAnalisis.forEach((ejemplo) => {
-      let resultado;
+      let resultado: ReturnType<typeof crearAnalisisHAZOP> | ReturnType<typeof crearAnalisisFMEA> | ReturnType<typeof crearAnalisisLOPA> | ReturnType<typeof crearAnalisisOCA> | ReturnType<typeof crearAnalisisIntuicion>;
 
       // Create analysis based on type
       switch (ejemplo.tipo) {
+        case 'RegistroDirecto':
+          resultado = crearAnalisisIntuicion(ejemplo.datos);
+          break;
         case 'HAZOP':
           resultado = crearAnalisisHAZOP(ejemplo.datos);
           break;
