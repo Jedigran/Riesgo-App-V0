@@ -509,7 +509,7 @@ export default function RiesgoApp() {
       agregarNotificacion({
         tipo: 'success',
         titulo: '✅ Ejemplos Cargados',
-        mensaje: '2 análisis (HAZOP + FMEA) + 5 hallazgos - Ubícalos en el esquemático',
+        mensaje: '4 análisis (HAZOP + FMEA + OCA + LOPA) + 11 hallazgos - Ubícalos en el esquemático',
         duracion: 8000,
       });
     }

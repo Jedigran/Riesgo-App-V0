@@ -143,6 +143,118 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
       },
     ],
   },
+
+  // ========================================
+  // OCA #1 - Emisión Tóxica de H2S desde Sistema de Drenaje
+  // ========================================
+  {
+    tipo: 'OCA',
+    datos: {
+      nombre: 'Emisión tóxica de H2S desde sistema de drenaje',
+      compuesto: 'H2S',
+      cantidad: 1000,
+      viento: 1.5,
+      factorViento: 1.0,
+      estabilidad: 'F',
+      factorEscalabilidad: 1.5,
+      topografia: 'Urbana',
+      factorTopografia: 0.85,
+      tipoEscenario: 'Alternativo',
+      endpoint: 0.0017,
+      tasaLiberacion: 16.67,
+      distanciaEndpointMillas: 2.29,
+      distanciaEndpointKm: 3.69,
+      areaAfectadaMillas2: 16.48,
+      areaAfectadaKm2: 42.67,
+      programaRMP: 'Programa 2',
+      evaluacion: 'MODERADA',
+      barrerasExistentes: ['Detector de gas H2S', 'Sistema de ventilación'],
+      gaps: ['Tiempo de respuesta lento', 'Equipos de respiración insuficientes'],
+      recomendaciones: ['Mejorar sistema de alerta temprana', 'Adquirir más equipos de respiración autónoma'],
+    },
+    hallazgos: [
+      {
+        tipo: 'Peligro',
+        datos: {
+          titulo: 'Emisión tóxica de H2S desde sistema de drenaje',
+          descripcion: 'Liberación de sulfuro de hidrógeno (H2S) desde aguas residuales acumuladas en el sistema de drenaje por reacción química con minerales sulfurados',
+          tipoPeligro: 'Diseño',
+          consecuencia: 'Intoxicación del personal subterráneo por exposición a gas H2S',
+          severidad: 5,
+          causaRaiz: 'Reacción química con minerales sulfurados',
+        },
+      },
+      {
+        tipo: 'POE',
+        datos: {
+          titulo: 'POE-MIN-002: Respuesta a detección de H2S',
+          descripcion: 'Procedimiento de evacuación inmediata y uso de equipos de respiración autónoma cuando se detecta H2S sobre 10 ppm',
+          procedimientoReferencia: 'POE-MIN-002',
+          frecuenciaAplicacion: 'Según sea necesario',
+          responsable: 'Todo el personal subterráneo',
+        },
+      },
+    ],
+  },
+
+  // ========================================
+  // LOPA #1 - Pérdida de Bombeo de Achique
+  // ========================================
+  {
+    tipo: 'LOPA',
+    datos: {
+      nombre: 'Pérdida de capacidad de achique en mina subterránea',
+      escenario: 'Pérdida de bombeo de achique',
+      consecuencia: 'Acumulación de agua',
+      receptorImpacto: 'Personal / Operación',
+      S: 7,
+      riesgoTolerable: 0.00001,
+      causa: 'Falla eléctrica del motor',
+      frecuenciaInicial: 0.0707,
+      capasIPL: [
+        { nombre: 'Alarma de alto nivel', pfd: 0.0001 },
+        { nombre: 'Bomba de achique automática de respaldo', pfd: 0.0001 },
+      ],
+      pfdTotal: 0.00000001,
+      riesgoFinal: 0.000000000707,
+      cumpleCriterio: true,
+      recomendaciones: ['Instalar capa IPL adicional'],
+    },
+    hallazgos: [
+      {
+        tipo: 'Barrera',
+        datos: {
+          titulo: 'Barrera-MIN-001: Alarma de alto nivel automática',
+          descripcion: 'Sistema de alarma que se activa cuando el nivel de agua en la poza alcanza 2.0 m, alertando al operador de turno',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Detectiva',
+          efectividadEstimada: 4,
+          elementoProtegido: 'Sistema de achique',
+        },
+      },
+      {
+        tipo: 'Barrera',
+        datos: {
+          titulo: 'Barrera-MIN-002: Bomba de achique automática de respaldo',
+          descripcion: 'Sistema de bombeo secundario que se activa automáticamente por interlock cuando falla la bomba principal',
+          tipoBarrera: 'Fisica',
+          tipoBarreraFuncion: 'Mitigativa',
+          efectividadEstimada: 4,
+          elementoProtegido: 'Sistema de drenaje subterráneo',
+        },
+      },
+      {
+        tipo: 'POE',
+        datos: {
+          titulo: 'POE-MIN-001: Respuesta a activación de bomba de emergencia',
+          descripcion: 'Procedimiento de verificación de operación de bomba de respaldo y diagnóstico de falla de bomba principal',
+          procedimientoReferencia: 'POE-MIN-001',
+          frecuenciaAplicacion: 'Según sea necesario',
+          responsable: 'Supervisor de Mantenimiento',
+        },
+      },
+    ],
+  },
 ];
 
 // ============================================================================
