@@ -29,6 +29,8 @@ export interface EjemploAnalisis {
   tipo: 'RegistroDirecto' | 'HAZOP' | 'FMEA' | 'LOPA' | 'OCA';
   /** Analysis data */
   datos: any;
+  /** Optional analysis name (shows in UI) */
+  nombre?: string;
   /** Hallazgos associated with this analysis */
   hallazgos: EjemploHallazgoAnalisis[];
 }
@@ -51,10 +53,11 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
   {
     tipo: 'RegistroDirecto',
     datos: {
-      titulo: 'Análisis de Peligros - Sistema de Achique Nivel 450',
+      titulo: 'Sistema de Achique',
       descripcion: 'Evaluación de riesgos por falla del sistema de bombeo en galerías subterráneas',
       observaciones: ['Análisis inicial del sistema de achique'],
     },
+    nombre: 'Achique Obs 1',
     hallazgos: [
       {
         tipo: 'Peligro',
@@ -87,6 +90,7 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
       salvaguardasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
       recomendaciones: ['Instalar bomba redundante'],
     },
+    nombre: 'Sistema de Achique HAZOP',
     hallazgos: [
       {
         tipo: 'Peligro',
@@ -145,6 +149,7 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
       barrerasExistentes: ['Sensor de nivel', 'Alarma de alto nivel'],
       accionesRecomendadas: ['Programar mantenimiento preventivo'],
     },
+    nombre: 'Bomba Principal del Sistema de Achique',
     hallazgos: [
       {
         tipo: 'Peligro',
@@ -196,6 +201,7 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
       cumpleCriterio: true,
       recomendaciones: ['Instalar capa IPL adicional'],
     },
+    nombre: 'Pérdida de Bombeo de Achique',
     hallazgos: [
       {
         tipo: 'Barrera',
@@ -259,6 +265,7 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
       gaps: ['Tiempo de respuesta lento'],
       recomendaciones: ['Mejorar sistema de alerta temprana'],
     },
+    nombre: 'Emisión Tóxica de H2S',
     hallazgos: [
       {
         tipo: 'Peligro',

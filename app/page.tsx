@@ -521,19 +521,19 @@ export default function RiesgoApp() {
       // Create analysis based on type
       switch (ejemplo.tipo) {
         case 'RegistroDirecto':
-          resultado = crearAnalisisIntuicion(ejemplo.datos);
+          resultado = crearAnalisisIntuicion(ejemplo.datos, ejemplo.nombre);
           break;
         case 'HAZOP':
-          resultado = crearAnalisisHAZOP(ejemplo.datos);
+          resultado = crearAnalisisHAZOP(ejemplo.datos, ejemplo.nombre);
           break;
         case 'FMEA':
-          resultado = crearAnalisisFMEA(ejemplo.datos);
+          resultado = crearAnalisisFMEA(ejemplo.datos, ejemplo.nombre);
           break;
         case 'LOPA':
-          resultado = crearAnalisisLOPA(ejemplo.datos);
+          resultado = crearAnalisisLOPA(ejemplo.datos, ejemplo.nombre);
           break;
         case 'OCA':
-          resultado = crearAnalisisOCA(ejemplo.datos);
+          resultado = crearAnalisisOCA(ejemplo.datos, ejemplo.nombre);
           break;
       }
 
