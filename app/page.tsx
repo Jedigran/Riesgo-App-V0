@@ -19,7 +19,7 @@
 
 'use client';
 
-import { useState, FormEvent, useCallback } from 'react';
+import { useState, FormEvent, useCallback, useEffect } from 'react';
 import { useAnalisis } from '@/src/controllers/useAnalisis';
 import { useHallazgo, type CrearPeligroDTO, type CrearBarreraDTO, type CrearPOEDTO, type CrearSOLDTO } from '@/src/controllers/useHallazgo';
 import { useUIEstado } from '@/src/controllers/useUIEstado';
@@ -486,7 +486,7 @@ export default function RiesgoApp() {
       agregarNotificacion({
         tipo: 'success',
         titulo: '✅ Ejemplos Cargados',
-        mensaje: '5 análisis + 11 hallazgos - Ubícalos en el esquemático',
+        mensaje: '5 análisis + 11 hallazgos + 4 grupos - Revisa la pestaña "Relaciones"',
         duracion: 8000,
       });
     }
@@ -592,6 +592,61 @@ export default function RiesgoApp() {
         duracion: 6000,
       });
     }
+  };
+
+  // ========================================
+  // AUTO-CREATE GROUPS WHEN HALLAZGOS EXIST
+  // ========================================
+  const [gruposCreados, setGruposCreados] = useState(false);
+
+  // Watch for hallazgos and auto-create groups
+  useEffect(() => {
+    if (sesion && sesion.hallazgos.length >= 11 && !gruposCreados && ejemplosGrupos.length > 0) {
+      console.log('✅ Hallazgos detectados en sesión, creando grupos...');
+      
+      // Small delay to ensure state is fully updated
+      setTimeout(() => {
+        crearGruposDesdeEjemplos();
+        setGruposCreados(true);
+      }, 200);
+    }
+  }, [sesion?.hallazgos.length]);
+
+  // Create groups from ejemplos
+  const crearGruposDesdeEjemplos = () => {
+    const hallazgoIdsByTitle = new Map<string, string>();
+    sesion?.hallazgos.forEach(h => {
+      hallazgoIdsByTitle.set(h.titulo, h.id);
+    });
+
+    console.log('🔵 Creando grupos de protección...');
+    console.log(`📦 Hallazgos en sesión: ${hallazgoIdsByTitle.size}`);
+
+    ejemplosGrupos.forEach((grupoData) => {
+      const peligrosIds = grupoData.peligrosTitulos
+        .map((titulo) => hallazgoIdsByTitle.get(titulo))
+        .filter((id): id is string => id !== undefined);
+
+      const protectoresIds = grupoData.protectoresTitulos
+        .map((titulo) => hallazgoIdsByTitle.get(titulo))
+        .filter((id): id is string => id !== undefined);
+
+      console.log(`  Grupo "${grupoData.nombre}": ${peligrosIds.length} peligros, ${protectoresIds.length} protectores`);
+
+      if (peligrosIds.length > 0 && protectoresIds.length > 0) {
+        const resultadoGrupo = crearGrupo({
+          nombre: grupoData.nombre,
+          descripcion: grupoData.descripcion,
+          color: grupoData.color,
+          peligrosIds,
+          protectoresIds,
+        }, true);
+
+        if (resultadoGrupo.exito) {
+          console.log(`✅ Grupo creado: ${grupoData.nombre}`);
+        }
+      }
+    });
   };
 
   // ========================================
@@ -1291,10 +1346,8 @@ export default function RiesgoApp() {
             <span>|</span>
             <button
               onClick={() => {
-                // First create all hallazgos from analyses
                 cargarAnalisisEjemplo();
-                // Then create groups (they need hallazgos to exist first)
-                cargarDatosEjemplo();
+                // Groups auto-create via useEffect when hallazgos are detected
               }}
               style={{
                 padding: '4px 10px',
