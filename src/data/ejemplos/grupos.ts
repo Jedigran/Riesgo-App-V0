@@ -49,10 +49,6 @@ export const ejemplosGrupos: EjemploGrupo[] = [
       'SOL-MIN-001: Control de nivel',
     ],
   },
-
- 
-
-
 ];
 
 // ============================================================================
@@ -62,13 +58,29 @@ export const ejemplosGrupos: EjemploGrupo[] = [
 /**
  * These groups are created AFTER the hallazgos from analisis.ts are loaded.
  *
- * IMPORTANT: Group creation will fail if titles don't exactly match!
+ * Group Structure:
+ * - Each group has ONE Peligro (hazard)
+ * - Each group has ONE or MORE protectores (Barrera, POE, SOL)
+ * - Groups are visualized with color-coded connections on the schematic
  *
  * Groups Summary:
- * 1. Sistema de achique de emergencia (Blue) - ✅ Should work (HAZOP)
- * 2. Protección térmica del motor (Red) - ✅ Should work (FMEA)
- * 3. Barreras IPL para inundación (Green) - ❌ Will fail (no Peligro in LOPA)
- * 4. Control de emisión tóxica H2S (Purple) - ✅ Should work (OCA)
+ * 1. Sistema de achique de emergencia (Blue #3b82f6)
+ *    - From HAZOP analysis
+ *    - 1 Peligro + 2 Controles (POE + SOL)
+ *
+ * 2. Protección térmica del motor de bomba principal (Red #ef4444)
+ *    - From FMEA analysis
+ *    - 1 Peligro + 1 Control (SOL)
+ *
+ * 3. Barreras IPL para prevención de inundación (Green #22c55e)
+ *    - From LOPA analysis
+ *    - 1 Peligro + 3 Controles (2 Barreras + POE)
+ *
+ * 4. Control de emisión tóxica H2S en drenaje (Purple #a855f7)
+ *    - From OCA analysis
+ *    - 1 Peligro + 1 Control (POE)
+ *
+ * IMPORTANT: All titles must EXACTLY match hallazgos in analisis.ts
  *
  * Related files:
  * - analisis.ts: Example data for 4 analyses (HAZOP, FMEA, OCA, LOPA)

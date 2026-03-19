@@ -512,6 +512,8 @@ export default function RiesgoApp() {
     const erroresEncontrados: string[] = [];
     let entityIndex = 0;
 
+    console.log('🔵 Creando análisis de ejemplo...');
+
     // Process each example analysis
     ejemplosAnalisis.forEach((ejemplo) => {
       let resultado: ReturnType<typeof crearAnalisisHAZOP> | ReturnType<typeof crearAnalisisFMEA> | ReturnType<typeof crearAnalisisLOPA> | ReturnType<typeof crearAnalisisOCA> | ReturnType<typeof crearAnalisisIntuicion>;
@@ -537,6 +539,9 @@ export default function RiesgoApp() {
 
       // Create hallazgos for this analysis
       if (resultado.exito && resultado.id) {
+        console.log(`✅ Análisis ${ejemplo.tipo} creado: ${ejemplo.datos.nombre}`);
+        console.log(`   📍 Creando ${ejemplo.hallazgos.length} hallazgos...`);
+        
         ejemplo.hallazgos.forEach((h) => {
           const ubicacion = posicionesHallazgos[entityIndex] || { x: 50, y: 50 };
 
@@ -565,7 +570,9 @@ export default function RiesgoApp() {
           entityIndex++;
         });
       } else if (!resultado.exito) {
-        erroresEncontrados.push(`Error creando ${ejemplo.tipo}: ${resultado.errores.join(', ')}`);
+        const error = `Error creando ${ejemplo.tipo}: ${resultado.errores.join(', ')}`;
+        erroresEncontrados.push(error);
+        console.error(`❌ ${error}`);
       }
     });
 

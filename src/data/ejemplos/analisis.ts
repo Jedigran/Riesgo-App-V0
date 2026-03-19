@@ -277,9 +277,9 @@ export const ejemplosAnalisis: EjemploAnalisis[] = [
  * Used to spread entities across the diagram.
  */
 export const posicionesHallazgos: { x: number; y: number }[] = [
-  { x: 30, y: 30 }, { x: 40, y: 30 }, { x: 50, y: 30 }, { x: 60, y: 30 },
-  { x: 30, y: 40 }, { x: 40, y: 40 }, { x: 50, y: 40 }, { x: 60, y: 40 },
-  { x: 30, y: 50 }, { x: 40, y: 50 }, { x: 50, y: 50 }, { x: 60, y: 50 },
+  { x: 65, y: 57 }, { x: 86, y: 51 }, { x: 69, y: 66 }, { x: 67, y: 59 },
+  { x: 63, y: 57 }, { x: 34, y: 78 }, { x: 82, y: 53 }, { x: 36, y: 72 },
+  { x: 22, y: 80 }, { x: 24, y: 83 }, { x: 50, y: 50 }, { x: 60, y: 50 },
   { x: 30, y: 60 }, { x: 40, y: 60 }, { x: 50, y: 60 }, { x: 60, y: 60 },
 ];
 
