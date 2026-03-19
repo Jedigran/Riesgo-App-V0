@@ -3,6 +3,7 @@
  * USE ANALISIS - Analysis Management Controller Hook
  * ============================================================================
  * 
+ * 
  * This hook provides CRUD operations for all analysis types:
  * HAZOP, FMEA, LOPA, OCA, and Intuicion.
  * 
