@@ -486,7 +486,7 @@ export default function RiesgoApp() {
       agregarNotificacion({
         tipo: 'success',
         titulo: '✅ Ejemplos Cargados',
-        mensaje: '4 análisis + 11 hallazgos + 4 grupos - Revisa la pestaña "Relaciones"',
+        mensaje: '5 análisis + 11 hallazgos - Ubícalos en el esquemático',
         duracion: 8000,
       });
     }
